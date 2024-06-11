@@ -62,12 +62,12 @@ const Home = () => {
       <main className={styles.container}>
         <div>
           <h1 className={styles.mainTitle}>
-            Welcome to ADiN Events!
+            Welcome to CTLC!
           </h1>
         </div>
         <div>
           <p className={styles.titleParagraph}>
-            Your trusted partner for programs
+            Your trusted partner for team building programs
           </p>
         </div>
         {overlayData.map((overlay, index) => (

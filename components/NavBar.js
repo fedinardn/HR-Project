@@ -59,7 +59,7 @@ const NavBar = () => {
         <div className={styles.logo}>
           <h1>
             <Link href={"/"}>
-              ADiN Events
+              CTLC
             </Link>
           </h1>
         </div>
