@@ -1,0 +1,141 @@
+.task-list {
+  display: flex;
+  max-width: 853px;
+  flex-direction: column;
+  font-size: 14px;
+  color: #0d171c;
+  line-height: 150%;
+  border: 1px solid rgba(229, 232, 235, 1);
+  margin: 20px auto;
+  border-radius: 12px;
+}
+
+.task-header {
+  background-color: #f7fafa;
+  display: flex;
+  gap: 20px;
+  font-weight: 500;
+  justify-content: space-between;
+  padding: 13px 16px;
+}
+
+
+
+
+.task-item {
+  align-items: center;
+  border-top: 1px solid rgba(229, 232, 235, 1);
+  display: flex;
+  gap: 20px;
+  font-weight: 400;
+  justify-content: space-between;
+  padding: 20px 16px;
+}
+
+
+
+.task-name {
+  font-feature-settings: "dlig" on;
+  font-family: Inter, sans-serif;
+  margin: auto 0;
+}
+
+
+.task-status {
+  background-color: #e8edf2;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  font-weight: 500;
+  justify-content: center;
+  padding: 6px 16px;
+}
+
+@media (max-width: 991px) {
+  .task-status {
+    padding: 0 20px;
+  }
+}
+
+.status-text {
+  background-color: #e8edf2;
+  font-family: Inter, sans-serif;
+  justify-content: center;
+}
+
+.task-staff {
+  color: #4f7a96;
+  font-family: Inter, sans-serif;
+  margin: auto 0;
+}
+
+@media (max-width: 991px) {
+  .task-staff {
+    overflow: hidden;
+  }
+}
+
+
+
+
+.task-action {
+  color: #4f7a96;
+  font-family: Inter, sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.21px;
+  margin: auto 0;
+}
+
+.title {
+  color: #0d171c;
+  letter-spacing: -0.7px;
+  font: 700 28px Inter, sans-serif;
+  padding-left: 20px;
+}
+
+
+.status-container {
+  display: flex;
+  gap: 8px;
+  font-size: 16px;
+  color: var(--vkui--color_text_contrast);
+  font-weight: 600;
+  line-height: 100%;
+}
+
+.status-wrapper {
+  border-radius: 20px;
+  background-color: rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  white-space: nowrap;
+  justify-content: center;
+  padding: 6px 12px 6px 14px;
+}
+
+.status-badge {
+  border-radius: 20px;
+  display: flex;
+  gap: 4px;
+  padding: 4px 8px;
+}
+
+.green {
+  background-color: var(--Palette-Accent-Green, #4bb34b);
+}
+
+.orange {
+  background-color: var(--Palette-Accent-Orange, #ffa000);
+}
+
+.status-icon {
+  width: 16px;
+  aspect-ratio: 1;
+  object-fit: contain;
+  object-position: center;
+}
+
+.status-text {
+  font-feature-settings: "clig" off, "liga" off;
+  font-family: VK Sans Display, -apple-system, Roboto, Helvetica, sans-serif;
+}

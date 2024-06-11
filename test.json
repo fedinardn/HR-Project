@@ -1,0 +1,148 @@
+{
+  "clients": [
+    {
+      "id": "1",
+      "name": "Client A",
+      "contactPerson": "John Doe",
+      "programs": [
+        {
+          "programId": "101",
+          "programName": "Program X",
+          "price": 100,
+          "assignedStaff": [
+            {
+              "staffId": "201",
+              "staffName": "Alice Smith",
+              "payPerHour": 50
+            },
+            {
+              "staffId": "202",
+              "staffName": "Bob Johnson",
+              "payPerHour": 45
+            }
+          ]
+        },
+        {
+          "programId": "102",
+          "programName": "Program Y",
+          "price": 150,
+          "assignedStaff": [
+            {
+              "staffId": "203",
+              "staffName": "Charlie Brown",
+              "payPerHour": 55
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "2",
+      "name": "Client B",
+      "contactPerson": "Jane Smith",
+      "programs": [
+        {
+          "programId": "103",
+          "programName": "Program Z",
+          "price": 120,
+          "assignedStaff": [
+            {
+              "staffId": "204",
+              "staffName": "David Johnson",
+              "payPerHour": 60
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "programs": [
+    {
+      "programId": "101",
+      "programName": "Program X",
+      "price": 100,
+      "assignedStaff": [
+        {
+          "staffId": "201",
+          "staffName": "Alice Smith",
+          "payPerHour": 50
+        },
+        {
+          "staffId": "202",
+          "staffName": "Bob Johnson",
+          "payPerHour": 45
+        }
+      ]
+    },
+    {
+      "programId": "102",
+      "programName": "Program Y",
+      "price": 150,
+      "assignedStaff": [
+        {
+          "staffId": "203",
+          "staffName": "Charlie Brown",
+          "payPerHour": 55
+        }
+      ]
+    },
+    {
+      "programId": "103",
+      "programName": "Program Z",
+      "price": 120,
+      "assignedStaff": [
+        {
+          "staffId": "204",
+          "staffName": "David Johnson",
+          "payPerHour": 60
+        }
+      ]
+    }
+  ],
+  "staff": [
+    {
+      "staffId": "201",
+      "staffName": "Alice Smith",
+      "payPerHour": 50,
+      "assignedPrograms": [
+        {
+          "programId": "101",
+          "programName": "Program X"
+        }
+      ]
+    },
+    {
+      "staffId": "202",
+      "staffName": "Bob Johnson",
+      "payPerHour": 45,
+      "assignedPrograms": [
+        {
+          "programId": "101",
+          "programName": "Program X"
+        }
+      ]
+    },
+    {
+      "staffId": "203",
+      "staffName": "Charlie Brown",
+      "payPerHour": 55,
+      "assignedPrograms": [
+        {
+          "programId": "102",
+          "programName": "Program Y"
+        }
+      ]
+    },
+    {
+      "staffId": "204",
+      "staffName": "David Johnson",
+      "payPerHour": 60,
+      "assignedPrograms": [
+        {
+          "programId": "103",
+          "programName": "Program Z"
+        }
+      ]
+    }
+  ]
+}

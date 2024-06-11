@@ -1,0 +1,122 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  max-width: 960px;
+  padding: 16px;
+  font-size: 16px;
+  color: #fff;
+  margin: 0 auto;
+}
+
+.image-overlay {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: start;
+  min-height: 480px;
+  margin-top: 32px;
+  border-radius: 12px;
+  overflow: hidden;
+  padding: 16px 16px 0;
+}
+
+@media (max-width: 991px) {
+  .image-overlay {
+    max-width: 100%;
+    padding-right: 20px;
+  }
+}
+
+.background-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.content {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 100%;
+  max-width: 729px;
+  padding: 80px 40px 24px;
+}
+
+@media (max-width: 991px) {
+  .content {
+    max-width: 100%;
+    padding: 0 20px;
+  }
+}
+
+.title {
+  margin-top: 188px;
+  font: 900 48px Inter, sans-serif;
+  letter-spacing: -1.58px;
+  font-feature-settings: "dlig" on;
+}
+
+@media (max-width: 991px) {
+  .title {
+    max-width: 100%;
+    margin-top: 40px;
+    font-size: 40px;
+  }
+}
+
+.description {
+  margin-top: 8px;
+  font-family: Inter, sans-serif;
+  font-weight: 400;
+  line-height: 150%;
+  font-feature-settings: "dlig" on;
+}
+
+@media (max-width: 991px) {
+  .description {
+    max-width: 100%;
+  }
+}
+
+.button-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.button {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+  max-width: 228px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  background-color: #1c94e3;
+  color: #f7fafa;
+  font-family: Inter, sans-serif;
+  font-weight: 700;
+  line-height: 150%;
+  letter-spacing: 0.24px;
+  font-feature-settings: "dlig" on;
+}
+
+.mainTitle {
+  z-index: 1;
+  color: black;
+  margin: 0 auto;
+  font-size: 56px;
+  text-align: center;
+}
+
+.titleParagraph {
+  z-index: 1;
+  color: rgb(105, 91, 91);
+  margin: 0 auto;
+  font-size: 24px;
+  text-align: center;
+}

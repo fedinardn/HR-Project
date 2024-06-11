@@ -1,0 +1,266 @@
+.program-request {
+  display: flex;
+  max-width: 512px;
+  flex-direction: column;
+  padding: 20px 0;
+  margin: 0 auto;
+}
+
+.request-header {
+  align-self: start;
+  margin-left: 16px;
+  color: #0d171c;
+  font-weight: 700;
+}
+
+@media (max-width: 991px) {
+  .request-header {
+    margin-left: 10px;
+  }
+}
+
+.request-number {
+  font-feature-settings: "dlig" on;
+  letter-spacing: -0.6px;
+  font: 24px Inter, sans-serif;
+}
+
+.section-title {
+  font-feature-settings: "dlig" on;
+  letter-spacing: -0.27px;
+  margin-top: 24px;
+  font: 18px Inter, sans-serif;
+}
+
+.company-details,
+.company-overview {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 150%;
+  padding: 16px;
+}
+
+@media (max-width: 991px) {
+
+  .company-details,
+  .company-overview {
+    max-width: 100%;
+  }
+}
+
+.contact-info,
+.overview-info {
+  display: flex;
+  gap: 0px;
+}
+
+@media (max-width: 991px) {
+
+  .contact-info,
+  .overview-info {
+    flex-wrap: wrap;
+  }
+}
+
+.info-item {
+  border-color: rgba(229, 232, 235, 1);
+  border-style: solid;
+  border-top-width: 1px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  padding: 16px 0;
+}
+
+.info-label {
+  color: #4f7a96;
+  font-feature-settings: "dlig" on;
+  font-family: Inter, sans-serif;
+  padding-left: 12px;
+}
+
+.info-value {
+  color: #0d171c;
+  font-feature-settings: "dlig" on;
+  font-family: Inter, sans-serif;
+  margin-top: 4px;
+  padding-left: 12px;
+
+}
+
+@media (max-width: 991px) {
+  .info-item {
+    white-space: initial;
+  }
+}
+
+.program-details {
+  display: flex;
+  margin-top: 8px;
+  width: 100%;
+  flex-direction: column;
+  padding: 16px;
+}
+
+@media (max-width: 991px) {
+  .program-details {
+    max-width: 100%;
+  }
+}
+
+.details-info {
+  display: flex;
+  gap: 0px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 150%;
+}
+
+@media (max-width: 991px) {
+  .details-info {
+    flex-wrap: wrap;
+  }
+}
+
+.details-row {
+  gap: 0px;
+  display: flex;
+}
+
+@media (max-width: 991px) {
+  .details-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0px;
+  }
+}
+
+.details-column {
+  display: flex;
+  flex-direction: column;
+  line-height: normal;
+  width: 50%;
+  margin-left: 0px;
+}
+
+@media (max-width: 991px) {
+  .details-column {
+    width: 100%;
+  }
+}
+
+.approve-button {
+  justify-content: center;
+  align-items: center;
+  border-radius: 12px;
+  background-color: #1c94e3;
+  align-self: center;
+  display: flex;
+  margin-top: 12px;
+  width: 100%;
+  max-width: 480px;
+  font-size: 16px;
+  color: #f7fafa;
+  font-weight: 700;
+  letter-spacing: 0.24px;
+  line-height: 150%;
+  padding: 12px 20px;
+  border: none;
+  cursor: pointer;
+}
+
+@media (max-width: 991px) {
+  .approve-button {
+    max-width: 100%;
+  }
+}
+
+.button-text {
+  font-feature-settings: "dlig" on;
+  font-family: Inter, sans-serif;
+  background-color: #1c94e3;
+  justify-content: center;
+}
+
+.delete-button {
+  justify-content: center;
+  align-items: center;
+  border-radius: 12px;
+  background-color: #eb4715;
+  align-self: center;
+  display: flex;
+  margin-top: 12px;
+  width: 100%;
+  max-width: 480px;
+  font-size: 16px;
+  color: #f7fafa;
+  font-weight: 700;
+  letter-spacing: 0.24px;
+  line-height: 150%;
+  padding: 12px 20px;
+  border: none;
+  cursor: pointer;
+}
+
+@media (max-width: 991px) {
+  .delete-button {
+    max-width: 100%;
+  }
+}
+
+.delete-button-text {
+  font-feature-settings: "dlig" on;
+  font-family: Inter, sans-serif;
+  background-color: #eb4715;
+  justify-content: center;
+}
+
+
+.status-container {
+  display: flex;
+  gap: 8px;
+  font-size: 16px;
+  color: var(--vkui--color_text_contrast);
+  font-weight: 600;
+  line-height: 100%;
+}
+
+.status-wrapper {
+  border-radius: 20px;
+  background-color: rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  white-space: nowrap;
+  justify-content: center;
+  padding: 6px 12px 6px 14px;
+}
+
+.status-badge {
+  border-radius: 20px;
+  display: flex;
+  gap: 4px;
+  padding: 4px 8px;
+}
+
+.green {
+  background-color: var(--Palette-Accent-Green, #4bb34b);
+}
+
+.orange {
+  background-color: var(--Palette-Accent-Orange, #ffa000);
+}
+
+.status-icon {
+  width: 16px;
+  aspect-ratio: 1;
+  object-fit: contain;
+  object-position: center;
+}
+
+.status-text {
+  font-feature-settings: "clig" off, "liga" off;
+  font-family: VK Sans Display, -apple-system, Roboto, Helvetica, sans-serif;
+}
