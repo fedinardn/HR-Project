@@ -25,13 +25,21 @@ const data = [
       </section>
     );
   }
+  const handleProgramRequestClick = () => {
+    window.location.href = '/app/program-requests/viewRequests'
+  };
+
+  const addNewEmployee = () => {
+    window.location.href = '/app/employees/addNewEmployee'
+  };
+
 
   function RequestCard({ title, value }) {
     return (
       <section className={styles["card"]}>
         <h3 className={styles["card-title"]}>{title}</h3>
         <p className={styles["card-value"]}>{value}</p>
-        <button className={styles["secondary-action"]}>View Program Requests</button>
+        <button className={styles["secondary-action"]} onClick={handleProgramRequestClick}>View Program Requests</button>
 
       </section>
     );
@@ -100,9 +108,9 @@ const data = [
                 <section className={styles["actions"]}>
                     <h2 className={styles["actions-title"]}>Quick Actions</h2>
                     <ActionCard
-                    actionTitle="Add a new employee"
-                    description="You can add employees one by one."
-                    //   action = {addNewEmployee}
+                    actionTitle="Add new staff"
+                    description="You can add staff one by one."
+                    action = {addNewEmployee}
                     />
                     <ActionCard
                     actionTitle="Add a new client"

@@ -176,6 +176,13 @@ padding: 16px;
     align-self: center;
   }
 
+  .action-button:hover {
+    cursor: pointer;
+    transform: translateY(-2px);
+    box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2);
+    background-color: #043e74;
+  }
+
   .secondary-action {
     background-color: #1c94e3;
     color: #f7fafa;
@@ -186,4 +193,11 @@ padding: 16px;
     align-self: flex-end;
     width: 155px;
     text-align: center;
+  }
+
+  .secondary-action:hover {
+    cursor: pointer;
+    transform: translateY(-2px);
+    box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2);
+    background-color: #043e74;
   }
