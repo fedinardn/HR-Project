@@ -64,6 +64,7 @@ const onCreateEmployeeSubmitted = async (event) => {
     const address = event.target.address.value;
     const payRate = event.target.payRate.value;
     const phone = event.target.phoneNumber.value;
+    const email = event.target.email.value;
     const lowsTraining = event.target.trainingLows.value;
     const highsTraining = event.target.trainingHighs.value;
     const towerTraining = event.target.towerTraining.value;
@@ -76,7 +77,7 @@ const onCreateEmployeeSubmitted = async (event) => {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ firstName: firstName , lastName: lastName, address: address, payRate: payRate, phone: phone, lowsTraining: lowsTraining, highsTraining: highsTraining, towerTraining: towerTraining, rescueTraining: rescueTraining, proFacilitator: proFacilitator, typeOfStaff: typeOfStaff})
+      body: JSON.stringify({ firstName: firstName , lastName: lastName, address: address, payRate: payRate, phone: phone, email: email, lowsTraining: lowsTraining, highsTraining: highsTraining, towerTraining: towerTraining, rescueTraining: rescueTraining, proFacilitator: proFacilitator, typeOfStaff: typeOfStaff})
     })
     if (response.ok) {
       console.log("new staff created")
@@ -102,6 +103,8 @@ function MyComponent() {
                 />
                 <InputField label="Pay Rate" placeholder="e.g. $20.00" id="payRate"  type = "text" name = "payRate"/>
                 <InputField label="Phone" placeholder="999-999-9999" id="phoneNumber" type = "tel" name = "phoneNumber"/>
+                <InputField label="Email" placeholder="johnsmith@gmail.com" id="email" type = "email" name = "email"/>
+
 
              
                 <SelectBox

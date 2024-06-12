@@ -207,7 +207,7 @@ export const deleteProgramRequest = async (programRequestId) => {
 
 // EMPLOYEE FUNCTIONS
 
-export const createNewStaff = async(firstName, lastName, address, payRate, phone, lowsTraining, highsTraining, towerTraining, rescueTraining, professionalFacilitatorLevel, typeOfStaff) => {
+export const createNewStaff = async(firstName, lastName, address, payRate, phone, email, lowsTraining, highsTraining, towerTraining, rescueTraining, professionalFacilitatorLevel, typeOfStaff) => {
   const db = getFirestore();
   const staffID = crypto.randomUUID()
   const staffRef = doc(db, "staff", staffID);
@@ -219,6 +219,7 @@ export const createNewStaff = async(firstName, lastName, address, payRate, phone
     address: address,
     payRate: payRate,
     phone: phone,
+    email: email,
     lowsTraining: lowsTraining,
     highsTraining: highsTraining,
     towerTraining: towerTraining,
@@ -249,6 +250,22 @@ export const updateStaffDetails = async (companyName, contactPerson, contactPers
   // await saveData(dbObject)
   // return newClient
 };
+
+export const getAllStaff = async () =>{
+  const db = getFirestore();
+  const staffCollection = collection(db, 'staff');
+
+  const q = query(staffCollection);
+
+  const querySnapshot = await getDocs(q);
+
+  const staff = [];
+  querySnapshot.forEach((doc) => {
+    staff.push((doc.id, "=>", doc.data()));
+  });
+
+  return staff;
+}
 
 export const getStaffDetails = async (staffId) => {
   // const db = getFirestore();

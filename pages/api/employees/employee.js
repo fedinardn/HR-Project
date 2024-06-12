@@ -5,7 +5,7 @@ export default async function handler(req, res) {
     if (req.method.toUpperCase() === "POST") {
       const staffDetails = req.body;
       const newStaff = await db.createNewStaff(staffDetails.firstName,
-        staffDetails.lastName, staffDetails.address, staffDetails.payRate, staffDetails.phone,
+        staffDetails.lastName, staffDetails.address, staffDetails.payRate, staffDetails.phone,staffDetails.email,
         staffDetails.lowsTraining, staffDetails.highsTraining, staffDetails.towerTraining, staffDetails.rescueTraining,
         staffDetails.proFacilitator, staffDetails.typeOfStaff)
       if (newStaff) {

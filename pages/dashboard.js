@@ -9,11 +9,11 @@ const data = [
     { title: 'Program Requests', value: '2000' },
   ];
 
-  const SideMenuItem = ({ src, alt, label }) => (
-    <div className={styles["side-menu-item"]}>
+  const SideMenuItem = ({ src, alt, label , href}) => (
+    <a href={href} className={styles["side-menu-item"]}>
       <img loading="lazy" src={src} alt={alt} className={styles["menu-icon"]} />
       <span className={styles["menu-label"]}>{label}</span>
-    </div>
+    </a>
   );
   
   function Card({ title, value }) {
@@ -73,6 +73,7 @@ const data = [
                         src="https://cdn.builder.io/api/v1/image/assets/TEMP/8d86f9b59e1d70f0e67588e10a86793bf9abe078a10496e35676dcedcb8ca735?apiKey=6dceda0d543f454b955d90f7c576a010&"
                         alt="Staff Icon"
                         label="Staff"
+                        href={"/app/employees/viewEmployees"}
                     />
                     <SideMenuItem
                         src="https://cdn.builder.io/api/v1/image/assets/TEMP/9a34677ddc2a19fdeb87616abc5f681e3b112f49a96db78b3dd6d6eb6b126d71?apiKey=6dceda0d543f454b955d90f7c576a010&"

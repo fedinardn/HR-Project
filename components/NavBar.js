@@ -79,6 +79,11 @@ const NavBar = () => {
                 Home
               </Link>
             </li>
+            <li>
+              <Link href={"/dashboard"}>
+                Dashboard
+              </Link>
+            </li>
 
             {user ? <li>
 
