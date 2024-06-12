@@ -1,0 +1,113 @@
+.staff-section {
+  display: flex;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px;
+  justify-content: space-between;
+}
+
+.staff-info,
+.assigned-programs,
+.view-profile {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.staff-info {
+  /* border: 1px solid #e5e8eb; */
+  margin-top: 8px;
+}
+
+.info-item {
+  padding: 16px 8px;
+  flex: 1;
+  border-color: rgba(229, 232, 235, 1);
+  border-style: solid;
+  border-top-width: 1px;
+  /* max-width: 700px; */
+}
+
+.contact-item,
+.additional-info-item {
+  border-top: 1px solid #e5e8eb;
+  padding: 16px 0;
+}
+
+.label {
+  color: #637587;
+}
+
+.value {
+  color: #121417;
+  margin-top: 4px;
+}
+
+.assigned-programs {
+  margin-top: 16px;
+}
+
+.programs-list {
+  padding: 0;
+  list-style: none;
+}
+
+.program,
+.program-details {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.program-image {
+  width: 56px;
+  height: 56px;
+}
+
+.program-name {
+  color: #121417;
+  font: 500 16px Work Sans, sans-serif;
+}
+
+.program-id {
+  color: #637587;
+  font: 400 14px Work Sans, sans-serif;
+}
+
+.view-profile {
+  max-width: 100%;
+  margin: 12px 16px;
+}
+
+.view-profile-button {
+  width: 100%;
+  max-width: 480px;
+  border-radius: 12px;
+  background-color: #fff;
+  color: #121417;
+  font-weight: 700;
+  padding: 10px 16px;
+}
+
+@media (max-width: 991px) {
+
+  .staff-section,
+  .staff-info,
+  .assigned-programs,
+  .view-profile {
+    padding: 0 20px;
+  }
+}
+
+
+.sub-grid {
+  margin: 0 26px;
+  display: flex;
+  /* flex-direction: grid; */
+
+}
+
+.info-section {
+  margin-bottom: 20px;
+}

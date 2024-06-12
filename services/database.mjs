@@ -267,20 +267,20 @@ export const getAllStaff = async () =>{
   return staff;
 }
 
-export const getStaffDetails = async (staffId) => {
-  // const db = getFirestore();
-  // const programRequestsCollection = collection(db, 'programRequests');
+export const getStaffDetails = async (staffID) => {
+  const db = getFirestore();
+  const staffCollection = collection(db, 'staff');
 
-  // const q = query(programRequestsCollection, where('id', '==', programRequestId));
+  const q = query(staffCollection, where('staffID', '==', staffID));
 
-  // const querySnapshot = await getDocs(q);
+  const querySnapshot = await getDocs(q);
 
-  // const programRequests = [];
-  // querySnapshot.forEach((doc) => {
-  //   programRequests.push((doc.id, "=>", doc.data()));
-  // });
-
-  // return programRequests[0];
+  const staff = [];
+  
+  querySnapshot.forEach((doc) => {
+    staff.push((doc.id, "=>", doc.data()));
+  });
+  return staff[0];
 }
 
 
