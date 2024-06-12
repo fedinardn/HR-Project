@@ -204,3 +204,66 @@ export const deleteProgramRequest = async (programRequestId) => {
 
   return true
 }
+
+// EMPLOYEE FUNCTIONS
+
+export const createNewStaff = async(firstName, lastName, address, payRate, phone, lowsTraining, highsTraining, towerTraining, rescueTraining, professionalFacilitatorLevel, typeOfStaff) => {
+  const db = getFirestore();
+  const staffID = crypto.randomUUID()
+  const staffRef = doc(db, "staff", staffID);
+
+  const newStaff = {
+    staffID: staffID,
+    firstName: firstName,
+    lastName: lastName,
+    address: address,
+    payRate: payRate,
+    phone: phone,
+    lowsTraining: lowsTraining,
+    highsTraining: highsTraining,
+    towerTraining: towerTraining,
+    rescueTraining: rescueTraining,
+    professionalFacilitatorLevel: professionalFacilitatorLevel,
+    typeOfStaff: typeOfStaff,
+    programs : []
+  }
+
+  await setDoc(staffRef, newStaff);
+  return newStaff;
+}
+
+
+export const updateStaffDetails = async (companyName, contactPerson, contactPersonEmail) => {
+  // const dbObject = await openDb()
+
+  // const newClient = {
+  //   id: crypto.randomUUID(),
+  //   companyName: companyName,
+  //   contactPerson: contactPerson,
+  //   contactPersonEmail: contactPersonEmail,
+  //   createdAt: Date.now(),
+  //   programs: []
+  // }
+  // dbObject.clients.push(newClient)
+
+  // await saveData(dbObject)
+  // return newClient
+};
+
+export const getStaffDetails = async (staffId) => {
+  // const db = getFirestore();
+  // const programRequestsCollection = collection(db, 'programRequests');
+
+  // const q = query(programRequestsCollection, where('id', '==', programRequestId));
+
+  // const querySnapshot = await getDocs(q);
+
+  // const programRequests = [];
+  // querySnapshot.forEach((doc) => {
+  //   programRequests.push((doc.id, "=>", doc.data()));
+  // });
+
+  // return programRequests[0];
+}
+
+
