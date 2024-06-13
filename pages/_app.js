@@ -1,26 +1,25 @@
 import "../styles/global.css";
 import NavBar from "../components/NavBar";
 import Head from "next/head";
-import { useState, useEffect } from 'react'
-import { onAuthStateChanged, getAuth } from 'firebase/auth'
-import firebaseApp from '../firebase'
-import { SpeedInsights } from '@vercel/speed-insights/next';
-import { Analytics } from '@vercel/analytics/react';
-
+import { useState, useEffect } from "react";
+import { onAuthStateChanged, getAuth } from "firebase/auth";
+import firebaseApp from "../firebase";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/react";
 
 function MyApp({ Component, pageProps }) {
-  const [user, setUser] = useState(null)
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     // We track the auth state to reset firebaseUi if the user signs out.
-    return onAuthStateChanged(getAuth(firebaseApp), user => {
-      if (user) {
-        // firebaseUiWidget.reset();
-        console.log("no User")
-      }
-      setUser(user)
+    return onAuthStateChanged(getAuth(firebaseApp), (user) => {
+      // if (user) {
+      //   // firebaseUiWidget.reset();
+      //   console.log("no User")
+      // }
+      setUser(user);
     });
-  }, [])
+  }, []);
   return (
     <div>
       <Head>
@@ -31,9 +30,6 @@ function MyApp({ Component, pageProps }) {
       <Component {...pageProps} user={user} />
       <Analytics />
       <SpeedInsights />
-
-
-
     </div>
   );
 }

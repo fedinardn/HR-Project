@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import styles from "../../../styles/viewStaff.module.css";
 import { useRouter } from "next/router";
-import { getStaffDetails } from "../../../services/database.mjs";
+import EditStaffModal from "../../../components/EditStaffModal";
+import { updateStaffDetails } from "../../../services/database.mjs";
 
 export default function getStaffData({ user }) {
   const router = useRouter();
   const staffID = router.query.employeeId;
   const [staffData, setStaffData] = useState([]);
+  const [showModal, setShowModal] = useState(false);
 
   const fetchStaffData = async () => {
     if (staffID) {
@@ -22,6 +24,24 @@ export default function getStaffData({ user }) {
     fetchStaffData();
   }, [router.query.employeeId, user]);
 
+  const handleEditClick = () => {
+    setShowModal(true);
+  };
+
+  const handleSave = async (editedStaff) => {
+    try {
+      await updateStaffDetails(editedStaff.staffID, editedStaff);
+      setStaffData(editedStaff);
+      setShowModal(false);
+    } catch (error) {
+      console.error("Error updating staff details:", error);
+    }
+  };
+
+  const handleCancel = () => {
+    setShowModal(false);
+  };
+
   const StaffSection = ({ staff }) => (
     <section className={styles["staff-section"]}>
       <h2 className={styles["staff-section-title"]}>Staff</h2>
@@ -30,6 +50,7 @@ export default function getStaffData({ user }) {
         src="https://cdn.builder.io/api/v1/image/assets/TEMP/63a740c47816da57a476db663d7572ba724c1ef93e2fd84ee2eaec6ea6782891?apiKey=6dceda0d543f454b955d90f7c576a010&"
         className={styles["staff-photo"]}
         alt="Staff photo"
+        onClick={handleEditClick}
       />
     </section>
   );
@@ -92,8 +113,8 @@ export default function getStaffData({ user }) {
           </section>
           <section className={styles["sub-grid"]}>
             <div className={styles["info-item"]}>
-              <div className={styles["label"]}>Rescue Training</div>
-              <div className={styles["value"]}>{info.rescueTraining}</div>
+              <div className={styles["label"]}>Type of staff</div>
+              <div className={styles["value"]}>{info.typeOfStaff}</div>
             </div>
             <div className={styles["info-item"]}>
               <div className={styles["label"]}>Pro Facilitator Level</div>
@@ -130,12 +151,19 @@ export default function getStaffData({ user }) {
   const programs = [
     { name: "Jennet Gray", id: "1234 - Program A" },
     { name: "Jennet Gray", id: "5678 - Program B" },
-    { imageSrc: "ext_4-", name: "Jennet Gray", id: "9012 - Program C" },
+    { name: "Jennet Gray", id: "9012 - Program C" },
   ];
 
   return (
     <>
       <StaffSection staff={staffData} />
+      {showModal && (
+        <EditStaffModal
+          staff={staffData}
+          onSave={handleSave}
+          onCancel={handleCancel}
+        />
+      )}
       <StaffInfo info={staffData} />
       <AssignedProgramsList programs={programs} />
       {/* <div className="view-profile">
