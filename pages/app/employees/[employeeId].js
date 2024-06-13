@@ -3,12 +3,26 @@ import styles from "../../../styles/viewStaff.module.css";
 import { useRouter } from "next/router";
 import EditStaffModal from "../../../components/EditStaffModal";
 import { updateStaffDetails } from "../../../services/database.mjs";
+import Link from "next/link";
+import AssignedProgramsList from "../../../components/AssignedProgamsList";
 
 export default function getStaffData({ user }) {
   const router = useRouter();
   const staffID = router.query.employeeId;
   const [staffData, setStaffData] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  const [programs, setAssignedPrograms] = useState([
+    { name: "Jennet Gray", id: "1234 - Program A" },
+    { name: "Jennet Gray", id: "5678 - Program B" },
+    { name: "Jennet Gray", id: "9012 - Program C" },
+    { name: "Jennet Gray", id: "1234 - Program D" },
+    { name: "Jennet Gray", id: "5678 - Program E" },
+    { name: "Jennet Gray", id: "9012 - Program F" },
+    { name: "Jennet Gray", id: "1234 - Program G" },
+    { name: "Jennet Gray", id: "5678 - Program H" },
+    { name: "Jennet Gray", id: "9012 - Program I" },
+    { name: "Jennet Gray", id: "1234 - Program J" },
+  ]);
 
   const fetchStaffData = async () => {
     if (staffID) {
@@ -44,7 +58,12 @@ export default function getStaffData({ user }) {
 
   const StaffSection = ({ staff }) => (
     <section className={styles["staff-section"]}>
-      <h2 className={styles["staff-section-title"]}>Staff</h2>
+      <Link
+        className={styles["staff-section-title"]}
+        href={"/app/employees/viewEmployees"}
+      >
+        Back to all staff
+      </Link>
       <img
         loading="lazy"
         src="https://cdn.builder.io/api/v1/image/assets/TEMP/63a740c47816da57a476db663d7572ba724c1ef93e2fd84ee2eaec6ea6782891?apiKey=6dceda0d543f454b955d90f7c576a010&"
@@ -128,32 +147,6 @@ export default function getStaffData({ user }) {
     </>
   );
 
-  const AssignedProgram = ({ program }) => (
-    <li className={styles["program"]}>
-      <div className={styles["program-details"]}>
-        <div className={styles["program-name"]}>{program.name}</div>
-        <div className={styles["program-id"]}>{program.id}</div>
-      </div>
-    </li>
-  );
-
-  const AssignedProgramsList = ({ programs }) => (
-    <section className={styles["assigned-programs"]}>
-      <h2 className={styles["programs-title"]}>Assigned Programs</h2>
-      <ul className={styles["programs-list"]}>
-        {programs.map((program, index) => (
-          <AssignedProgram key={index} program={program} />
-        ))}
-      </ul>
-    </section>
-  );
-
-  const programs = [
-    { name: "Jennet Gray", id: "1234 - Program A" },
-    { name: "Jennet Gray", id: "5678 - Program B" },
-    { name: "Jennet Gray", id: "9012 - Program C" },
-  ];
-
   return (
     <>
       <StaffSection staff={staffData} />
@@ -165,10 +158,11 @@ export default function getStaffData({ user }) {
         />
       )}
       <StaffInfo info={staffData} />
-      <AssignedProgramsList programs={programs} />
-      {/* <div className="view-profile">
-            <button className="view-profile-button">View Staff Profile</button>
-        </div> */}
+      <AssignedProgramsList
+        // initialPrograms={staffData.programs || []}  this is the correct one replace when functionality is correct
+        initialPrograms={programs}
+        onAddProgram={(newProgram) => console.log("Program added:", newProgram)}
+      />
     </>
   );
 }

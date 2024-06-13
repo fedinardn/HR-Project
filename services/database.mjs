@@ -66,7 +66,7 @@ import { getDatabase, ref, onValue } from "firebase/database";
 
 // }
 
-export const getAllProgramsForClient = async (uid) => {
+export const getAllProgramRequestsForClient = async (uid) => {
   const db = getFirestore();
   const programRequestsCollection = collection(db, "programRequests");
 
@@ -306,3 +306,7 @@ export const getStaffDetails = async (staffID) => {
   });
   return staff[0];
 };
+
+// EMPLOYEE FUNCTIONS END HERE
+
+//CLIENT FUNCTIONS
