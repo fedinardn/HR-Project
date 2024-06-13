@@ -36,7 +36,7 @@ export default function getStaffData({ user }) {
 
   useEffect(() => {
     fetchStaffData();
-  }, []);
+  }, [router.query.employeeId]);
 
   const handleEditClick = () => {
     setShowModal(true);
