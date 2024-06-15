@@ -1,72 +1,85 @@
 import styles from "../styles/Dashboard.module.css";
 import { getAllProgramRequests, getAllStaff } from "../services/database.mjs";
 import { useState, useEffect } from "react";
+export default function MyComponent({ user }) {
+  const [numberOfProgramRequest, setNumberOfProgramRequest] = useState(0);
+  const [numberOfStaff, setNumberOfStaff] = useState(0);
 
-const allStaff = await getAllStaff();
-const numberOfStaff = allStaff.length;
-const data = [
-  { title: "Total Employees", value: numberOfStaff },
-  { title: "Total Clients", value: "10" },
-];
+  const fetchPageDetails = async () => {
+    if (user) {
+      const pageStaffData = await getAllStaff();
+      const pageRequestData = await getAllProgramRequests(user.uid).then();
+      setNumberOfProgramRequest(pageRequestData.length);
+      setNumberOfStaff(pageStaffData.length);
+    }
+  };
 
-const programRequests = await getAllProgramRequests();
-const numberOfRequests = programRequests.length;
-const RequestData = [{ title: "Program Requests", value: numberOfRequests }];
+  useEffect(() => {
+    fetchPageDetails();
+  }, [user]);
 
-const SideMenuItem = ({ src, alt, label, href }) => (
-  <a href={href} className={styles["side-menu-item"]}>
-    <img loading="lazy" src={src} alt={alt} className={styles["menu-icon"]} />
-    <span className={styles["menu-label"]}>{label}</span>
-  </a>
-);
+  const data = [
+    { title: "Total Employees", value: numberOfStaff },
+    { title: "Total Clients", value: "10" },
+  ];
 
-function Card({ title, value }) {
-  return (
-    <section className={styles["card"]}>
-      <h3 className={styles["card-title"]}>{title}</h3>
-      <p className={styles["card-value"]}>{value}</p>
-    </section>
+  const RequestData = [
+    { title: "Program Requests", value: numberOfProgramRequest },
+  ];
+
+  const SideMenuItem = ({ src, alt, label, href }) => (
+    <a href={href} className={styles["side-menu-item"]}>
+      <img loading="lazy" src={src} alt={alt} className={styles["menu-icon"]} />
+      <span className={styles["menu-label"]}>{label}</span>
+    </a>
   );
-}
 
-const handleProgramRequestClick = () => {
-  window.location.href = "/app/program-requests/viewRequests";
-};
+  function Card({ title, value }) {
+    return (
+      <section className={styles["card"]}>
+        <h3 className={styles["card-title"]}>{title}</h3>
+        <p className={styles["card-value"]}>{value}</p>
+      </section>
+    );
+  }
 
-const addNewEmployee = () => {
-  window.location.href = "/app/employees/addNewEmployee";
-};
+  const handleProgramRequestClick = () => {
+    window.location.href = "/app/program-requests/viewRequests";
+  };
 
-function RequestCard({ title, value }) {
-  return (
-    <section className={styles["card"]}>
-      <h3 className={styles["card-title"]}>{title}</h3>
-      <p className={styles["card-value"]}>{value}</p>
-      <button
-        className={styles["secondary-action"]}
-        onClick={handleProgramRequestClick}
-      >
-        View Program Requests
-      </button>
-    </section>
-  );
-}
+  const addNewEmployee = () => {
+    window.location.href = "/app/employees/addNewEmployee";
+  };
 
-function ActionCard({ actionTitle, description, action }) {
-  return (
-    <section className={styles["action-card"]}>
-      <div className={styles["action-info"]}>
-        <h4 className={styles["action-title"]}>{actionTitle}</h4>
-        <p className={styles["action-description"]}>{description}</p>
-      </div>
-      <button className={styles["action-button"]} onClick={action}>
-        Add
-      </button>
-    </section>
-  );
-}
+  function RequestCard({ title, value }) {
+    return (
+      <section className={styles["card"]}>
+        <h3 className={styles["card-title"]}>{title}</h3>
+        <p className={styles["card-value"]}>{value}</p>
+        <button
+          className={styles["secondary-action"]}
+          onClick={handleProgramRequestClick}
+        >
+          View Program Requests
+        </button>
+      </section>
+    );
+  }
 
-function MyComponent() {
+  function ActionCard({ actionTitle, description, action }) {
+    return (
+      <section className={styles["action-card"]}>
+        <div className={styles["action-info"]}>
+          <h4 className={styles["action-title"]}>{actionTitle}</h4>
+          <p className={styles["action-description"]}>{description}</p>
+        </div>
+        <button className={styles["action-button"]} onClick={action}>
+          Add
+        </button>
+      </section>
+    );
+  }
+
   return (
     <>
       <div className={styles["container"]}>
@@ -98,6 +111,7 @@ function MyComponent() {
               src="https://cdn.builder.io/api/v1/image/assets/TEMP/8234ee97158ece626fe6881c9bfb223354c575b5839bc5c3edd1a052f7b7a007?apiKey=6dceda0d543f454b955d90f7c576a010&"
               alt="Settings Icon"
               label="Settings"
+              href={"/app/charge-items/chargeItems"}
             />
           </section>
         </aside>
@@ -133,4 +147,4 @@ function MyComponent() {
   );
 }
 
-export default MyComponent;
+// export default MyComponent;

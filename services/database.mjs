@@ -1,9 +1,4 @@
-// import { db } from "firebase"
-// const fsPromises = require('fs')
-
 import crypto from "crypto";
-
-// import fsPromises from "fs/promises"
 import {
   getFirestore,
   collection,
@@ -16,55 +11,6 @@ import {
   updateDoc,
   deleteDoc,
 } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
-import { getDatabase, ref, onValue } from "firebase/database";
-
-// export const createClient = async (companyName, contactPerson, contactPersonEmail) => {
-//   const dbObject = await openDb()
-
-//   const newClient = {
-//     id: crypto.randomUUID(),
-//     companyName: companyName,
-//     contactPerson: contactPerson,
-//     contactPersonEmail: contactPersonEmail,
-//     createdAt: Date.now(),
-//     programs: []
-//   }
-//   dbObject.clients.push(newClient)
-
-//   await saveData(dbObject)
-//   return newClient
-// };
-
-// export const getClientById = async (id) => {
-
-// }
-
-// export const getAllClients = () => {
-
-// }
-
-// export const createNewProgramForClient = async (clientId, companyName, programName, programTypes, date) => {
-//   if (!client) {
-//     throw new Error(`Client with ID ${clientId} not found`);
-//   }
-
-//   const newProgram = {
-//     id: crypto.randomUUID(),
-//     companyName: companyName,
-//     programName: programName,
-//     date: date,
-//     programTypes: programTypes,
-//     price: [],
-//     assignedStaff: [],
-//     approved: false,
-//   }
-
-//   const docRef = await addDoc(programRequestsCollection, newProgram);
-
-//   return { id: docRef.id, ...newProgram };
-
-// }
 
 export const getAllProgramRequestsForClient = async (uid) => {
   const db = getFirestore();
@@ -310,3 +256,127 @@ export const getStaffDetails = async (staffID) => {
 // EMPLOYEE FUNCTIONS END HERE
 
 //CLIENT FUNCTIONS
+export const createClient = async (
+  companyName,
+  contactPerson,
+  contactPersonEmail,
+  address,
+  phone,
+  email,
+  typeOfClient
+) => {
+  const db = getFirestore();
+  const clientID = crypto.randomUUID();
+  const clientRef = doc(db, "clients", clientID);
+
+  const newClient = {
+    clientID: clientID,
+    companyName: companyName,
+    contactPerson: contactPerson,
+    contactPersonEmail: contactPersonEmail,
+    createdAt: Date.now(),
+    address: address,
+    phone: phone,
+    email: email,
+    typeOfClient: typeOfClient,
+    programs: [],
+  };
+  await setDoc(clientRef, newClient);
+  return newClient;
+};
+
+export const getClientDetails = async (clientID) => {
+  const db = getFirestore();
+  const clientCollection = collection(db, "staff");
+
+  const q = query(clientCollection, where("clientID", "==", clientID));
+
+  const querySnapshot = await getDocs(q);
+
+  const clients = [];
+
+  querySnapshot.forEach((doc) => {
+    clients.push((doc.id, "=>", doc.data()));
+  });
+  return clients[0];
+};
+
+export const getAllClients = async () => {
+  const db = getFirestore();
+  const clientCollection = collection(db, "clients");
+
+  const q = query(clientCollection);
+
+  const querySnapshot = await getDocs(q);
+
+  const clients = [];
+  querySnapshot.forEach((doc) => {
+    clients.push((doc.id, "=>", doc.data()));
+  });
+
+  return clients;
+};
+
+// export const createNewProgramForClient = async (clientId, companyName, programName, programTypes, date) => {
+//   if (!client) {
+//     throw new Error(`Client with ID ${clientId} not found`);
+//   }
+
+//   const newProgram = {
+//     id: crypto.randomUUID(),
+//     companyName: companyName,
+//     programName: programName,
+//     date: date,
+//     programTypes: programTypes,
+//     price: [],
+//     assignedStaff: [],
+//     approved: false,
+//   }
+
+//   const docRef = await addDoc(programRequestsCollection, newProgram);
+
+//   return { id: docRef.id, ...newProgram };
+
+// }
+
+//ITEM CODES
+
+export const createChargeItem = async (
+  lineItemCode,
+  description,
+  unitPrice,
+  isService,
+  isProduct
+) => {
+  const db = getFirestore();
+  const itemID = crypto.randomUUID();
+  const itemRef = doc(db, "chargeItems", itemID);
+
+  const newItem = {
+    itemID: itemID,
+    lineItemCode: lineItemCode,
+    description: description,
+    unitPrice: unitPrice,
+    isService: isService,
+    createdAt: Date.now(),
+    isProduct: isProduct,
+  };
+  await setDoc(itemRef, newItem);
+  return newItem;
+};
+
+export const getAllChargeItemCodes = async () => {
+  const db = getFirestore();
+  const chargeItemCollection = collection(db, "chargeItems");
+
+  const q = query(chargeItemCollection);
+
+  const querySnapshot = await getDocs(q);
+
+  const chargeItems = [];
+  querySnapshot.forEach((doc) => {
+    chargeItems.push((doc.id, "=>", doc.data()));
+  });
+
+  return chargeItems;
+};
