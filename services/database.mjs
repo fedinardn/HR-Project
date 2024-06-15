@@ -380,3 +380,29 @@ export const getAllChargeItemCodes = async () => {
 
   return chargeItems;
 };
+
+export const updateChargeItem = async (itemID, updatedItemData) => {
+  const db = getFirestore();
+  const itemRef = doc(db, "chargeItems", itemID);
+
+  try {
+    await updateDoc(itemRef, updatedItemData);
+    console.log("Charge item details updated successfully");
+  } catch (error) {
+    console.error("Error updating charge item details:", error);
+    throw error;
+  }
+};
+
+export const deleteChargeItem = async (itemID) => {
+  const db = getFirestore();
+  const itemRef = doc(db, "chargeItems", itemID);
+
+  try {
+    await deleteDoc(itemRef);
+    console.log("Charge item deleted successfully");
+  } catch (error) {
+    console.error("Error deleting charge item:", error);
+    throw error;
+  }
+};
