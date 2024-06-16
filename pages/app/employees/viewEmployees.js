@@ -81,7 +81,7 @@ export default function ViewStaff({ user }) {
               src="https://cdn.builder.io/api/v1/image/assets/TEMP/ef95366c70a6c027dfc7a1c0bb808953401267a94186d90914dcc35153889a45?apiKey=6dceda0d543f454b955d90f7c576a010&"
               alt=""
               className={styles["search-icon"]}
-              tabindex="0"
+              // tabindex="0"
               role="button"
             />
           </form>

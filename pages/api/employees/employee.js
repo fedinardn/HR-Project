@@ -23,16 +23,17 @@ export default async function handler(req, res) {
     } else {
       return res.status(400).json("staff not created");
     }
-  } else if (req.method.toUpperCase() === "GET") {
-    const request = req.body;
-    const allProgramRequests = await db.getAllProgramRequestsForClient(
-      request.userid
-    );
-
-    if (allProgramRequests) {
-      return res.status(200).json(allProgramRequests);
-    } else {
-      return res.status(200).json(["no requests"]);
-    }
   }
+  // else if (req.method.toUpperCase() === "GET") {
+  //   const request = req.body;
+  //   const allProgramRequests = await db.getAllProgramRequestsForClient(
+  //     request.userid
+  //   );
+
+  //   if (allProgramRequests) {
+  //     return res.status(200).json(allProgramRequests);
+  //   } else {
+  //     return res.status(200).json(["no requests"]);
+  //   }
+  // }
 }

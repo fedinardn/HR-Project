@@ -26,7 +26,7 @@ export default function getStaffData({ user }) {
 
   const fetchStaffData = async () => {
     if (staffID) {
-      console.log(staffID);
+      // console.log(staffID);
       const response = await fetch(`/api/employees/${staffID}`, {
         method: "GET",
       });
