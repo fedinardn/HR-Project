@@ -188,7 +188,7 @@ const EditStaffModal = ({ staff, onSave, onCancel }) => {
         />
 
         <LevelTraining
-          id="professionalFacilitatorLevel"
+          id="proFacilitator"
           title="Pro Facilitator Level"
           options={proFacilitator}
           staffData={staffData}

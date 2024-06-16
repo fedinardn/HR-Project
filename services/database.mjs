@@ -182,7 +182,7 @@ export const createNewStaff = async (
   highsTraining,
   towerTraining,
   rescueTraining,
-  professionalFacilitatorLevel,
+  proFacilitator,
   typeOfStaff
 ) => {
   const db = getFirestore();
@@ -201,7 +201,7 @@ export const createNewStaff = async (
     highsTraining: highsTraining,
     towerTraining: towerTraining,
     rescueTraining: rescueTraining,
-    professionalFacilitatorLevel: professionalFacilitatorLevel,
+    proFacilitator: proFacilitator,
     typeOfStaff: typeOfStaff,
     programs: [],
   };

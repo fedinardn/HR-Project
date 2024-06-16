@@ -26,6 +26,7 @@ export default function getStaffData({ user }) {
 
   const fetchStaffData = async () => {
     if (staffID) {
+      console.log(staffID);
       const response = await fetch(`/api/employees/${staffID}`, {
         method: "GET",
       });
@@ -137,9 +138,7 @@ export default function getStaffData({ user }) {
             </div>
             <div className={styles["info-item"]}>
               <div className={styles["label"]}>Pro Facilitator Level</div>
-              <div className={styles["value"]}>
-                {info.professionalFacilitatorLevel}
-              </div>
+              <div className={styles["value"]}>{info.proFacilitator}</div>
             </div>
           </section>
         </div>
