@@ -2,7 +2,7 @@
 import { initializeApp, getApps } from "firebase/app";
 // import { getFirestore } from "firebase/firestore";
 
-import fb from "firebase/app"
+import fb from "firebase/app";
 const firebaseConfig = {
   apiKey: "AIzaSyAapciJJ2F5C7dhTrJ1_Yg1tAmgsCS0obs",
   authDomain: "uma-update.firebaseapp.com",
@@ -10,14 +10,13 @@ const firebaseConfig = {
   storageBucket: "uma-update.appspot.com",
   messagingSenderId: "1024334442806",
   appId: "1:1024334442806:web:5326640f223f31a797c397",
-  measurementId: "G-EGFQV87YQS"
+  measurementId: "G-EGFQV87YQS",
 };
-
-const firebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
+const firebaseApp = initializeApp(firebaseConfig);
+// const firebaseApp = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
 // const db = getFirestore(app)
 // export {db}
 export default firebaseApp;
-
 
 // Your web app's Firebase configuration
 // const firebaseConfig = {
@@ -33,7 +32,6 @@ export default firebaseApp;
 // let firebaseApp
 // if (!getApps().length) {
 //   firebaseApp = initializeApp(firebaseConfig);
-
 
 // } else {
 //   firebaseApp = getApps()[0];
