@@ -1,29 +1,33 @@
-import { useEffect, useRef, useState } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
-import 'firebaseui/dist/firebaseui.css';
+import { useEffect, useRef, useState } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import "firebaseui/dist/firebaseui.css";
 
-const StyledFirebaseAuth = ({ uiConfig, firebaseAuth, className, uiCallback }) => {
+const StyledFirebaseAuth = ({
+  uiConfig,
+  firebaseAuth,
+  className,
+  uiCallback,
+}) => {
   const [firebaseui, setFirebaseui] = useState(null);
   const elementRef = useRef(null);
 
   useEffect(() => {
     // Firebase UI only works on the Client. So we're loading the package only after
     // the component has mounted, so that this works when doing server-side rendering.
-    setFirebaseui(require('firebaseui'));
+    setFirebaseui(require("firebaseui"));
   }, []);
 
-
   useEffect(() => {
-    if (firebaseui === null)
-      return;
+    if (firebaseui === null) return;
 
     // Get or Create a firebaseUI instance.
-    const firebaseUiWidget = firebaseui.auth.AuthUI.getInstance() || new firebaseui.auth.AuthUI(firebaseAuth);
-    if (uiConfig.signInFlow === 'popup')
-      firebaseUiWidget.reset();
+    const firebaseUiWidget =
+      firebaseui.auth.AuthUI.getInstance() ||
+      new firebaseui.auth.AuthUI(firebaseAuth);
+    if (uiConfig.signInFlow === "popup") firebaseUiWidget.reset();
 
     // We track the auth state to reset firebaseUi if the user signs out.
-    const unregisterAuthObserver = onAuthStateChanged(firebaseAuth, user => {
+    const unregisterAuthObserver = onAuthStateChanged(firebaseAuth, (user) => {
       if (!user) {
         firebaseUiWidget.reset();
       }
