@@ -1,4 +1,6 @@
 import crypto from "crypto";
+import { uuidv7 } from "uuidv7";
+
 import {
   getFirestore,
   collection,
@@ -342,14 +344,16 @@ export const getAllClients = async () => {
 //ITEM CODES
 
 export const createChargeItem = async (
+  id,
   lineItemCode,
   description,
-  unitPrice,
-  isService,
-  isProduct
+  unitPrice
+  // isService,
+  // isProduct
 ) => {
   const db = getFirestore();
-  const itemID = crypto.randomUUID();
+  const itemID = id;
+  // console.log(itemID);
   const itemRef = doc(db, "chargeItems", itemID);
 
   const newItem = {
@@ -357,9 +361,10 @@ export const createChargeItem = async (
     lineItemCode: lineItemCode,
     description: description,
     unitPrice: unitPrice,
-    isService: isService,
+    isService: false,
     createdAt: Date.now(),
-    isProduct: isProduct,
+    isProduct: false,
+    isNew: false,
   };
   await setDoc(itemRef, newItem);
   return newItem;
@@ -392,6 +397,7 @@ export const updateChargeItem = async (itemID, updatedItemData) => {
     console.error("Error updating charge item details:", error);
     throw error;
   }
+  return updatedItemData;
 };
 
 export const deleteChargeItem = async (itemID) => {

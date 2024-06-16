@@ -1,12 +1,10 @@
 // import React, { useState } from "react";
 import styles from "../../../styles/createChargeItem.module.css";
+// import { getAuth } from "firebase/auth";
 
 // export default function MyComponent() {
 //   const [isServiceChecked, setIsServiceChecked] = useState(false);
 //   const [isProductChecked, setIsProductChecked] = useState(false);
-//   const [lineItemCode, setLineItemCode] = useState("");
-//   const [description, setDescription] = useState("");
-//   const [unitPrice, setUnitPrice] = useState("");
 
 //   const handleServiceCheckboxChange = () => {
 //     setIsServiceChecked(!isServiceChecked);
@@ -16,31 +14,12 @@ import styles from "../../../styles/createChargeItem.module.css";
 //     setIsProductChecked(!isProductChecked);
 //   };
 
-//   const handleInputChange = (e) => {
-//     const { name, value } = e.target;
-//     switch (name) {
-//       case "lineItemCode":
-//         setLineItemCode(value);
-
-//       case "description":
-//         setDescription(value);
-//         break;
-//       case "unitPrice":
-//         setUnitPrice(value);
-//         break;
-//       default:
-//         break;
-//     }
-//   };
-
 //   const FormReusableInput = ({
 //     id,
 //     name,
 //     label,
 //     placeholder,
 //     type = "text",
-//     value,
-//     onChange,
 //   }) => {
 //     return (
 //       <div className={styles["form-group"]}>
@@ -53,15 +32,13 @@ import styles from "../../../styles/createChargeItem.module.css";
 //           id={id}
 //           name={name}
 //           placeholder={placeholder}
-//           value={value}
-//           onChange={onChange}
 //           aria-label={label}
 //         />
 //       </div>
 //     );
 //   };
 
-//   const FormOptions = ({ id, name, ariaLabel, checked, onChange }) => {
+//   const FormOptions = ({ id, name, label, checked, onChange }) => {
 //     return (
 //       <div className={styles["form-options"]}>
 //         <div className={styles["form-option"]}>
@@ -71,26 +48,21 @@ import styles from "../../../styles/createChargeItem.module.css";
 //             tabIndex="0"
 //             id={id}
 //             name={name}
+//             aria-label={label}
 //             checked={checked}
-//             aria-label={ariaLabel}
 //             onChange={onChange}
 //           />
-//           <span className={styles["form-option-label"]}>{name}</span>
+//           <span className={styles["form-option-label"]}>{label}</span>
 //         </div>
 //       </div>
 //     );
 //   };
 
-//   const resetForm = () => {
-//     setLineItemCode("");
-//     setDescription("");
-//     setUnitPrice("");
-//     setIsServiceChecked(false);
-//     setIsProductChecked(false);
-//   };
-
 //   const onChargeItemSubmitted = async (event) => {
 //     event.preventDefault();
+//     const auth = getAuth(); // Get the Auth instance (assuming you need user authentication)
+
+//     const user = auth.currentUser;
 
 //     const lineItemCode = event.target.lineItemCode.value;
 //     const description = event.target.description.value;
@@ -115,6 +87,8 @@ import styles from "../../../styles/createChargeItem.module.css";
 //       console.log("Item submitted");
 //     }
 //     event.target.reset();
+//     console.log({ isproduct: isProduct });
+//     console.log({ isservice: isService });
 //   };
 
 //   return (
@@ -131,16 +105,12 @@ import styles from "../../../styles/createChargeItem.module.css";
 //               name="lineItemCode"
 //               label="Line Item Code"
 //               placeholder="Enter code"
-//               value={lineItemCode}
-//               onChange={handleInputChange}
 //             />
 //             <FormReusableInput
 //               id="description"
 //               name="description"
 //               label="Description"
 //               placeholder="Enter description"
-//               value={description}
-//               onChange={handleInputChange}
 //             />
 //             <FormReusableInput
 //               id="unitPrice"
@@ -148,30 +118,23 @@ import styles from "../../../styles/createChargeItem.module.css";
 //               label="Unit Price"
 //               placeholder="$0.00"
 //               type="text"
-//               value={unitPrice}
-//               onChange={handleInputChange}
 //             />
 //             <FormOptions
 //               id="isService"
 //               name="isService"
-//               ariaLabel="isService"
+//               label="is Service"
 //               checked={isServiceChecked}
 //               onChange={handleServiceCheckboxChange}
 //             />
-
 //             <FormOptions
 //               id="isProduct"
 //               name="isProduct"
-//               ariaLabel="isProduct"
+//               label="is Product"
 //               checked={isProductChecked}
 //               onChange={handleProductCheckboxChange}
 //             />
 //             <div className={styles["form-actions"]}>
-//               <button
-//                 type="button"
-//                 onClick={resetForm}
-//                 className={styles["form-cancel"]}
-//               >
+//               <button type="button" className={styles["form-cancel"]}>
 //                 Cancel
 //               </button>
 //               <button type="submit" className={styles["form-save"]}>
@@ -186,11 +149,12 @@ import styles from "../../../styles/createChargeItem.module.css";
 // }
 
 import * as React from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   getAllChargeItemCodes,
   createChargeItem,
   updateChargeItem,
+  deleteChargeItem,
 } from "../../../services/database.mjs";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -200,6 +164,7 @@ import DeleteIcon from "@mui/icons-material/DeleteOutlined";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Close";
 import Checkbox from "@mui/material/Checkbox";
+import crypto from "crypto";
 
 import {
   GridRowModes,
@@ -209,6 +174,8 @@ import {
   GridRowEditStopReasons,
 } from "@mui/x-data-grid";
 import { randomId } from "@mui/x-data-grid-generator";
+import { getRowIdFromRowModel } from "@mui/x-data-grid/internals";
+import { useGridApiRef } from "@mui/x-data-grid";
 
 const initialRows = [
   {
@@ -233,8 +200,8 @@ function EditToolbar(props) {
         lineItemCode: "",
         description: "",
         unitPrice: "",
-        isService: "",
-        isProduct: "",
+        isService: false,
+        isProduct: false,
         isNew: true,
       },
     ]);
@@ -256,9 +223,18 @@ function EditToolbar(props) {
 }
 
 export default function FullFeaturedCrudGrid() {
-  const [rows, setRows] = React.useState(initialRows);
-  const [rowModesModel, setRowModesModel] = React.useState({});
+  const [rows, setRows] = useState(initialRows);
+  const [rowModesModel, setRowModesModel] = useState({});
 
+  const handleCheckboxChange = async (id, field, value) => {
+    const rowToUpdate = rows.find((row) => row.id === id);
+    const updatedRow = { ...rowToUpdate, [field]: value };
+    const newRow = await updateChargeItem(id, updatedRow);
+    // console.log(newRow);
+    setRows((prevRows) =>
+      prevRows.map((row) => (row.id === newRow.id ? newRow : row))
+    );
+  };
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -285,25 +261,20 @@ export default function FullFeaturedCrudGrid() {
     }
   };
 
-  const handleEditClick = (id) => () => {
+  const handleEditClick = (id) => async () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
 
+  //   const apiRef = useGridApiRef();
+
   const handleSaveClick = (id) => async () => {
-    const editedRow = rows.find((row) => row.id === id);
-    if (editedRow.isNew) {
-      await createChargeItem(editedRow);
-      setRows((oldRows) =>
-        oldRows.map((row) => (row.id === id ? { ...row, isNew: false } : row))
-      );
-    } else {
-      await updateChargeItem(id, editedRow);
-    }
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
-  const handleDeleteClick = (id) => () => {
+  const handleDeleteClick = (id) => async () => {
     setRows(rows.filter((row) => row.id !== id));
+    // console.log(id);
+    await deleteChargeItem(id);
   };
 
   const handleCancelClick = (id) => () => {
@@ -318,10 +289,41 @@ export default function FullFeaturedCrudGrid() {
     }
   };
 
-  const processRowUpdate = (newRow) => {
-    const updatedRow = { ...newRow, isNew: false };
-    setRows(rows.map((row) => (row.id === newRow.id ? updatedRow : row)));
-    return updatedRow;
+  const processRowUpdate = async (newRow) => {
+    const updatedRow = { ...newRow };
+    // console.log(updatedRow);
+
+    try {
+      if (updatedRow.isNew) {
+        setRowModesModel({
+          ...rowModesModel,
+          [updatedRow.id]: { mode: GridRowModes.View },
+        });
+        const createdItem = await createChargeItem(
+          updatedRow.id,
+          updatedRow.lineItemCode,
+          updatedRow.description,
+          updatedRow.unitPrice,
+          updatedRow.isService,
+          updatedRow.isProduct
+        );
+      } else {
+        await updateChargeItem(updatedRow.id, updatedRow);
+      }
+
+      setRows((oldRows) =>
+        oldRows.map((row) => (row.id === updatedRow.id ? updatedRow : row))
+      );
+
+      return updatedRow;
+    } catch (error) {
+      console.error("Error updating row:", error);
+      //   throw new Error("row not added");
+    }
+  };
+
+  const handleProcessRowUpdateError = async () => {
+    console.log("row not added");
   };
 
   const handleRowModesModelChange = (newRowModesModel) => {
@@ -331,33 +333,54 @@ export default function FullFeaturedCrudGrid() {
   const columns = [
     {
       field: "lineItemCode",
+      id: "lineItemCode",
       headerName: "Line Item Code",
       width: 180,
       editable: true,
     },
     {
       field: "description",
+      id: "description",
       headerName: "Description",
       width: 280,
       editable: true,
     },
     {
       field: "unitPrice",
+      id: "unitPrice",
       headerName: "Unit Price",
       width: 150,
       editable: true,
     },
     {
       field: "isService",
+      id: "isService",
       headerName: "isService",
       width: 120,
-      renderCell: (params) => <Checkbox />,
+      //   editable: true,
+      renderCell: (params) => (
+        <Checkbox
+          checked={params.value}
+          onChange={(event) =>
+            handleCheckboxChange(params.id, "isService", event.target.checked)
+          }
+        />
+      ),
     },
     {
       field: "isProduct",
+      id: "isProduct",
       headerName: "isProduct",
       width: 120,
-      renderCell: (params) => <Checkbox />,
+      //   editable: true,
+      renderCell: (params) => (
+        <Checkbox
+          checked={params.value}
+          onChange={(event) =>
+            handleCheckboxChange(params.id, "isProduct", event.target.checked)
+          }
+        />
+      ),
     },
     {
       field: "actions",
@@ -429,6 +452,7 @@ export default function FullFeaturedCrudGrid() {
           onRowModesModelChange={handleRowModesModelChange}
           onRowEditStop={handleRowEditStop}
           processRowUpdate={processRowUpdate}
+          onProcessRowUpdateError={handleProcessRowUpdateError}
           slots={{
             toolbar: EditToolbar,
           }}
