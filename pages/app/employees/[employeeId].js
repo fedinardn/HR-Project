@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import styles from "../../../styles/viewStaff.module.css";
 import { useRouter } from "next/router";
 import EditStaffModal from "../../../components/EditStaffModal";
-import { updateStaffDetails } from "../../../services/database.mjs";
+import {
+  updateStaffDetails,
+  getStaffDetails,
+} from "../../../services/database.mjs";
 import Link from "next/link";
 import AssignedProgramsList from "../../../components/AssignedProgamsList";
 import firebaseApp from "../../../firebase";
@@ -28,10 +31,10 @@ export default function getStaffData({ user }) {
   const fetchStaffData = async () => {
     if (staffID) {
       // console.log(staffID);
-      const response = await fetch(`/api/employees/${staffID}`, {
-        method: "GET",
-      });
-      const data = await response.json();
+      // const response = await fetch(`/api/employees/${staffID}`, {
+      //   method: "GET",
+      // });
+      const data = await getStaffDetails(staffID).then();
       setStaffData(data);
     }
   };
