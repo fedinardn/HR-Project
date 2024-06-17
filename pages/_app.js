@@ -1,5 +1,6 @@
 import "../styles/global.css";
 import NavBar from "../components/NavBar";
+import Footer from "../components/Footer";
 import Head from "next/head";
 import { useState, useEffect } from "react";
 import { onAuthStateChanged, getAuth } from "firebase/auth";
@@ -28,6 +29,7 @@ function MyApp({ Component, pageProps }) {
       </Head>
       <NavBar />
       <Component {...pageProps} user={user} />
+      <Footer />
       <Analytics />
       <SpeedInsights />
     </div>

@@ -90,6 +90,7 @@ export default function MyComponent({ user }) {
               src="https://cdn.builder.io/api/v1/image/assets/TEMP/7d50d5d0b5a6d91c8c2df85849bb272eab7bc37bac38e3845d0295edc7d405a6?apiKey=6dceda0d543f454b955d90f7c576a010&"
               alt="clients Icon"
               label="Clients"
+              href={"/app/clients/viewClients"}
             />
             <SideMenuItem
               src="https://cdn.builder.io/api/v1/image/assets/TEMP/8d86f9b59e1d70f0e67588e10a86793bf9abe078a10496e35676dcedcb8ca735?apiKey=6dceda0d543f454b955d90f7c576a010&"
