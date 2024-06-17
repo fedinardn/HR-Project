@@ -1,16 +1,23 @@
 import styles from "../styles/Dashboard.module.css";
-import { getAllProgramRequests, getAllStaff } from "../services/database.mjs";
+import {
+  getAllProgramRequests,
+  getAllStaff,
+  getAllClients,
+} from "../services/database.mjs";
 import { useState, useEffect } from "react";
 export default function MyComponent({ user }) {
   const [numberOfProgramRequest, setNumberOfProgramRequest] = useState(0);
   const [numberOfStaff, setNumberOfStaff] = useState(0);
+  const [numberOfClients, setNumberOfClients] = useState(0);
 
   const fetchPageDetails = async () => {
     if (user) {
       const pageStaffData = await getAllStaff();
       const pageRequestData = await getAllProgramRequests(user.uid).then();
+      const pageClientData = await getAllClients();
       setNumberOfProgramRequest(pageRequestData.length);
       setNumberOfStaff(pageStaffData.length);
+      setNumberOfClients(pageClientData.length);
     }
   };
 
@@ -20,7 +27,7 @@ export default function MyComponent({ user }) {
 
   const data = [
     { title: "Total Employees", value: numberOfStaff },
-    { title: "Total Clients", value: "10" },
+    { title: "Total Clients", value: numberOfClients },
   ];
 
   const RequestData = [
@@ -49,6 +56,10 @@ export default function MyComponent({ user }) {
 
   const addNewEmployee = () => {
     window.location.href = "/app/employees/addNewEmployee";
+  };
+
+  const addNewClient = () => {
+    window.location.href = "/app/clients/addNewClient";
   };
 
   function RequestCard({ title, value }) {
@@ -139,7 +150,7 @@ export default function MyComponent({ user }) {
             <ActionCard
               actionTitle="Add a new client"
               description="You can add clients here."
-              //   action = {addNewClient}
+              action={addNewClient}
             />
           </section>
         </main>

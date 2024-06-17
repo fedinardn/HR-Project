@@ -289,7 +289,7 @@ export const createClient = async (
 
 export const getClientDetails = async (clientID) => {
   const db = getFirestore();
-  const clientCollection = collection(db, "staff");
+  const clientCollection = collection(db, "clients");
 
   const q = query(clientCollection, where("clientID", "==", clientID));
 
@@ -317,6 +317,19 @@ export const getAllClients = async () => {
   });
 
   return clients;
+};
+
+export const updateClientDetails = async (clientID, updatedClientData) => {
+  const db = getFirestore();
+  const clientRef = doc(db, "clients", clientID);
+
+  try {
+    await updateDoc(clientRef, updatedClientData);
+    console.log("Client details updated successfully");
+  } catch (error) {
+    console.error("Error updating client details:", error);
+    throw error;
+  }
 };
 
 // export const createNewProgramForClient = async (clientId, companyName, programName, programTypes, date) => {

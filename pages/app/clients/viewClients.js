@@ -5,41 +5,42 @@ import { useState, useEffect } from "react";
 import { getAllClients } from "../../../services/database.mjs";
 
 export default function ViewStaff({ user }) {
-  const clientsData = [
-    { name: "Acme Inc.", type: "Tech", contact: "John Doe", programs: "12" },
-    {
-      name: "Globex Corp.",
-      type: "Retail",
-      contact: "Jane Smith",
-      programs: "15",
-    },
-    { name: "Initech", type: "Finance", contact: "Sam Johnson", programs: "9" },
-    {
-      name: "Umbrella Corp.",
-      type: "BioTech",
-      contact: "Dr. Alice Wong",
-      programs: "18",
-    },
-    {
-      name: "Gringotts Bank",
-      type: "Finance",
-      contact: "Rubeus Hagrid",
-      programs: "6",
-    },
-    { name: "LexCorp", type: "Media", contact: "Lois Lane", programs: "22" },
-    {
-      name: "Stark Industries",
-      type: "Tech",
-      contact: "Pepper Potts",
-      programs: "13",
-    },
-    {
-      name: "Wayne Enterprises",
-      type: "Diversified",
-      contact: "Lucius Fox",
-      programs: "17",
-    },
-  ];
+  //   const [clientData, setClientData] = useState([]);
+  //   const clientsData = [
+  //     { name: "Acme Inc.", type: "Tech", contact: "John Doe", programs: "12" },
+  //     {
+  //       name: "Globex Corp.",
+  //       type: "Retail",
+  //       contact: "Jane Smith",
+  //       programs: "15",
+  //     },
+  //     { name: "Initech", type: "Finance", contact: "Sam Johnson", programs: "9" },
+  //     {
+  //       name: "Umbrella Corp.",
+  //       type: "BioTech",
+  //       contact: "Dr. Alice Wong",
+  //       programs: "18",
+  //     },
+  //     {
+  //       name: "Gringotts Bank",
+  //       type: "Finance",
+  //       contact: "Rubeus Hagrid",
+  //       programs: "6",
+  //     },
+  //     { name: "LexCorp", type: "Media", contact: "Lois Lane", programs: "22" },
+  //     {
+  //       name: "Stark Industries",
+  //       type: "Tech",
+  //       contact: "Pepper Potts",
+  //       programs: "13",
+  //     },
+  //     {
+  //       name: "Wayne Enterprises",
+  //       type: "Diversified",
+  //       contact: "Lucius Fox",
+  //       programs: "17",
+  //     },
+  //   ];
 
   function ClientCard({ name, type, contact, programs }) {
     return (
@@ -74,14 +75,31 @@ export default function ViewStaff({ user }) {
       return clients;
     }
 
-    return clients.filter(
-      (member) =>
-        member.firstName.toLowerCase().startsWith(searchQuery.toLowerCase()) ||
-        member.lastName.toLowerCase().startsWith(searchQuery.toLowerCase())
-    );
+    // return clients.filter(
+    //   (member) =>
+    //     member.organizationName
+    //       .toLowerCase()
+    //       .startsWith(searchQuery.toLowerCase()) ||
+    //     member.contactPerson.toLowerCase().startsWith(searchQuery.toLowerCase())
+    // );
+    return clients.filter((member) => {
+      const query = searchQuery.toLowerCase();
+
+      const orgNameWords = member.organizationName.toLowerCase().split(" ");
+      const contactPersonWords = member.contactPerson.toLowerCase().split(" ");
+
+      const matchesOrgName = orgNameWords.some((word) =>
+        word.startsWith(query)
+      );
+      const matchesContactPerson = contactPersonWords.some((word) =>
+        word.startsWith(query)
+      );
+
+      return matchesOrgName || matchesContactPerson;
+    });
   };
 
-  const filteredStaff = filterClients(clients, searchQuery);
+  const filteredClients = filterClients(clients, searchQuery);
 
   return (
     <>
@@ -105,14 +123,11 @@ export default function ViewStaff({ user }) {
             id="searchClients"
             placeholder="Search clients"
             aria-label="Search clients"
-            // value={value}
-            // onChange={handleSearch}
           />
           <img
             src="https://cdn.builder.io/api/v1/image/assets/TEMP/ef95366c70a6c027dfc7a1c0bb808953401267a94186d90914dcc35153889a45?apiKey=6dceda0d543f454b955d90f7c576a010&"
             alt=""
             className={styles["search-icon"]}
-            // tabindex="0"
             role="button"
           />
         </form>
@@ -124,42 +139,19 @@ export default function ViewStaff({ user }) {
             <div className={styles["client-list-header-item"]}>Contact</div>
             <div className={styles["client-list-header-item"]}>Programs</div>
           </div>
-          {clientsData.map((client, index) => (
-            <ClientCard
-              key={index}
-              name={client.name}
-              type={client.type}
-              contact={client.contact}
-              programs={client.programs}
-            />
+
+          {filteredClients.map((client, index) => (
+            <a key={index} href={`/app/clients/${client.clientID}`}>
+              <ClientCard
+                key={index}
+                name={client.organizationName}
+                type={client.clientType}
+                contact={client.contactPerson}
+                programs={client.programs.length}
+              />
+            </a>
           ))}
         </section>
-        {/* <section className={styles["client-list"]}>
-          <table className={styles["client-table"]}>
-            <thead>
-              <tr className={styles["client-list-header"]}>
-                <th className={styles["client-list-header-item"]}>Client</th>
-                <th className={styles["client-list-header-item"]}>Type</th>
-                <th className={styles["client-list-header-item"]}>Contact</th>
-                <th className={styles["client-list-header-item"]}>Programs</th>
-              </tr>
-            </thead>
-            <tbody>
-              {clientsData.map((client, index) => (
-                <tr key={index} className={styles["client-row"]}>
-                  <td className={styles["client-list-item"]}>{client.name}</td>
-                  <td className={styles["client-list-item"]}>{client.type}</td>
-                  <td className={styles["client-list-item"]}>
-                    {client.contact}
-                  </td>
-                  <td className={styles["client-list-item"]}>
-                    {client.programs.join(", ")}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section> */}
       </section>
     </>
   );
