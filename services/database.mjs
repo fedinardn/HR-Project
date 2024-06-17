@@ -259,13 +259,13 @@ export const getStaffDetails = async (staffID) => {
 
 //CLIENT FUNCTIONS
 export const createClient = async (
-  companyName,
+  organizationName,
+  clientType,
   contactPerson,
-  contactPersonEmail,
   address,
   phone,
-  email,
-  typeOfClient
+  mobile,
+  contactPersonEmail
 ) => {
   const db = getFirestore();
   const clientID = crypto.randomUUID();
@@ -273,14 +273,14 @@ export const createClient = async (
 
   const newClient = {
     clientID: clientID,
-    companyName: companyName,
+    organizationName: organizationName,
     contactPerson: contactPerson,
+    clientType: clientType,
     contactPersonEmail: contactPersonEmail,
     createdAt: Date.now(),
     address: address,
     phone: phone,
-    email: email,
-    typeOfClient: typeOfClient,
+    mobile: mobile,
     programs: [],
   };
   await setDoc(clientRef, newClient);

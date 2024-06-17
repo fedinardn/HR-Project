@@ -2,6 +2,7 @@ import * as React from "react";
 import styles from "../../../styles/viewClients.module.css";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { getAllClients } from "../../../services/database.mjs";
 
 export default function ViewStaff({ user }) {
   const clientsData = [
@@ -55,9 +56,9 @@ export default function ViewStaff({ user }) {
   const [clients, setClients] = useState([]);
 
   const fetchClients = async () => {
-    // const data = await getAllClients().then();
-    // setClients(data);
-    console.log("all Clients");
+    const data = await getAllClients().then();
+    setClients(data);
+    // console.log("all Clients");
   };
 
   useEffect(() => {
@@ -89,7 +90,7 @@ export default function ViewStaff({ user }) {
           <h1 className={styles["title"]}>Clients</h1>
           <Link
             className={styles["new-client"]}
-            href={"/app/clients/viewClients"}
+            href={"/app/clients/addNewClient"}
           >
             <h4 className={styles["new-client-text"]}>Add New Client</h4>
           </Link>
