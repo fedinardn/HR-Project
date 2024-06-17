@@ -5,6 +5,7 @@ import EditStaffModal from "../../../components/EditStaffModal";
 import { updateStaffDetails } from "../../../services/database.mjs";
 import Link from "next/link";
 import AssignedProgramsList from "../../../components/AssignedProgamsList";
+import firebaseApp from "../../../firebase";
 
 export default function getStaffData({ user }) {
   const router = useRouter();
