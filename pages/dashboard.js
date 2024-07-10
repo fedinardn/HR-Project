@@ -112,7 +112,8 @@ export default function MyComponent({ user }) {
             <SideMenuItem
               src="https://cdn.builder.io/api/v1/image/assets/TEMP/9a34677ddc2a19fdeb87616abc5f681e3b112f49a96db78b3dd6d6eb6b126d71?apiKey=6dceda0d543f454b955d90f7c576a010&"
               alt="Administration Icon"
-              label="Administration"
+              label="Schedule"
+              href={"/app/schedule/scheduleDisplay"}
             />
             <SideMenuItem
               src="https://cdn.builder.io/api/v1/image/assets/TEMP/6e36345e6dbb2a893bf8f0639a566fa778d453362db0c18c237db37d1f3cfdef?apiKey=6dceda0d543f454b955d90f7c576a010&"

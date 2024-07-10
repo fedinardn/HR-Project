@@ -2,17 +2,26 @@
 import React, { useState } from "react";
 // import styles from "../styles/viewStaff.module.css";
 import styles from "../styles/AssignedStaff.module.css";
+import CreateClientContract from "./CreateClientContract";
 
 export default function AssignedProgramsList({
   initialPrograms,
   onAddProgram,
 }) {
   const [programs, setPrograms] = useState(initialPrograms);
+  const [showContract, setShowContract] = useState(false);
 
   const handleAddProgram = () => {
     const newProgram = { name: "New Program", id: "12345" }; // Replace with actual data
     setPrograms([newProgram, ...programs]);
     if (onAddProgram) onAddProgram(newProgram);
+  };
+
+  const handleCreateContractClick = () => {
+    setShowContract(true);
+  };
+  const handleCloseContractModal = () => {
+    setShowContract(false);
   };
 
   const AssignedProgram = ({ program }) => (
@@ -43,12 +52,16 @@ export default function AssignedProgramsList({
           <h1 className={styles.title}>Assigned Programs({0})</h1>
           <button
             className={styles["add-program-button"]}
-            onClick={handleAddProgram}
+            onClick={handleCreateContractClick}
           >
             <span className={styles["add-program-icon"]}>+</span>
-            <span className={styles["add-program-text"]}>Assign Program</span>
+            <a href="">
+              <span className={styles["add-program-text"]}>Assign Program</span>
+            </a>
           </button>
         </div>
+        <CreateClientContract onClose={handleCloseContractModal} />
+
         <form onChange={(event) => event} className={styles["search-form"]}>
           <input
             className={styles["search-input"]}
@@ -67,6 +80,7 @@ export default function AssignedProgramsList({
             role="button"
           />
         </form>
+
         <header className={styles["task-header"]}>
           <div className={styles["header-name"]}>Program Name</div>
           <div className={styles["header-status"]}>Date</div>

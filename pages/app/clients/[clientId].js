@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import styles from "../../../styles/viewClient.module.css";
 import { useRouter } from "next/router";
 import EditClientModal from "../../../components/EditClientModal";
+import CreateClientContract from "../../../components/CreateClientContract";
 import {
   updateClientDetails,
   getClientDetails,
@@ -15,6 +16,7 @@ export default function getClientData({ user }) {
   const clientID = router.query.clientId;
   const [clientData, setClientData] = useState([]);
   const [showModal, setShowModal] = useState(false);
+  //   const [showContract, setShowContract] = useState(false);
   const [programs, setAssignedPrograms] = useState([
     { name: "Jennet Gray", id: "1234 - Program A" },
     { name: "Jennet Gray", id: "5678 - Program B" },
@@ -43,6 +45,8 @@ export default function getClientData({ user }) {
   const handleEditClick = () => {
     setShowModal(true);
   };
+
+  //   s
 
   const handleSave = async (editedClient) => {
     try {
@@ -128,6 +132,7 @@ export default function getClientData({ user }) {
   return (
     <>
       <ClientSection client={clientData} />
+
       {showModal && (
         <EditClientModal
           client={clientData}
@@ -136,6 +141,7 @@ export default function getClientData({ user }) {
         />
       )}
       <ClientInfo info={clientData} />
+      {/* <CreateClientContract /> */}
       <AssignedProgramsList
         // initialPrograms={staffData.programs || []}  this is the correct one replace when functionality is correct
         initialPrograms={programs}

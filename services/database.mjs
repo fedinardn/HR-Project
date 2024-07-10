@@ -1,5 +1,6 @@
 import crypto from "crypto";
 import { uuidv7 } from "uuidv7";
+import { format } from "date-fns";
 
 import {
   getFirestore,
@@ -422,6 +423,100 @@ export const deleteChargeItem = async (itemID) => {
     console.log("Charge item deleted successfully");
   } catch (error) {
     console.error("Error deleting charge item:", error);
+    throw error;
+  }
+};
+
+//Schedule
+
+export const createNewProgramInGrid = async (
+  id,
+  programName,
+  date,
+  time,
+  clientType,
+  locationAndProgram,
+  groupSize,
+  contactPerson,
+  contactPersonEmail,
+  notes,
+  facilitators
+  // facilitatorsNeeded,
+) => {
+  const db = getFirestore();
+  const programID = id;
+  const programRef = doc(db, "programSchedule", programID);
+  const formattedDate = format(new Date(date), "MM/dd/yyyy");
+
+  const newProgram = {
+    programID: programID,
+    programName: programName,
+    date: formattedDate,
+    time: time,
+    clientType: clientType,
+    locationAndProgram: locationAndProgram,
+    groupSize: groupSize,
+    contactPerson: contactPerson,
+    contactPersonEmail: contactPersonEmail,
+    underAgeParticipants: false,
+    facilitators: [],
+    facilitatorEmails: [], // Assuming facilitators is an array of objects with email field
+    notes: notes,
+    returningClient: false,
+    contractSent: false,
+    preProgramEmail: false,
+    packetReady: false,
+    packetProcessed: false,
+    followUp: false,
+    cancelled: false,
+    facilitatorsNeeded: [],
+    createdAt: Date.now(),
+    isNew: false,
+  };
+
+  await setDoc(programRef, newProgram);
+  return newProgram;
+};
+
+export const updateProgramInGrid = async (programID, updatedProgramData) => {
+  const db = getFirestore();
+  const programRef = doc(db, "programSchedule", programID);
+
+  try {
+    await updateDoc(programRef, updatedProgramData);
+    console.log("Program details updated successfully");
+  } catch (error) {
+    console.error("Error updating program details:", error);
+    throw error;
+  }
+  return updatedProgramData;
+};
+
+export const getAllProgramsInGrid = async () => {
+  const db = getFirestore();
+  const programsCollection = collection(db, "programSchedule");
+
+  const q = query(programsCollection);
+
+  const querySnapshot = await getDocs(q);
+
+  const programs = [];
+  querySnapshot.forEach((doc) => {
+    programs.push((doc.id, "=>", doc.data()));
+  });
+
+  return programs;
+};
+
+export const deleteProgramInGrid = async (programID) => {
+  const db = getFirestore();
+  const programRef = doc(db, "programSchedule", programID);
+
+  try {
+    await deleteDoc(programRef);
+    console.log("Program deleted successfully");
+  } catch (error) {
+    console.error("Error deleting program:", error);
     throw error;
   }
 };
