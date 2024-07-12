@@ -111,6 +111,7 @@ import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import MyCalendar from "./scheduleCalendar";
 import FullFeaturedCrudProgramGrid from "./scheduleGrid";
+import ProgramList from "./scheduleTest";
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -152,12 +153,14 @@ export default function BasicTabs() {
     <Box sx={{ width: "100%" }}>
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs value={value} onChange={handleChange} aria-label="Schedule Tabs">
-          <Tab label="Program Grid View" {...a11yProps(0)} />
+          {/* <Tab label="Program Grid View" {...a11yProps(0)} /> */}
+          <Tab label="Programs View" {...a11yProps(0)} />
           <Tab label="Program Calendar View" {...a11yProps(1)} />
         </Tabs>
       </Box>
+
       <CustomTabPanel value={value} index={0}>
-        <FullFeaturedCrudProgramGrid />
+        <ProgramList />
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>
         <MyCalendar />

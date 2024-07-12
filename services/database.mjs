@@ -1,6 +1,7 @@
 import crypto from "crypto";
 import { uuidv7 } from "uuidv7";
 import { format } from "date-fns";
+import { useState } from "react";
 
 import {
   getFirestore,
@@ -433,34 +434,49 @@ export const createNewProgramInGrid = async (
   id,
   programName,
   date,
-  time,
+  startTime,
+  endTime,
   clientType,
   locationAndProgram,
   groupSize,
   contactPerson,
   contactPersonEmail,
   notes,
-  facilitators
-  // facilitatorsNeeded,
+  facilitators,
+  facilitatorsNeeded
 ) => {
   const db = getFirestore();
   const programID = id;
   const programRef = doc(db, "programSchedule", programID);
-  const formattedDate = format(new Date(date), "MM/dd/yyyy");
 
+  let formattedDate = "";
+  if (date) {
+    formattedDate = format(new Date(date), "MM/dd/yyyy");
+  }
+
+  let formattedStartTime = "";
+  if (startTime) {
+    formattedStartTime = format(new Date(startTime), "Pp");
+  }
+
+  let formattedEndTime = "";
+  if (endTime) {
+    formattedEndTime = format(new Date(endTime), "Pp");
+  }
   const newProgram = {
     programID: programID,
     programName: programName,
     date: formattedDate,
-    time: time,
+    startTime: formattedStartTime,
+    endTime: formattedEndTime,
     clientType: clientType,
     locationAndProgram: locationAndProgram,
     groupSize: groupSize,
     contactPerson: contactPerson,
     contactPersonEmail: contactPersonEmail,
     underAgeParticipants: false,
-    facilitators: [],
-    facilitatorEmails: [], // Assuming facilitators is an array of objects with email field
+    facilitators: facilitators,
+    facilitatorEmails: [],
     notes: notes,
     returningClient: false,
     contractSent: false,
@@ -469,7 +485,7 @@ export const createNewProgramInGrid = async (
     packetProcessed: false,
     followUp: false,
     cancelled: false,
-    facilitatorsNeeded: [],
+    facilitatorsNeeded: facilitatorsNeeded,
     createdAt: Date.now(),
     isNew: false,
   };
@@ -482,8 +498,32 @@ export const updateProgramInGrid = async (programID, updatedProgramData) => {
   const db = getFirestore();
   const programRef = doc(db, "programSchedule", programID);
 
+  const { date, startTime, endTime, ...rest } = updatedProgramData;
+
+  let formattedDate = "";
+  if (date) {
+    formattedDate = format(new Date(date), "MM/dd/yyyy");
+  }
+
+  let formattedStartTime = "";
+  if (startTime) {
+    formattedStartTime = format(new Date(startTime), "Pp");
+  }
+
+  let formattedEndTime = "";
+  if (endTime) {
+    formattedEndTime = format(new Date(endTime), "Pp");
+  }
+
+  const formattedProgramData = {
+    ...rest,
+    date: formattedDate,
+    startTime: formattedStartTime,
+    endTime: formattedEndTime,
+  };
+
   try {
-    await updateDoc(programRef, updatedProgramData);
+    await updateDoc(programRef, formattedProgramData);
     console.log("Program details updated successfully");
   } catch (error) {
     console.error("Error updating program details:", error);

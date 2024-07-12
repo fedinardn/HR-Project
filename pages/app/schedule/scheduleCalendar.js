@@ -5,7 +5,6 @@ import { getAllProgramsInGrid } from "../../../services/database.mjs";
 import { useState, useEffect } from "react";
 
 const localizer = momentLocalizer(moment);
-const myEventsList = []; //empty object for now
 
 const MyCalendar = (props) => {
   const [events, setEvents] = useState([]);
@@ -14,15 +13,39 @@ const MyCalendar = (props) => {
     const fetchEvents = async () => {
       try {
         const programs = await getAllProgramsInGrid();
-        console.log(programs);
-        const formattedEvents = programs.map((program) => ({
-          id: program.programID,
-          title: program.programName,
-          start: new Date(program.date), // Ensure date is in correct format
-          end: new Date(program.date), // Adjust if you have an end date/time
-        }));
+        // console.log(programs);
+        const formattedEvents = programs.map((program) => {
+          // Default to the date if time is not provided
+          const startDateTime = program.startTime
+            ? new Date(
+                `${program.date} ${new Date(
+                  program.startTime
+                ).toLocaleTimeString([], {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}`
+              )
+            : new Date(program.date);
+          const endDateTime = program.endTime
+            ? new Date(
+                `${program.date} ${new Date(program.endTime).toLocaleTimeString(
+                  [],
+                  {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }
+                )}`
+              )
+            : new Date(program.date);
+          console.log(program.startTime);
+          return {
+            id: program.programID,
+            title: program.programName,
+            start: startDateTime,
+            end: endDateTime,
+          };
+        });
         setEvents(formattedEvents);
-        // console.log(formattedEvents);
       } catch (error) {
         console.error("Error fetching events:", error);
       }

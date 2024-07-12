@@ -7,6 +7,7 @@ import { onAuthStateChanged, getAuth } from "firebase/auth";
 import firebaseApp from "../firebase";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/react";
+import { PrimeReactProvider } from "primereact/api";
 
 function MyApp({ Component, pageProps }) {
   const [user, setUser] = useState(null);
@@ -28,7 +29,9 @@ function MyApp({ Component, pageProps }) {
         <meta name="description" content="HR Dashboard" />
       </Head>
       <NavBar />
-      <Component {...pageProps} user={user} />
+      <PrimeReactProvider>
+        <Component {...pageProps} user={user} />
+      </PrimeReactProvider>
       <Footer />
       <Analytics />
       <SpeedInsights />
