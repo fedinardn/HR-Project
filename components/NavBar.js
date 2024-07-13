@@ -1,9 +1,9 @@
 import * as React from "react";
-import styles from "../styles/NavBar.module.css"
+import styles from "../styles/NavBar.module.css";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import { getFirestore, collection, addDoc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc } from "firebase/firestore";
 import { useState, useEffect } from "react";
 
 const NavBar = () => {
@@ -20,7 +20,6 @@ const NavBar = () => {
   }, []);
 
   const handleSubmitRequestClick = () => {
-
     if (!user) {
       window.location.href = "/login";
     } else {
@@ -28,11 +27,19 @@ const NavBar = () => {
     }
   };
 
+  const handleViewProgramRequestsClick = () => {
+    if (!user) {
+      window.location.href = "/login";
+    } else {
+      window.location.href = "/app/program-requests/viewRequests";
+    }
+  };
+
   const handleLogout = () => {
     setUser(null);
     signOut(getAuth());
     window.location.href = "/login";
-  }
+  };
 
   const renderUserMessage = () => {
     if (user) {
@@ -42,7 +49,7 @@ const NavBar = () => {
         </div>
       );
     }
-  }
+  };
 
   function IconButton({ icon, alt }) {
     return (
@@ -52,55 +59,39 @@ const NavBar = () => {
     );
   }
 
-
   return (
     <>
       <header className={styles.header}>
         <div className={styles.logo}>
           <h1>
-            <Link href={"/"}>
-              CTLC
-            </Link>
+            <Link href={"/"}>CTLC</Link>
           </h1>
         </div>
         <nav className={styles.navigation}>
           <ul className={styles.menu}>
-
             <li>
               <a onClick={handleSubmitRequestClick}>Submit Request</a>
             </li>
             <li>
-              <Link href={"/app/program-requests/viewRequests"}>
-                Program Requests
-              </Link>
+              <a onClick={handleViewProgramRequestsClick}>Program Requests</a>
             </li>
             <li>
-              <Link href={"/"}>
-                Home
-              </Link>
+              <Link href={"/"}>Home</Link>
             </li>
             <li>
-              <Link href={"/dashboard"}>
-                Dashboard
-              </Link>
+              <Link href={"/dashboard"}>Dashboard</Link>
             </li>
 
-            {user ? <li>
-
-              <a onClick={handleLogout}>Logout</a>
-              <a className={styles.welcome}> Welcome, {user.email}</a>
-
-              
-
-            </li> :
+            {user ? (
+              <li>
+                <a onClick={handleLogout}>Logout</a>
+                <a className={styles.welcome}> Welcome, {user.email}</a>
+              </li>
+            ) : (
               <li>
                 <Link href={"/login"}>Sign In</Link>
-
               </li>
-              }
-
-            
-
+            )}
           </ul>
           {/* <div className={styles.actions}>
             <IconButton icon="https://cdn.builder.io/api/v1/image/assets/TEMP/446b18838c641d7530d07c21a2b7d42752cd2096fc66893db8734ce07de5a899?apiKey=6dceda0d543f454b955d90f7c576a010&" alt="Notification icon" />
@@ -108,9 +99,9 @@ const NavBar = () => {
           </div>
           <img src="https://cdn.builder.io/api/v1/image/assets/TEMP/a362dd09f68740213ea73a5c47bb4131907844f04f385d2fbc14b5c91b75da47?apiKey=6dceda0d543f454b955d90f7c576a010&" alt="User avatar" className={styles.avatar} /> */}
         </nav>
-      </header >
+      </header>
     </>
   );
-}
+};
 
 export default NavBar;

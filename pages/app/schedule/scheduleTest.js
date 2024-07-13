@@ -47,7 +47,7 @@ const ProgramList = () => {
     contactPersonEmail: "",
     underAgeParticipants: false,
     facilitators: [],
-    facilitatorEmails: "",
+    facilitatorEmails: [],
     notes: "",
     returningClient: false,
     contractSent: false,
@@ -71,6 +71,8 @@ const ProgramList = () => {
   const [deleteProgramsDialog, setDeleteProgramsDialog] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [selectedPrograms, setSelectedPrograms] = useState(null);
+  const [editable, setEditable] = useState(false);
+  const [selectedProgram, setSelectedProgram] = useState(null);
   const [globalFilter, setGlobalFilter] = useState(null);
   const globalFilterFields = [
     "programName",
@@ -86,6 +88,7 @@ const ProgramList = () => {
     { name: "Michael Johnson", email: "MJ@gmail.com" },
     // Add more facilitators as needed
   ]);
+
   const toast = useRef(null);
   const dt = useRef(null);
 
@@ -134,8 +137,8 @@ const ProgramList = () => {
       contactPerson: "",
       contactPersonEmail: "",
       underAgeParticipants: false,
-      facilitators: "",
-      facilitatorEmails: "",
+      facilitators: [],
+      facilitatorEmails: [],
       notes: "",
       returningClient: false,
       contractSent: false,
@@ -156,6 +159,7 @@ const ProgramList = () => {
     });
     setSubmitted(false);
     setProgramDialog(true);
+    setEditable(true);
   };
 
   const leftToolbarTemplate = () => {
@@ -202,6 +206,17 @@ const ProgramList = () => {
     setDeleteProgramsDialog(false);
   };
 
+  const showProgramDetails = (program) => {
+    setProgram({ ...program.data });
+    console.log(program);
+    setProgramDialog(true);
+    setEditable(false);
+  };
+
+  const toggleEditable = () => {
+    setEditable(!editable);
+  };
+
   const confirmDeleteSelected = () => {
     setDeleteProgramsDialog(true);
   };
@@ -245,7 +260,7 @@ const ProgramList = () => {
     }
 
     // setSubmitted(true);
-    setPrograms(_programs);
+    // setPrograms(_programs);
     setProgramDialog(false);
     fetchData();
   };
@@ -253,6 +268,7 @@ const ProgramList = () => {
   const editProgram = (program) => {
     setProgram({ ...program });
     setProgramDialog(true);
+    setEditable(true);
   };
 
   const confirmDeleteProgram = (program) => {
@@ -361,6 +377,7 @@ const ProgramList = () => {
           display="chip"
           placeholder="Select Facilitators"
           className="w-full md:w-100rem"
+          disabled={!editable}
         />
       </div>
     );
@@ -391,6 +408,7 @@ const ProgramList = () => {
           optionLabel="name"
           placeholder="Select Client Type"
           className="w-full md:w-100rem"
+          disabled={!editable}
         />
       </div>
     );
@@ -438,18 +456,33 @@ const ProgramList = () => {
 
   const programDialogFooter = (
     <>
-      <Button
-        label="Cancel"
-        icon="pi pi-times"
-        className="p-button-text"
-        onClick={hideDialog}
-      />
-      <Button
-        label="Save"
-        icon="pi pi-check"
-        className="p-button-text"
-        onClick={saveProgram}
-      />
+      <div>
+        {!editable ? (
+          <Button label="Edit" icon="pi pi-pencil" onClick={toggleEditable} />
+        ) : (
+          <>
+            <Button
+              label="Cancel"
+              icon="pi pi-times"
+              onClick={toggleEditable}
+              className="p-button-text"
+            />
+            <Button label="Save" icon="pi pi-check" onClick={saveProgram} />
+            {/* <Button
+              label="Cancel"
+              icon="pi pi-times"
+              className="p-button-text"
+              onClick={hideDialog}
+            />
+            <Button
+              label="Save"
+              icon="pi pi-check"
+              className="p-button-text"
+              onClick={saveProgram}
+            /> */}
+          </>
+        )}
+      </div>
     </>
   );
 
@@ -516,6 +549,7 @@ const ProgramList = () => {
           reorderableColumns={true}
           showGridlines
           sortField="date"
+          onRowDoubleClick={showProgramDetails}
         >
           <Column selectionMode="multiple" exportable={false}></Column>
 
@@ -523,7 +557,7 @@ const ProgramList = () => {
           <Column
             field="date"
             header="Date"
-            body={(rowData) => rowData.date} // Format the date
+            body={(rowData) => rowData.date}
             sortable
           ></Column>
           <Column
@@ -612,8 +646,6 @@ const ProgramList = () => {
               maxWidth: "200px",
               maxHeight: "50px",
               overflow: "scroll",
-
-              //   textWrap: "wrap",
             }}
           ></Column>
           <Column
@@ -659,9 +691,7 @@ const ProgramList = () => {
             onChange={(e) => onInputChange(e, "programName")}
             required
             autoFocus
-            // className={classNames({
-            //   "p-invalid": submitted && !program.programName,
-            // })}
+            readOnly={!editable}
           />
           {submitted && !program.programName && (
             <small className="p-invalid">Program Name is required.</small>
@@ -675,6 +705,7 @@ const ProgramList = () => {
             value={program.date ? new Date(program.date) : program.date}
             onChange={(e) => onCalendarChange(e, "date")}
             showIcon
+            disabled={!editable}
           />
         </div>
 
@@ -694,6 +725,7 @@ const ProgramList = () => {
             timeOnly
             hourFormat="12"
             icon={() => <i className="pi pi-clock" />}
+            disabled={!editable}
           />
         </div>
 
@@ -709,6 +741,7 @@ const ProgramList = () => {
             timeOnly
             hourFormat="12"
             icon={() => <i className="pi pi-clock" />}
+            disabled={!editable}
           />
         </div>
 
@@ -728,6 +761,7 @@ const ProgramList = () => {
             id="locationAndProgram"
             value={program.locationAndProgram}
             onChange={(e) => onInputChange(e, "locationAndProgram")}
+            readOnly={!editable}
           />
         </div>
 
@@ -738,6 +772,7 @@ const ProgramList = () => {
             value={program.groupSize}
             onValueChange={(e) => onInputNumberChange(e, "groupSize")}
             integeronly
+            readOnly={!editable}
           />
         </div>
 
@@ -747,6 +782,7 @@ const ProgramList = () => {
             id="contactPerson"
             value={program.contactPerson}
             onChange={(e) => onInputChange(e, "contactPerson")}
+            readOnly={!editable}
           />
         </div>
 
@@ -756,6 +792,7 @@ const ProgramList = () => {
             id="contactPersonEmail"
             value={program.contactPersonEmail}
             onChange={(e) => onInputChange(e, "contactPersonEmail")}
+            readOnly={!editable}
           />
         </div>
 
@@ -767,6 +804,7 @@ const ProgramList = () => {
             onChange={(e) =>
               handleCheckboxChange("underAgeParticipants", e.target.checked)
             }
+            disabled={!editable}
           />
           <label htmlFor="underAgeParticipants">Under Age Participants</label>
         </div>
@@ -795,6 +833,7 @@ const ProgramList = () => {
             id="notes"
             value={program.notes}
             onChange={(e) => onInputChange(e, "notes")}
+            readOnly={!editable}
           />
         </div>
 
@@ -806,6 +845,7 @@ const ProgramList = () => {
             onChange={(e) =>
               handleCheckboxChange("returningClient", e.target.checked)
             }
+            disabled={!editable}
           />
           <label htmlFor="returningClient">Returning Client</label>
         </div>
@@ -818,6 +858,7 @@ const ProgramList = () => {
             onChange={(e) =>
               handleCheckboxChange("contractSent", e.target.checked)
             }
+            disabled={!editable}
           />
           <label htmlFor="contractSent">Contract Sent</label>
         </div>
@@ -830,6 +871,7 @@ const ProgramList = () => {
             onChange={(e) =>
               handleCheckboxChange("preProgramEmail", e.target.checked)
             }
+            disabled={!editable}
           />
           <label htmlFor="preProgramEmail">Pre-Program Email</label>
         </div>
@@ -842,6 +884,7 @@ const ProgramList = () => {
             onChange={(e) =>
               handleCheckboxChange("packetReady", e.target.checked)
             }
+            disabled={!editable}
           />
           <label htmlFor="packetReady">Packet Ready</label>
         </div>
@@ -854,6 +897,7 @@ const ProgramList = () => {
             onChange={(e) =>
               handleCheckboxChange("packetProcessed", e.target.checked)
             }
+            disabled={!editable}
           />
           <label htmlFor="packetProcessed">Packet Processed</label>
         </div>
@@ -864,6 +908,7 @@ const ProgramList = () => {
             id="followUp"
             checked={program.followUp}
             onChange={(e) => handleCheckboxChange("followUp", e.target.checked)}
+            disabled={!editable}
           />
           <label htmlFor="followUp">Follow Up</label>
         </div>
@@ -876,6 +921,7 @@ const ProgramList = () => {
             onChange={(e) =>
               handleCheckboxChange("cancelled", e.target.checked)
             }
+            disabled={!editable}
           />
           <label htmlFor="cancelled">Cancelled</label>
         </div>
@@ -893,6 +939,7 @@ const ProgramList = () => {
                     <InputText
                       value={count}
                       onChange={(e) => onFacilitatorChange(e, role)}
+                      readOnly={!editable}
                     />
                   </div>
                 )
@@ -902,6 +949,7 @@ const ProgramList = () => {
               icon="pi pi-plus"
               onClick={addFacilitatorRole}
               className="p-mt-2"
+              disabled={!editable}
             />
           </div>
         </div>
