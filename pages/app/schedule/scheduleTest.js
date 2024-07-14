@@ -30,9 +30,10 @@ import {
   createNewProgramInGrid,
   updateProgramInGrid,
   deleteProgramInGrid,
+  getUserPermission,
 } from "../../../services/database.mjs";
 
-const ProgramList = () => {
+export default function ProgramList({ user }) {
   const [programs, setPrograms] = useState([]);
   const [program, setProgram] = useState({
     id: randomId(),
@@ -74,6 +75,7 @@ const ProgramList = () => {
   const [editable, setEditable] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [globalFilter, setGlobalFilter] = useState(null);
+  const [userPermission, setUserPermission] = useState("");
   const globalFilterFields = [
     "programName",
     "date",
@@ -96,18 +98,56 @@ const ProgramList = () => {
     dt.current.exportCSV();
   };
 
+  const exportExcel = () => {
+    import("xlsx").then((xlsx) => {
+      const worksheet = xlsx.utils.json_to_sheet(programs);
+      const workbook = { Sheets: { data: worksheet }, SheetNames: ["data"] };
+      const excelBuffer = xlsx.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
+
+      saveAsExcelFile(excelBuffer, "programs");
+    });
+  };
+
+  const saveAsExcelFile = (buffer, fileName) => {
+    import("file-saver").then((module) => {
+      if (module && module.default) {
+        let EXCEL_TYPE =
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+        let EXCEL_EXTENSION = ".xlsx";
+        const data = new Blob([buffer], {
+          type: EXCEL_TYPE,
+        });
+
+        module.default.saveAs(
+          data,
+          fileName + "_export_" + new Date().getTime() + EXCEL_EXTENSION
+        );
+      }
+    });
+  };
+
   const fetchData = async () => {
-    try {
-      const data = await getAllProgramsInGrid();
-      setPrograms(data);
-    } catch (error) {
-      console.error("Error fetching data:", error);
+    if (user) {
+      try {
+        const permission = await getUserPermission(user.uid);
+        // console.log(permission);
+        setUserPermission(permission);
+        const data = await getAllProgramsInGrid();
+        setPrograms(data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    } else {
+      console.log("No User");
     }
   };
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [user]);
 
   const header = () => {
     return (
@@ -165,31 +205,39 @@ const ProgramList = () => {
   const leftToolbarTemplate = () => {
     return (
       <div className="flex flex-wrap gap-2">
-        <Button
-          label="New"
-          icon="pi pi-plus"
-          className="p-button-success"
-          onClick={openNew}
-        />
-        <Button
-          label="Delete"
-          icon="pi pi-trash"
-          className="p-button-danger"
-          onClick={confirmDeleteSelected}
-          disabled={!selectedPrograms || !selectedPrograms.length}
-        />
+        {userPermission == "hr" && (
+          <>
+            <Button
+              label="New"
+              icon="pi pi-plus"
+              className="p-button-success"
+              onClick={openNew}
+            />
+            <Button
+              label="Delete"
+              icon="pi pi-trash"
+              className="p-button-danger"
+              onClick={confirmDeleteSelected}
+              disabled={!selectedPrograms || !selectedPrograms.length}
+            />
+          </>
+        )}
       </div>
     );
   };
 
   const rightToolbarTemplate = () => {
     return (
-      <Button
-        label="Export"
-        icon="pi pi-upload"
-        className="p-button-help"
-        onClick={exportCSV}
-      />
+      <div>
+        {userPermission == "hr" && (
+          <Button
+            label="Export"
+            icon="pi pi-upload"
+            className="p-button-help"
+            onClick={exportExcel}
+          />
+        )}
+      </div>
     );
   };
 
@@ -457,31 +505,20 @@ const ProgramList = () => {
   const programDialogFooter = (
     <>
       <div>
-        {!editable ? (
-          <Button label="Edit" icon="pi pi-pencil" onClick={toggleEditable} />
-        ) : (
-          <>
-            <Button
-              label="Cancel"
-              icon="pi pi-times"
-              onClick={toggleEditable}
-              className="p-button-text"
-            />
-            <Button label="Save" icon="pi pi-check" onClick={saveProgram} />
-            {/* <Button
-              label="Cancel"
-              icon="pi pi-times"
-              className="p-button-text"
-              onClick={hideDialog}
-            />
-            <Button
-              label="Save"
-              icon="pi pi-check"
-              className="p-button-text"
-              onClick={saveProgram}
-            /> */}
-          </>
-        )}
+        {userPermission == "hr" &&
+          (!editable ? (
+            <Button label="Edit" icon="pi pi-pencil" onClick={toggleEditable} />
+          ) : (
+            <>
+              <Button
+                label="Cancel"
+                icon="pi pi-times"
+                onClick={toggleEditable}
+                className="p-button-text"
+              />
+              <Button label="Save" icon="pi pi-check" onClick={saveProgram} />
+            </>
+          ))}
       </div>
     </>
   );
@@ -544,11 +581,12 @@ const ProgramList = () => {
           globalFilter={globalFilter}
           globalFilterFields={globalFilterFields}
           header={header}
-          sortMode="multiple"
+          //   sortMode="multiple"
           resizableColumns={true}
           reorderableColumns={true}
           showGridlines
           sortField="date"
+          sortOrder={1}
           onRowDoubleClick={showProgramDetails}
         >
           <Column selectionMode="multiple" exportable={false}></Column>
@@ -648,28 +686,31 @@ const ProgramList = () => {
               overflow: "scroll",
             }}
           ></Column>
-          <Column
-            body={(rowData) => (
-              <>
-                <Button
-                  icon="pi pi-pencil"
-                  rounded
-                  outlined
-                  className="mr-2"
-                  onClick={() => editProgram(rowData)}
-                />
-                <Button
-                  icon="pi pi-trash"
-                  rounded
-                  outlined
-                  severity="danger"
-                  onClick={() => confirmDeleteProgram(rowData)}
-                />
-              </>
-            )}
-            exportable={false}
-            style={{ minWidth: "12rem" }}
-          ></Column>
+
+          {userPermission == "hr" && (
+            <Column
+              body={(rowData) => (
+                <>
+                  <Button
+                    icon="pi pi-pencil"
+                    rounded
+                    outlined
+                    className="mr-2"
+                    onClick={() => editProgram(rowData)}
+                  />
+                  <Button
+                    icon="pi pi-trash"
+                    rounded
+                    outlined
+                    severity="danger"
+                    onClick={() => confirmDeleteProgram(rowData)}
+                  />
+                </>
+              )}
+              exportable={false}
+              style={{ minWidth: "12rem" }}
+            ></Column>
+          )}
         </DataTable>
       </div>
 
@@ -997,6 +1038,6 @@ const ProgramList = () => {
       </Dialog>
     </div>
   );
-};
+}
 
-export default ProgramList;
+// export default ProgramList;

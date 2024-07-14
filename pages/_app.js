@@ -15,10 +15,7 @@ function MyApp({ Component, pageProps }) {
   useEffect(() => {
     // We track the auth state to reset firebaseUi if the user signs out.
     return onAuthStateChanged(getAuth(firebaseApp), (user) => {
-      // if (user) {
-      //   // firebaseUiWidget.reset();
-      //   console.log("no User")
-      // }
+      // console.log("Auth state changed, user:", user);
       setUser(user);
     });
   }, []);
@@ -29,7 +26,7 @@ function MyApp({ Component, pageProps }) {
         <meta name="description" content="HR Dashboard" />
       </Head>
       <NavBar />
-      <PrimeReactProvider>
+      <PrimeReactProvider user={user}>
         <Component {...pageProps} user={user} />
       </PrimeReactProvider>
       <Footer />

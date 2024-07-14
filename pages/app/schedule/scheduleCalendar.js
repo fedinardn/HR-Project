@@ -1,7 +1,10 @@
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
-import { getAllProgramsInGrid } from "../../../services/database.mjs";
+import {
+  getAllProgramsInGrid,
+  getUserPermission,
+} from "../../../services/database.mjs";
 import { useState, useEffect, useCallback, useRef } from "react";
 import programDialog from "./scheduleTest";
 import { Dialog } from "primereact/dialog";
@@ -18,12 +21,13 @@ import { Toast } from "primereact/toast";
 
 const localizer = momentLocalizer(moment);
 
-const MyCalendar = (props) => {
+const MyCalendar = ({ user }) => {
   const [events, setEvents] = useState([]);
   const [programDialog, setProgramDialog] = useState(false);
   const [selectedProgram, setSelectedProgram] = useState("");
   const [editable, setEditable] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [userPermission, setUserPermission] = useState("");
   const [program, setProgram] = useState({
     id: randomId(),
     programName: "",
@@ -207,19 +211,20 @@ const MyCalendar = (props) => {
   const programDialogFooter = (
     <>
       <div>
-        {!editable ? (
-          <Button label="Edit" icon="pi pi-pencil" onClick={toggleEditable} />
-        ) : (
-          <>
-            <Button
-              label="Cancel"
-              icon="pi pi-times"
-              onClick={toggleEditable}
-              className="p-button-text"
-            />
-            <Button label="Save" icon="pi pi-check" onClick={saveProgram} />
-          </>
-        )}
+        {userPermission == "hr" &&
+          (!editable ? (
+            <Button label="Edit" icon="pi pi-pencil" onClick={toggleEditable} />
+          ) : (
+            <>
+              <Button
+                label="Cancel"
+                icon="pi pi-times"
+                onClick={toggleEditable}
+                className="p-button-text"
+              />
+              <Button label="Save" icon="pi pi-check" onClick={saveProgram} />
+            </>
+          ))}
       </div>
     </>
   );
@@ -234,56 +239,59 @@ const MyCalendar = (props) => {
 
   const fetchEvents = async () => {
     try {
-      const programs = await getAllProgramsInGrid();
-      // console.log(programs);
-      const formattedEvents = programs.map((program) => {
-        // Default to the date if time is not provided
-        const startDateTime = program.startTime
-          ? new Date(
-              `${program.date} ${new Date(program.startTime).toLocaleTimeString(
-                [],
-                {
+      if (user) {
+        const programs = await getAllProgramsInGrid();
+        const permission = await getUserPermission(user.uid);
+        setUserPermission(permission);
+        // console.log(programs);
+        const formattedEvents = programs.map((program) => {
+          // Default to the date if time is not provided
+          const startDateTime = program.startTime
+            ? new Date(
+                `${program.date} ${new Date(
+                  program.startTime
+                ).toLocaleTimeString([], {
                   hour: "2-digit",
                   minute: "2-digit",
-                }
-              )}`
-            )
-          : new Date(program.date);
-        const endDateTime = program.endTime
-          ? new Date(
-              `${program.date} ${new Date(program.endTime).toLocaleTimeString(
-                [],
-                {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                }
-              )}`
-            )
-          : new Date(program.date);
-        // console.log(program.startTime);
-        return {
-          id: program.programID,
-          title: program.programName,
-          start: startDateTime,
-          end: endDateTime,
-          programName: program.programName,
-          date: program.date,
-          startTime: program.startTime,
-          endTime: program.endTime,
-          clientType: program.clientType,
-          locationAndProgram: program.locationAndProgram,
-          groupSize: program.groupSize,
-          contactPerson: program.contactPerson,
-          contactPersonEmail: program.contactPersonEmail,
-          facilitators: program.facilitators,
-          facilitatorEmails: program.facilitatorEmails,
-          notes: program.notes,
-          contractSent: program.contractSent,
-          cancelled: program.cancelled,
-          facilitatorsNeeded: program.facilitatorsNeeded,
-        };
-      });
-      setEvents(formattedEvents);
+                })}`
+              )
+            : new Date(program.date);
+          const endDateTime = program.endTime
+            ? new Date(
+                `${program.date} ${new Date(program.endTime).toLocaleTimeString(
+                  [],
+                  {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  }
+                )}`
+              )
+            : new Date(program.date);
+          // console.log(program.startTime);
+          return {
+            id: program.programID,
+            title: program.programName,
+            start: startDateTime,
+            end: endDateTime,
+            programName: program.programName,
+            date: program.date,
+            startTime: program.startTime,
+            endTime: program.endTime,
+            clientType: program.clientType,
+            locationAndProgram: program.locationAndProgram,
+            groupSize: program.groupSize,
+            contactPerson: program.contactPerson,
+            contactPersonEmail: program.contactPersonEmail,
+            facilitators: program.facilitators,
+            facilitatorEmails: program.facilitatorEmails,
+            notes: program.notes,
+            contractSent: program.contractSent,
+            cancelled: program.cancelled,
+            facilitatorsNeeded: program.facilitatorsNeeded,
+          };
+        });
+        setEvents(formattedEvents);
+      }
     } catch (error) {
       console.error("Error fetching events:", error);
     }
@@ -291,7 +299,7 @@ const MyCalendar = (props) => {
 
   useEffect(() => {
     fetchEvents();
-  }, []);
+  }, [user]);
 
   return (
     <div>
