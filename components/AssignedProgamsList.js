@@ -60,7 +60,7 @@ export default function AssignedProgramsList({
             </a>
           </button>
         </div>
-        <CreateClientContract onClose={handleCloseContractModal} />
+        {/* <CreateClientContract onClose={handleCloseContractModal} /> */}
 
         <form onChange={(event) => event} className={styles["search-form"]}>
           <input
