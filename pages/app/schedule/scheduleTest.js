@@ -91,6 +91,9 @@ export default function ProgramList({ user }) {
     // Add more facilitators as needed
   ]);
 
+  const [isAddRoleDialogVisible, setIsAddRoleDialogVisible] = useState(false);
+  const [newRole, setNewRole] = useState("");
+
   const toast = useRef(null);
   const dt = useRef(null);
 
@@ -400,13 +403,27 @@ export default function ProgramList({ user }) {
     setProgram(_program);
   };
 
+  // const addFacilitatorRole = () => {
+  //   const role = prompt("Enter the new role:");
+  //   if (role && !program.facilitatorsNeeded[role]) {
+  //     let _program = { ...program };
+  //     _program.facilitatorsNeeded[role] = "";
+  //     setProgram(_program);
+  //   }
+  // };
+
   const addFacilitatorRole = () => {
-    const role = prompt("Enter the new role:");
-    if (role && !program.facilitatorsNeeded[role]) {
+    if (newRole && !program.facilitatorsNeeded[newRole]) {
       let _program = { ...program };
-      _program.facilitatorsNeeded[role] = "";
+      _program.facilitatorsNeeded[newRole] = "";
       setProgram(_program);
+      setNewRole("");
+      setIsAddRoleDialogVisible(false);
     }
+  };
+
+  const showAddRoleDialog = () => {
+    setIsAddRoleDialogVisible(true);
   };
 
   const FacilitatorsMultiSelect = ({
@@ -985,13 +1002,51 @@ export default function ProgramList({ user }) {
                   </div>
                 )
               )}
-            <Button
+            {/* <Button
               label="Add Role"
               icon="pi pi-plus"
               onClick={addFacilitatorRole}
               className="p-mt-2"
               disabled={!editable}
+            /> */}
+
+            <Button
+              label="Add Role"
+              icon="pi pi-plus"
+              onClick={showAddRoleDialog}
+              className="p-mt-2"
+              disabled={!editable}
             />
+
+            <Dialog
+              header="Add New Role"
+              visible={isAddRoleDialogVisible}
+              style={{ width: "30vw" }}
+              modal
+              footer={
+                <div>
+                  <Button
+                    label="Cancel"
+                    icon="pi pi-times"
+                    onClick={() => setIsAddRoleDialogVisible(false)}
+                    className="p-button-text"
+                  />
+                  <Button
+                    label="Add"
+                    icon="pi pi-check"
+                    onClick={addFacilitatorRole}
+                  />
+                </div>
+              }
+              onHide={() => setIsAddRoleDialogVisible(false)}
+            >
+              <div className="p-field">
+                <InputText
+                  id="newRole"
+                  onChange={(e) => setNewRole(e.target.value)}
+                />
+              </div>
+            </Dialog>
           </div>
         </div>
       </Dialog>

@@ -12,6 +12,7 @@ import {
   query,
   where,
   getDocs,
+  getDoc,
   updateDoc,
   deleteDoc,
 } from "firebase/firestore";
@@ -355,6 +356,37 @@ export const updateClientDetails = async (clientID, updatedClientData) => {
 //   return { id: docRef.id, ...newProgram };
 
 // }
+
+export const createNewProgramForClient = async (clientID, programData) => {
+  const db = getFirestore();
+  const clientRef = doc(db, "clients", clientID);
+  const clientProgramRef = doc(db, "clientPrograms", programData.programID);
+
+  try {
+    await setDoc(clientProgramRef, {
+      clientID: clientID,
+      ...programData,
+      createdAt: Date.now(),
+    });
+
+    const clientDoc = await getDoc(clientRef);
+
+    if (!clientDoc.exists()) {
+      throw new Error("Client not found");
+    }
+
+    await updateDoc(clientRef, {
+      programs: [...clientDoc.data().programs, programData],
+    });
+
+    return {
+      ...programData,
+    };
+  } catch (error) {
+    console.error("Error creating new program:", error);
+    throw error;
+  }
+};
 
 //ITEM CODES
 

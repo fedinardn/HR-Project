@@ -167,3 +167,21 @@
     width: 24px;
     cursor: pointer;
 }
+
+.custom-button-margin {
+    margin-top: 20px;
+}
+
+.custom-search-bar {
+    margin: 10px;
+}
+
+.custom-total-calculation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.custom-total-calculation-container {
+    margin-top: 20px;
+}

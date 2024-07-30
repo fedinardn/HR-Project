@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import styles from "../../../styles/viewClient.module.css";
 import { useRouter } from "next/router";
 import EditClientModal from "../../../components/EditClientModal";
-import CreateClientContract from "../../../components/CreateClientContract";
 import {
   updateClientDetails,
   getClientDetails,
@@ -141,12 +140,15 @@ export default function getClientData({ user }) {
         />
       )}
       <ClientInfo info={clientData} />
-      {/* <CreateClientContract /> */}
+
       <AssignedProgramsList
         // initialPrograms={staffData.programs || []}  this is the correct one replace when functionality is correct
         initialPrograms={programs}
         onAddProgram={(newProgram) => console.log("Program added:", newProgram)}
+        clientData={clientData}
       />
+
+      {/* <CreateClientContract /> */}
     </>
   );
 }

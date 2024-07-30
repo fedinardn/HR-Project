@@ -5,7 +5,11 @@
     font-size: 14px;
     color: #121417;
     font-weight: 700;
-    margin: 0 auto;
+    margin: 20px auto;
+    margin-bottom: 50px;
+    border-radius: 12px;
+    border: 1px solid rgba(229, 232, 235, 1);
+
 }
 
 .header {
