@@ -306,6 +306,22 @@ export const getClientDetails = async (clientID) => {
   return clients[0];
 };
 
+export const getClientPrograms = async (clientID) => {
+  const db = getFirestore();
+  const clientCollection = collection(db, "clients");
+
+  const q = query(clientCollection, where("clientID", "==", clientID));
+
+  const querySnapshot = await getDocs(q);
+
+  const clients = [];
+
+  querySnapshot.forEach((doc) => {
+    clients.push((doc.id, "=>", doc.data()));
+  });
+  return clients[0].programs;
+};
+
 export const getAllClients = async () => {
   const db = getFirestore();
   const clientCollection = collection(db, "clients");
@@ -335,28 +351,6 @@ export const updateClientDetails = async (clientID, updatedClientData) => {
   }
 };
 
-// export const createNewProgramForClient = async (clientId, companyName, programName, programTypes, date) => {
-//   if (!client) {
-//     throw new Error(`Client with ID ${clientId} not found`);
-//   }
-
-//   const newProgram = {
-//     id: crypto.randomUUID(),
-//     companyName: companyName,
-//     programName: programName,
-//     date: date,
-//     programTypes: programTypes,
-//     price: [],
-//     assignedStaff: [],
-//     approved: false,
-//   }
-
-//   const docRef = await addDoc(programRequestsCollection, newProgram);
-
-//   return { id: docRef.id, ...newProgram };
-
-// }
-
 export const createNewProgramForClient = async (clientID, programData) => {
   const db = getFirestore();
   const clientRef = doc(db, "clients", clientID);
@@ -384,6 +378,82 @@ export const createNewProgramForClient = async (clientID, programData) => {
     };
   } catch (error) {
     console.error("Error creating new program:", error);
+    throw error;
+  }
+};
+
+export const updateProgramForClient = async (
+  clientID,
+  programID,
+  updatedProgramData
+) => {
+  const db = getFirestore();
+  const clientRef = doc(db, "clients", clientID);
+  const clientProgramRef = doc(db, "clientPrograms", programID);
+
+  try {
+    await updateDoc(clientProgramRef, {
+      ...updatedProgramData,
+      updatedAt: Date.now(),
+    });
+
+    const clientDoc = await getDoc(clientRef);
+
+    if (!clientDoc.exists()) {
+      throw new Error("Client not found");
+    }
+
+    const clientData = clientDoc.data();
+    const updatedPrograms = clientData.programs.map((program) =>
+      program.programID === programID
+        ? { ...program, ...updatedProgramData }
+        : program
+    );
+
+    await updateDoc(clientRef, {
+      programs: updatedPrograms,
+    });
+
+    return {
+      ...updatedProgramData,
+    };
+  } catch (error) {
+    console.error("Error updating program:", error);
+    throw error;
+  }
+};
+
+export const deleteProgramForClient = async (clientID, programID) => {
+  const db = getFirestore();
+  const clientRef = doc(db, "clients", clientID);
+  const programRef = doc(db, "clientPrograms", programID);
+
+  try {
+    // Get the client document
+    const clientDoc = await getDoc(clientRef);
+
+    if (!clientDoc.exists()) {
+      throw new Error("Client not found");
+    }
+
+    // Remove the program from the client's list of programs
+    const updatedPrograms = clientDoc
+      .data()
+      .programs.filter((program) => program.programID !== programID);
+
+    await updateDoc(clientRef, {
+      programs: updatedPrograms,
+    });
+
+    // Delete the program document
+    await deleteDoc(programRef);
+
+    return {
+      success: true,
+      message: "Program deleted successfully",
+    };
+  } catch (error) {
+    console.error("Error deleting program:", error);
     throw error;
   }
 };

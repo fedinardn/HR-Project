@@ -86,12 +86,12 @@ const PDFGenerator = ({ invoiceItems, clientData, programDetails }) => {
         ],
         body: invoiceItems.map((item) => [
           item.description,
-          item.date ? item.date.toLocaleDateString() : "",
+          item.date ? item.date : "",
           item.timeSlot,
           item.location,
           item.qty,
-          item.price,
-          item.subtotal.toFixed(2),
+          `$${item.price}`,
+          `$${item.subtotal.toFixed(2)}`,
         ]),
         startY: 70,
         theme: "plain",
@@ -121,7 +121,7 @@ const PDFGenerator = ({ invoiceItems, clientData, programDetails }) => {
 
       const paymentText = [
         {
-          text: `A signed contract and roster are required by ${programDetails.programDate.toLocaleDateString()} to confirm this program. Final payment is due by ${programDetails.programDate.toLocaleDateString()}. If paying with a Cornell account number, the full accounting string is necessary.`,
+          text: `A signed contract and roster are required by ${programDetails.programDate} to confirm this program. Final payment is due by ${programDetails.programDate}. If paying with a Cornell account number, the full accounting string is necessary.`,
         },
         {
           checkbox: true,
@@ -221,7 +221,9 @@ const PDFGenerator = ({ invoiceItems, clientData, programDetails }) => {
 
       const formatDate = (date) => {
         const options = { year: "2-digit", month: "2-digit", day: "2-digit" };
-        return date.toLocaleDateString("en-US", options).replace(/\//g, "-");
+        return new Date(date)
+          .toLocaleDateString("en-US", options)
+          .replace(/\//g, "-");
       };
 
       if (action === "save") {

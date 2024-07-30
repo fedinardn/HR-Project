@@ -6,7 +6,7 @@ import {
   getUserPermission,
 } from "../../../services/database.mjs";
 import { useState, useEffect, useCallback, useRef } from "react";
-import programDialog from "./scheduleTest";
+import programDialog from "./scheduleGrid";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";

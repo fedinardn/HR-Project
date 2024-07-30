@@ -5,6 +5,7 @@ import EditClientModal from "../../../components/EditClientModal";
 import {
   updateClientDetails,
   getClientDetails,
+  getClientPrograms,
 } from "../../../services/database.mjs";
 import Link from "next/link";
 import AssignedProgramsList from "../../../components/AssignedProgamsList";
@@ -15,25 +16,14 @@ export default function getClientData({ user }) {
   const clientID = router.query.clientId;
   const [clientData, setClientData] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  //   const [showContract, setShowContract] = useState(false);
-  const [programs, setAssignedPrograms] = useState([
-    { name: "Jennet Gray", id: "1234 - Program A" },
-    { name: "Jennet Gray", id: "5678 - Program B" },
-    { name: "Jennet Gray", id: "9012 - Program C" },
-    { name: "Jennet Gray", id: "1234 - Program D" },
-    { name: "Jennet Gray", id: "5678 - Program E" },
-    { name: "Jennet Gray", id: "9012 - Program F" },
-    { name: "Jennet Gray", id: "1234 - Program G" },
-    { name: "Jennet Gray", id: "5678 - Program H" },
-    { name: "Jennet Gray", id: "9012 - Program I" },
-    { name: "Jennet Gray", id: "1234 - Program J" },
-  ]);
+  const [programs, setPrograms] = useState([]);
 
   const fetchClientData = async () => {
     if (clientID) {
-      const data = await getClientDetails(clientID).then();
+      const data = await getClientDetails(clientID);
       setClientData(data);
-      console.log(data);
+      const clientPrograms = await getClientPrograms(clientID);
+      setPrograms(clientPrograms);
     }
   };
 
@@ -44,8 +34,6 @@ export default function getClientData({ user }) {
   const handleEditClick = () => {
     setShowModal(true);
   };
-
-  //   s
 
   const handleSave = async (editedClient) => {
     try {
@@ -142,9 +130,7 @@ export default function getClientData({ user }) {
       <ClientInfo info={clientData} />
 
       <AssignedProgramsList
-        // initialPrograms={staffData.programs || []}  this is the correct one replace when functionality is correct
         initialPrograms={programs}
-        onAddProgram={(newProgram) => console.log("Program added:", newProgram)}
         clientData={clientData}
       />
 

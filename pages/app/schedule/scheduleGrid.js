@@ -1,170 +1,54 @@
-import styles from "../../../styles/createChargeItem.module.css";
+// import { FileUpload } from "primereact/fileupload";
+// import { RadioButton } from "primereact/radiobutton";
+// import { Tag } from "primereact/tag";
 
-import * as React from "react";
-import { useEffect, useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { Calendar } from "primereact/calendar";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
+import { InputText } from "primereact/inputtext";
+import { InputNumber } from "primereact/inputnumber";
+import { Toast } from "primereact/toast";
+import { Toolbar } from "primereact/toolbar";
+import { IconField } from "primereact/iconfield";
+import { InputIcon } from "primereact/inputicon";
+import { MultiSelect } from "primereact/multiselect";
+import { Dropdown } from "primereact/dropdown";
+import { Message } from "primereact/message";
+
+import { InputTextarea } from "primereact/inputtextarea";
+import classNames from "primereact/utils";
+import { format } from "date-fns";
+import { randomId } from "@mui/x-data-grid-generator";
+import "primereact/resources/themes/lara-light-blue/theme.css";
+import "primeicons/primeicons.css";
+import "primeflex/primeflex.css";
 import {
   getAllProgramsInGrid,
   createNewProgramInGrid,
   updateProgramInGrid,
   deleteProgramInGrid,
+  getUserPermission,
 } from "../../../services/database.mjs";
-import Box from "@mui/material/Box";
-import Button from "@mui/material/Button";
-import AddIcon from "@mui/icons-material/Add";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/DeleteOutlined";
-import SaveIcon from "@mui/icons-material/Save";
-import CancelIcon from "@mui/icons-material/Close";
-import Checkbox from "@mui/material/Checkbox";
-import crypto from "crypto";
 
-import {
-  GridRowModes,
-  DataGrid,
-  GridToolbarContainer,
-  GridActionsCellItem,
-  GridRowEditStopReasons,
-} from "@mui/x-data-grid";
-import { randomId } from "@mui/x-data-grid-generator";
-import { getRowIdFromRowModel } from "@mui/x-data-grid/internals";
-import { useGridApiRef } from "@mui/x-data-grid";
-
-import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
-import { DateTimePicker } from "@mui/x-date-pickers/DateTimePicker";
-import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFnsV3";
-import { enUS as locale } from "date-fns/locale";
-import { styled } from "@mui/material/styles";
-import InputBase from "@mui/material/InputBase";
-
-import {
-  useGridApiContext,
-  GRID_DATE_COL_DEF,
-  getGridDateOperators,
-} from "@mui/x-data-grid";
-import { isValid, parseISO } from "date-fns";
-
-const dateAdapter = new AdapterDateFns({ locale });
-
-const dateColumnType = {
-  ...GRID_DATE_COL_DEF,
-  renderEditCell: (params) => {
-    return <GridEditDateCell {...params} />;
-  },
-  filterOperators: getGridDateOperators(false).map((item) => ({
-    ...item,
-    InputComponent: GridFilterDateInput,
-    InputComponentProps: { showTime: false },
-  })),
-  valueFormatter: (value) => {
-    //     if (value) {
-    //       return dateAdapter.format(value, "keyboardDate");
-    //     }
-    //     return "";
-    //   },
-    //     if (value) {
-    //       try {
-    //         const date = new Date(value);
-    //         return dateAdapter.format(date, "keyboardDate");
-    //       } catch (error) {
-    //         console.error("Invalid date value:", value, error);
-    //         return "";
-    //       }
-    //     }
-    //     return "";
-    //   },
-
-    if (value) {
-      try {
-        const date = parseISO(value); // Changed to parseISO
-        if (isValid(date)) {
-          // Added validation check
-          return dateAdapter.format(date, "keyboardDate");
-        } else {
-          throw new Error("Invalid date");
-        }
-      } catch (error) {
-        console.error("Invalid date value:", value, error);
-        return "";
-      }
-    }
-    return "";
-  },
-};
-
-const GridEditDateInput = styled(InputBase)({
-  fontSize: "inherit",
-  padding: "0 9px",
-});
-
-function WrappedGridEditDateInput(props) {
-  const { InputProps, focused, ...other } = props;
-  return <GridEditDateInput fullWidth {...InputProps} {...other} />;
-}
-
-function GridEditDateCell({ id, field, value, colDef }) {
-  const apiRef = useGridApiContext();
-
-  const Component = colDef.type === "dateTime" ? DateTimePicker : DatePicker;
-
-  const handleChange = (newValue) => {
-    apiRef.current.setEditCellValue({ id, field, value: newValue });
-  };
-
-  return (
-    <Component
-      value={value ? new Date(value) : null}
-      //   autoFocus
-      onChange={handleChange}
-      slots={{ textField: WrappedGridEditDateInput }}
-    />
-  );
-}
-
-function GridFilterDateInput(props) {
-  const { item, showTime, applyValue, apiRef } = props;
-
-  const Component = showTime ? DateTimePicker : DatePicker;
-
-  const handleFilterChange = (newValue) => {
-    applyValue({ ...item, value: newValue });
-  };
-
-  return (
-    <Component
-      value={item.value ? new Date(item.value) : null}
-      label={apiRef.current.getLocaleText("filterPanelInputLabel")}
-      slotProps={{
-        textField: {
-          variant: "standard",
-        },
-        inputAdornment: {
-          sx: {
-            "& .MuiButtonBase-root": {
-              marginRight: -1,
-            },
-          },
-        },
-      }}
-      onChange={handleFilterChange}
-    />
-  );
-}
-
-const initialRows = [
-  {
+export default function ProgramList({ user }) {
+  const [programs, setPrograms] = useState([]);
+  const [program, setProgram] = useState({
     id: randomId(),
     programName: "",
     date: "",
-    time: "",
+    startTime: "",
+    endTime: "",
     clientType: "",
     locationAndProgram: "",
     groupSize: "",
     contactPerson: "",
     contactPersonEmail: "",
     underAgeParticipants: false,
-    facilitators: "",
-    facilitatorEmails: "",
+    facilitators: [],
+    facilitatorEmails: [],
     notes: "",
     returningClient: false,
     contractSent: false,
@@ -173,493 +57,1042 @@ const initialRows = [
     packetProcessed: false,
     followUp: false,
     cancelled: false,
-    facilitatorsNeeded: "",
-  },
-];
+    facilitatorsNeeded: {
+      Lead: "",
+      Belayers: "",
+      "Low and High": "",
+      TA: "",
+      Support: "",
+      Van: "",
+    },
+  });
 
-function EditToolbar(props) {
-  const { setRows, setRowModesModel } = props;
+  const [programDialog, setProgramDialog] = useState(false);
+  const [deleteProgramDialog, setDeleteProgramDialog] = useState(false);
+  const [deleteProgramsDialog, setDeleteProgramsDialog] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [selectedPrograms, setSelectedPrograms] = useState(null);
+  const [editable, setEditable] = useState(false);
+  const [selectedProgram, setSelectedProgram] = useState(null);
+  const [globalFilter, setGlobalFilter] = useState(null);
+  const [userPermission, setUserPermission] = useState("");
+  const globalFilterFields = [
+    "programName",
+    "date",
+    "facilitators",
+    "contactPerson",
+    "contactPersonEmail",
+    "locationAndProgram",
+  ];
+  const [facilitators] = useState([
+    { name: "John Doe", email: "JD@gmail.com" },
+    { name: "Jane Smith", email: "JS@gmail.com" },
+    { name: "Michael Johnson", email: "MJ@gmail.com" },
+    // Add more facilitators as needed
+  ]);
 
-  const handleClick = () => {
-    const id = randomId();
-    setRows((oldRows) => [
-      ...oldRows,
-      {
-        id,
-        lineItemCode: "",
-        description: "",
-        unitPrice: "",
-        isService: false,
-        isProduct: false,
-        isNew: true,
-      },
-    ]);
-    setRowModesModel((oldModel) => ({
-      ...oldModel,
-      [id]: { mode: GridRowModes.Edit, fieldToFocus: "programName" },
-    }));
+  const [isAddRoleDialogVisible, setIsAddRoleDialogVisible] = useState(false);
+  const [newRole, setNewRole] = useState("");
+
+  const toast = useRef(null);
+  const dt = useRef(null);
+
+  const exportCSV = () => {
+    dt.current.exportCSV();
   };
 
-  return (
-    <GridToolbarContainer className={styles["header"]}>
-      <h1 className={styles["form-title"]}>Program Schedule Grid</h1>
+  const exportExcel = () => {
+    import("xlsx").then((xlsx) => {
+      const worksheet = xlsx.utils.json_to_sheet(programs);
+      const workbook = { Sheets: { data: worksheet }, SheetNames: ["data"] };
+      const excelBuffer = xlsx.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+      });
 
-      <Button color="primary" startIcon={<AddIcon />} onClick={handleClick}>
-        Add record
-      </Button>
-    </GridToolbarContainer>
-  );
-}
-
-export default function FullFeaturedCrudProgramGrid() {
-  const [rows, setRows] = useState(initialRows);
-  const [rowModesModel, setRowModesModel] = useState({});
-
-  const handleCheckboxChange = async (id, field, value) => {
-    const rowToUpdate = rows.find((row) => row.id === id);
-    const updatedRow = { ...rowToUpdate, [field]: value };
-    const newRow = await updateProgramInGrid(id, updatedRow);
-    // console.log(newRow);
-    setRows((prevRows) =>
-      prevRows.map((row) => (row.id === newRow.id ? newRow : row))
-    );
+      saveAsExcelFile(excelBuffer, "programs");
+    });
   };
-  useEffect(() => {
-    const fetchData = async () => {
+
+  const saveAsExcelFile = (buffer, fileName) => {
+    import("file-saver").then((module) => {
+      if (module && module.default) {
+        let EXCEL_TYPE =
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+        let EXCEL_EXTENSION = ".xlsx";
+        const data = new Blob([buffer], {
+          type: EXCEL_TYPE,
+        });
+
+        module.default.saveAs(
+          data,
+          fileName + "_export_" + new Date().getTime() + EXCEL_EXTENSION
+        );
+      }
+    });
+  };
+
+  const fetchData = async () => {
+    if (user) {
       try {
+        const permission = await getUserPermission(user.uid);
+        // console.log(permission);
+        setUserPermission(permission);
         const data = await getAllProgramsInGrid();
-        const formattedData = data.map((program) => ({
-          id: program.programID,
-          programName: program.programName,
-          date: program.date,
-          time: program.time,
-          clientType: program.clientType,
-          locationAndProgram: program.locationAndProgram,
-          groupSize: program.groupSize,
-          contactPerson: program.contactPerson,
-          contactPersonEmail: program.contactPersonEmail,
-          underAgeParticipants: program.underAgeParticipants,
-          facilitators: program.facilitators,
-          facilitatorEmails: [],
-          notes: program.notes,
-          returningClient: program.returningClient,
-          contractSent: program.contractSent,
-          preProgramEmail: program.preProgramEmail,
-          packetReady: program.packetReady,
-          packetProcessed: program.packetProcessed,
-          followUp: program.followUp,
-          cancelled: program.cancelled,
-          facilitatorsNeeded: program.facilitatorsNeeded,
-        }));
-        setRows(formattedData);
-        console.log(formattedData);
+        setPrograms(data);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
-    };
+    } else {
+      console.log("No User");
+    }
+  };
+
+  useEffect(() => {
     fetchData();
-  }, []);
+  }, [user]);
 
-  const handleRowEditStop = (params, event) => {
-    if (params.reason === GridRowEditStopReasons.rowFocusOut) {
-      event.defaultMuiPrevented = true;
-    }
+  const header = () => {
+    return (
+      <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
+        <h4 className="m-0">Manage Programs</h4>
+        <IconField iconPosition="left">
+          <InputIcon className="pi pi-search" />
+          <InputText
+            type="search"
+            onInput={(e) => setGlobalFilter(e.target.value)}
+            placeholder="Search..."
+          />
+        </IconField>
+      </div>
+    );
   };
-
-  const handleEditClick = (id) => async () => {
-    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
-  };
-
-  //   const apiRef = useGridApiRef();
-
-  const handleSaveClick = (id) => async () => {
-    setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
-  };
-
-  const handleDeleteClick = (id) => async () => {
-    setRows(rows.filter((row) => row.id !== id));
-    // console.log(id);
-    await deleteProgramInGrid(id);
-  };
-
-  const handleCancelClick = (id) => () => {
-    setRowModesModel({
-      ...rowModesModel,
-      [id]: { mode: GridRowModes.View, ignoreModifications: true },
-    });
-
-    const editedRow = rows.find((row) => row.id === id);
-    if (editedRow.isNew) {
-      setRows(rows.filter((row) => row.id !== id));
-    }
-  };
-
-  const processRowUpdate = async (newRow) => {
-    const updatedRow = { ...newRow };
-    // console.log(updatedRow);
-
-    try {
-      if (updatedRow.isNew) {
-        setRowModesModel({
-          ...rowModesModel,
-          [updatedRow.id]: { mode: GridRowModes.View },
-        });
-        const createdItem = await createNewProgramInGrid(
-          updatedRow.id,
-          updatedRow.programName,
-          updatedRow.date,
-          updatedRow.time,
-          updatedRow.clientType,
-          updatedRow.locationAndProgram,
-          updatedRow.groupSize,
-          updatedRow.contactPerson,
-          updatedRow.contactPersonEmail,
-          updatedRow.notes,
-          updatedRow.facilitators
-
-          //   updatedRow.facilitatorsNeeded
-        );
-      } else {
-        await updateProgramInGrid(updatedRow.id, updatedRow);
-      }
-
-      setRows((oldRows) =>
-        oldRows.map((row) => (row.id === updatedRow.id ? updatedRow : row))
-      );
-
-      return updatedRow;
-    } catch (error) {
-      console.error("Error updating row:", error);
-      //   throw new Error("row not added");
-    }
-  };
-
-  const handleProcessRowUpdateError = async () => {
-    // console.log("row not added");
-    console.log("rI came here");
-  };
-
-  const handleRowModesModelChange = (newRowModesModel) => {
-    setRowModesModel(newRowModesModel);
-  };
-
-  const columns = [
-    {
-      field: "programName",
-      id: "programName",
-      headerName: "Program Name",
-      width: 250,
-      editable: true,
-    },
-    {
-      field: "date",
-      id: "date",
-      headerName: "Date",
-      ...dateColumnType,
-      width: 150,
-      editable: true,
-    },
-    {
-      field: "time",
-      id: "time",
-      headerName: "Time",
-      width: 150,
-      editable: true,
-    },
-
-    {
-      field: "clientType",
-      id: "clientType",
-      headerName: "Client Type",
-      width: 100,
-      editable: true,
-    },
-    {
-      field: "locationAndProgram",
-      id: "locationAndProgram",
-      headerName: "Location and Program",
-      width: 250,
-      editable: true,
-    },
-    {
-      field: "groupSize",
-      id: "groupSize",
-      headerName: "Group Size",
-      width: 100,
-      editable: true,
-    },
-
-    {
-      field: "contactPerson",
-      id: "contactPerson",
-      headerName: "Contact Person",
-      width: 250,
-      editable: true,
-    },
-    {
-      field: "contactPersonEmail",
-      id: "contactPersonEmail",
-      headerName: "Contact Person Email",
-      width: 250,
-      editable: true,
-    },
-
-    {
-      field: "underAgeParticipants",
-      id: "underAgeParticipants",
-      headerName: "Under Age Participants",
-      width: 50,
-      //   editable: true,
-      renderCell: (params) => (
-        <Checkbox
-          checked={params.value}
-          onChange={(event) =>
-            handleCheckboxChange(
-              params.id,
-              "underAgeParticipants",
-              event.target.checked
-            )
-          }
-        />
-      ),
-    },
-
-    {
-      field: "facilitators",
-      id: "facilitators",
-      headerName: "Facilitators",
-      width: 150,
-      editable: true,
-    },
-
-    {
-      field: "facilitatorEmails",
-      id: "facilitatorEmails",
-      headerName: "Facilitator Emails",
-      width: 250,
-      editable: false,
-    },
-
-    {
-      field: "notes",
-      id: "notes",
-      headerName: "Notes",
-      width: 200,
-      editable: true,
-    },
-
-    {
-      field: "returningClient",
-      id: "returningClient",
-      headerName: "Returning Client",
-      width: 50,
-      //   editable: true,
-      renderCell: (params) => (
-        <Checkbox
-          checked={params.value}
-          onChange={(event) =>
-            handleCheckboxChange(
-              params.id,
-              "returningClient",
-              event.target.checked
-            )
-          }
-        />
-      ),
-    },
-
-    {
-      field: "contractSent",
-      id: "contractSent",
-      headerName: "Contract Sent",
-      width: 50,
-      //   editable: true,
-      renderCell: (params) => (
-        <Checkbox
-          checked={params.value}
-          onChange={(event) =>
-            handleCheckboxChange(
-              params.id,
-              "contractSent",
-              event.target.checked
-            )
-          }
-        />
-      ),
-    },
-
-    {
-      field: "preProgramEmail",
-      id: "preProgramEmail",
-      headerName: "Pre Program Email",
-      width: 50,
-      //   editable: true,
-      renderCell: (params) => (
-        <Checkbox
-          checked={params.value}
-          onChange={(event) =>
-            handleCheckboxChange(
-              params.id,
-              "preProgramEmail",
-              event.target.checked
-            )
-          }
-        />
-      ),
-    },
-
-    {
-      field: "packetReady",
-      id: "packetReady",
-      headerName: "Packet Ready",
-      width: 50,
-      //   editable: true,
-      renderCell: (params) => (
-        <Checkbox
-          checked={params.value}
-          onChange={(event) =>
-            handleCheckboxChange(params.id, "packetReady", event.target.checked)
-          }
-        />
-      ),
-    },
-
-    {
-      field: "packetProcessed",
-      id: "packetProcessed",
-      headerName: "Packet Processed",
-      width: 50,
-      //   editable: true,
-      renderCell: (params) => (
-        <Checkbox
-          checked={params.value}
-          onChange={(event) =>
-            handleCheckboxChange(
-              params.id,
-              "packetProcessed",
-              event.target.checked
-            )
-          }
-        />
-      ),
-    },
-
-    {
-      field: "followUp",
-      id: "followUp",
-      headerName: "Follow Up",
-      width: 50,
-      //   editable: true,
-      renderCell: (params) => (
-        <Checkbox
-          checked={params.value}
-          onChange={(event) =>
-            handleCheckboxChange(params.id, "followUp", event.target.checked)
-          }
-        />
-      ),
-    },
-
-    {
-      field: "cancelled",
-      id: "cancelled",
-      headerName: "Cancelled",
-      width: 50,
-      //   editable: true,
-      renderCell: (params) => (
-        <Checkbox
-          checked={params.value}
-          onChange={(event) =>
-            handleCheckboxChange(params.id, "cancelled", event.target.checked)
-          }
-        />
-      ),
-    },
-
-    {
-      field: "actions",
-      type: "actions",
-      headerName: "Actions",
-      width: 80,
-      cellClassName: "actions",
-      getActions: ({ id }) => {
-        const isInEditMode = rowModesModel[id]?.mode === GridRowModes.Edit;
-
-        if (isInEditMode) {
-          return [
-            <GridActionsCellItem
-              icon={<SaveIcon />}
-              label="Save"
-              sx={{
-                color: "primary.main",
-              }}
-              onClick={handleSaveClick(id)}
-            />,
-            <GridActionsCellItem
-              icon={<CancelIcon />}
-              label="Cancel"
-              className="textPrimary"
-              onClick={handleCancelClick(id)}
-              color="inherit"
-            />,
-          ];
-        }
-
-        return [
-          <GridActionsCellItem
-            icon={<EditIcon />}
-            label="Edit"
-            className="textPrimary"
-            onClick={handleEditClick(id)}
-            color="inherit"
-          />,
-          <GridActionsCellItem
-            icon={<DeleteIcon />}
-            label="Delete"
-            onClick={handleDeleteClick(id)}
-            color="inherit"
-          />,
-        ];
+  const openNew = () => {
+    setProgram({
+      id: randomId(),
+      programName: "",
+      date: "",
+      startTime: "",
+      endTime: "",
+      clientType: "",
+      locationAndProgram: "",
+      groupSize: "",
+      contactPerson: "",
+      contactPersonEmail: "",
+      underAgeParticipants: false,
+      facilitators: [],
+      facilitatorEmails: [],
+      notes: "",
+      returningClient: false,
+      contractSent: false,
+      preProgramEmail: false,
+      packetReady: false,
+      packetProcessed: false,
+      followUp: false,
+      cancelled: false,
+      facilitatorsNeeded: {
+        Lead: "",
+        Belayers: "",
+        "Low and High": "",
+        TA: "",
+        Support: "",
+        Van: "",
       },
-    },
-  ];
+      isNew: true,
+    });
+    setSubmitted(false);
+    setProgramDialog(true);
+    setEditable(true);
+  };
+
+  const leftToolbarTemplate = () => {
+    return (
+      <div className="flex flex-wrap gap-2">
+        {userPermission == "hr" && (
+          <>
+            <Button
+              label="New"
+              icon="pi pi-plus"
+              className="p-button-success"
+              onClick={openNew}
+            />
+            <Button
+              label="Delete"
+              icon="pi pi-trash"
+              className="p-button-danger"
+              onClick={confirmDeleteSelected}
+              disabled={!selectedPrograms || !selectedPrograms.length}
+            />
+          </>
+        )}
+      </div>
+    );
+  };
+
+  const rightToolbarTemplate = () => {
+    return (
+      <div>
+        {userPermission == "hr" && (
+          <Button
+            label="Export"
+            icon="pi pi-upload"
+            className="p-button-help"
+            onClick={exportExcel}
+          />
+        )}
+      </div>
+    );
+  };
+
+  const hideDialog = () => {
+    setSubmitted(false);
+    setProgramDialog(false);
+  };
+
+  const hideDeleteProgramDialog = () => {
+    setDeleteProgramDialog(false);
+  };
+
+  const hideDeleteProgramsDialog = () => {
+    setDeleteProgramsDialog(false);
+  };
+
+  const showProgramDetails = (program) => {
+    setProgram({ ...program.data });
+    console.log(program);
+    setProgramDialog(true);
+    setEditable(false);
+  };
+
+  const toggleEditable = () => {
+    setEditable(!editable);
+  };
+
+  const confirmDeleteSelected = () => {
+    setDeleteProgramsDialog(true);
+  };
+
+  const saveProgram = async () => {
+    let _programs = [...programs];
+    let _program = { ...program };
+
+    if (!_program.isNew) {
+      await updateProgramInGrid(_program.programID, _program);
+      toast.current.show({
+        severity: "success",
+        summary: "Successful",
+        detail: "Program Edited Successfully",
+        life: 3000,
+      });
+    } else {
+      setSubmitted(true);
+      await createNewProgramInGrid(
+        _program.id,
+        _program.programName,
+        _program.date,
+        _program.startTime,
+        _program.endTime,
+        _program.clientType,
+        _program.locationAndProgram,
+        _program.groupSize,
+        _program.contactPerson,
+        _program.contactPersonEmail,
+        _program.notes,
+        _program.facilitators,
+        _program.facilitatorsNeeded
+      );
+      _programs.push(_program);
+      toast.current.show({
+        severity: "success",
+        summary: "Successful",
+        detail: "Program Created Successfully",
+        life: 3000,
+      });
+    }
+
+    // setSubmitted(true);
+    // setPrograms(_programs);
+    setProgramDialog(false);
+    fetchData();
+  };
+
+  const editProgram = (program) => {
+    setProgram({ ...program });
+    setProgramDialog(true);
+    setEditable(true);
+  };
+
+  const confirmDeleteProgram = (program) => {
+    setProgram(program);
+    setDeleteProgramDialog(true);
+  };
+
+  const deleteProgram = async () => {
+    let _program = { ...program };
+
+    setPrograms(programs.filter((row) => row.programID !== _program.programID));
+
+    await deleteProgramInGrid(_program.programID);
+    setDeleteProgramDialog(false);
+    fetchData();
+  };
+
+  const deleteSelectedPrograms = async () => {
+    let _programs = programs.filter((val) => !selectedPrograms.includes(val));
+
+    for (let program of selectedPrograms) {
+      await deleteProgramInGrid(program.programID);
+    }
+
+    setPrograms(_programs);
+
+    setDeleteProgramsDialog(false);
+
+    setSelectedPrograms(null);
+
+    fetchData();
+    toast.current.show({
+      severity: "success",
+      summary: "Successful",
+      detail: "Programs Deleted",
+      life: 3000,
+    });
+  };
+
+  const onInputChange = (e, name) => {
+    const val = (e.target && e.target.value) || "";
+    let _program = { ...program };
+    _program[`${name}`] = val;
+
+    setProgram(_program);
+  };
+
+  const onInputNumberChange = (e, name) => {
+    const val = e.value || "";
+    let _program = { ...program };
+    _program[`${name}`] = val;
+
+    setProgram(_program);
+  };
+
+  const onCalendarChange = (e, name) => {
+    const val = e.value || null;
+    let _program = { ...program };
+    _program[`${name}`] = val;
+
+    setProgram(_program);
+  };
+
+  const findIndexById = (id) => {
+    let index = -1;
+    for (let i = 0; i < programs.length; i++) {
+      if (programs[i].id === id) {
+        index = i;
+        break;
+      }
+    }
+
+    return index;
+  };
+  const onFacilitatorChange = (e, role) => {
+    const val = (e.target && e.target.value) || "";
+    let _program = { ...program };
+
+    _program.facilitatorsNeeded[role] = val;
+
+    setProgram(_program);
+  };
+
+  // const addFacilitatorRole = () => {
+  //   const role = prompt("Enter the new role:");
+  //   if (role && !program.facilitatorsNeeded[role]) {
+  //     let _program = { ...program };
+  //     _program.facilitatorsNeeded[role] = "";
+  //     setProgram(_program);
+  //   }
+  // };
+
+  const addFacilitatorRole = () => {
+    if (newRole && !program.facilitatorsNeeded[newRole]) {
+      let _program = { ...program };
+      _program.facilitatorsNeeded[newRole] = "";
+      setProgram(_program);
+      setNewRole("");
+      setIsAddRoleDialogVisible(false);
+    }
+  };
+
+  const showAddRoleDialog = () => {
+    setIsAddRoleDialogVisible(true);
+  };
+
+  const FacilitatorsMultiSelect = ({
+    facilitators,
+    selectedFacilitators,
+    onChange,
+  }) => {
+    return (
+      <div className="card flex justify-content-center">
+        <MultiSelect
+          value={program.facilitators}
+          onChange={onChange}
+          options={facilitators}
+          optionLabel="name"
+          filter
+          display="chip"
+          placeholder="Select Facilitators"
+          className="w-full md:w-100rem"
+          disabled={!editable}
+        />
+      </div>
+    );
+  };
+
+  const handleFacilitatorsChange = (e) => {
+    let selectedFacilitators = e.value;
+    let facilitatorEmails = selectedFacilitators.map(
+      (facilitator) => facilitator.email
+    );
+
+    setProgram({
+      ...program,
+      facilitators: selectedFacilitators,
+      facilitatorEmails: facilitatorEmails,
+    });
+  };
+
+  const ClientTypeDropdown = ({ onChange }) => {
+    const clientTypes = ["STU", "NON-CU-STU", "CUP", "PDP", "COMMYTH"];
+
+    return (
+      <div className="card flex justify-content-center">
+        <Dropdown
+          value={program.clientType}
+          onChange={onChange}
+          options={clientTypes}
+          optionLabel="name"
+          placeholder="Select Client Type"
+          className="w-full md:w-100rem"
+          disabled={!editable}
+        />
+      </div>
+    );
+  };
+
+  const handleClientTypeChange = (e) => {
+    let _program = { ...program };
+    try {
+      const updatedProgram = { ..._program, clientType: e.value };
+
+      setProgram(updatedProgram);
+    } catch (error) {
+      console.error("Error updating program details:", error);
+    }
+  };
+
+  const handleCheckboxChange = async (field, value) => {
+    let _program = { ...program };
+    try {
+      const updatedProgram = { ..._program, [field]: value };
+      setProgram(updatedProgram);
+    } catch (error) {
+      console.error("Error updating program details:", error);
+    }
+  };
+
+  const formatFacilitatorsNeeded = (facilitatorsNeeded) => {
+    const formattedText = Object.entries(facilitatorsNeeded)
+      .filter(([key, value]) => value)
+      .map(([key, value]) => `${value} ${key}`)
+      .join(", ");
+
+    return formattedText ? `NEED ${formattedText}` : null;
+  };
+
+  const facilitatorsNeededBodyTemplate = (rowData) => {
+    const formattedText = formatFacilitatorsNeeded(rowData.facilitatorsNeeded);
+
+    return formattedText ? (
+      <Message severity="warn" text={formattedText} />
+    ) : (
+      <Message severity="success" text="No facilitators needed" />
+    );
+  };
+
+  const programDialogFooter = (
+    <>
+      <div>
+        {userPermission == "hr" &&
+          (!editable ? (
+            <Button label="Edit" icon="pi pi-pencil" onClick={toggleEditable} />
+          ) : (
+            <>
+              <Button
+                label="Cancel"
+                icon="pi pi-times"
+                onClick={toggleEditable}
+                className="p-button-text"
+              />
+              <Button label="Save" icon="pi pi-check" onClick={saveProgram} />
+            </>
+          ))}
+      </div>
+    </>
+  );
+
+  const deleteProgramDialogFooter = (
+    <>
+      <Button
+        label="No"
+        icon="pi pi-times"
+        className="p-button-text"
+        onClick={hideDeleteProgramDialog}
+      />
+      <Button
+        label="Yes"
+        icon="pi pi-check"
+        className="p-button-text"
+        onClick={deleteProgram}
+      />
+    </>
+  );
+
+  const deleteProgramsDialogFooter = (
+    <React.Fragment>
+      <Button
+        label="No"
+        icon="pi pi-times"
+        outlined
+        onClick={hideDeleteProgramsDialog}
+      />
+      <Button
+        label="Yes"
+        icon="pi pi-check"
+        severity="danger"
+        onClick={deleteSelectedPrograms}
+      />
+    </React.Fragment>
+  );
 
   return (
-    <main>
-      <Box
-        sx={{
-          height: 800,
-          width: "100%",
-          "& .actions": {
-            color: "text.secondary",
-          },
-          "& .textPrimary": {
-            color: "text.primary",
-          },
-        }}
-      >
-        <LocalizationProvider
-          dateAdapter={AdapterDateFns}
-          adapterLocale={locale}
+    <div>
+      <Toast ref={toast} />
+
+      <Toolbar
+        className="mb-4"
+        start={leftToolbarTemplate}
+        end={rightToolbarTemplate}
+      />
+      <div className="card">
+        <DataTable
+          ref={dt}
+          value={programs}
+          selection={selectedPrograms}
+          onSelectionChange={(e) => [setSelectedPrograms(e.value)]}
+          dataKey={program.programID}
+          paginator
+          rows={10}
+          rowsPerPageOptions={[5, 10, 25]}
+          paginatorTemplate="FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport RowsPerPageDropdown"
+          currentPageReportTemplate="Showing {first} to {last} of {totalRecords} programs"
+          globalFilter={globalFilter}
+          globalFilterFields={globalFilterFields}
+          header={header}
+          //   sortMode="multiple"
+          resizableColumns={true}
+          reorderableColumns={true}
+          showGridlines
+          sortField="date"
+          sortOrder={1}
+          onRowDoubleClick={showProgramDetails}
         >
-          <DataGrid
-            rows={rows}
-            columns={columns}
-            editMode="row"
-            rowModesModel={rowModesModel}
-            onRowModesModelChange={handleRowModesModelChange}
-            onRowEditStop={handleRowEditStop}
-            processRowUpdate={processRowUpdate}
-            onProcessRowUpdateError={handleProcessRowUpdateError}
-            slots={{
-              toolbar: EditToolbar,
+          <Column selectionMode="multiple" exportable={false}></Column>
+
+          <Column field="programName" header="Program Name" sortable></Column>
+          <Column
+            field="date"
+            header="Date"
+            body={(rowData) => rowData.date}
+            sortable
+          ></Column>
+          <Column
+            field="startTime"
+            header="Start Time"
+            body={(rowData) =>
+              rowData.startTime
+                ? new Date(rowData.startTime).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : rowData.startTime
+            }
+            sortable
+          ></Column>
+          <Column
+            field="endTime"
+            header="End Time"
+            body={(rowData) =>
+              rowData.endTime
+                ? new Date(rowData.endTime).toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                : rowData.endTime
+            }
+            sortable
+          ></Column>
+          <Column field="clientType" header="Client Type" sortable></Column>
+          <Column
+            field="locationAndProgram"
+            header="Location and Program"
+            sortable
+          ></Column>
+          <Column field="groupSize" header="Group Size" sortable></Column>
+          <Column
+            field="contactPerson"
+            header="Contact Person"
+            sortable
+          ></Column>
+          <Column
+            field="contactPersonEmail"
+            header="Contact Person Email"
+            sortable
+          ></Column>
+          <Column
+            field="facilitatorsNeeded"
+            header="Facilitators Needed"
+            body={facilitatorsNeededBodyTemplate}
+            style={{ maxWidth: "300px", overflow: "scroll" }}
+            sortable
+          ></Column>
+          <Column
+            field="facilitators"
+            header="Facilitators"
+            body={(rowData) => (
+              <div>
+                {rowData.facilitators.map((facilitator, index) => (
+                  <div key={index} className="p-chip">
+                    <span>{facilitator.name}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            sortable
+          ></Column>
+          <Column
+            field="facilitatorEmails"
+            header="Facilitator Emails"
+            body={(rowData) => (
+              <div>
+                {rowData.facilitatorEmails.map((facilitatorEmail, index) => (
+                  <div key={index} className="p-chip">
+                    <span>{facilitatorEmail}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            sortable
+          ></Column>
+          <Column
+            field="notes"
+            header="Notes"
+            sortable
+            style={{
+              maxWidth: "200px",
+              maxHeight: "50px",
+              overflow: "scroll",
             }}
-            slotProps={{
-              toolbar: { setRows, setRowModesModel },
-            }}
+          ></Column>
+
+          {userPermission == "hr" && (
+            <Column
+              body={(rowData) => (
+                <>
+                  <Button
+                    icon="pi pi-pencil"
+                    rounded
+                    outlined
+                    className="mr-2"
+                    onClick={() => editProgram(rowData)}
+                  />
+                  <Button
+                    icon="pi pi-trash"
+                    rounded
+                    outlined
+                    severity="danger"
+                    onClick={() => confirmDeleteProgram(rowData)}
+                  />
+                </>
+              )}
+              exportable={false}
+              style={{ minWidth: "12rem" }}
+            ></Column>
+          )}
+        </DataTable>
+      </div>
+
+      <Dialog
+        visible={programDialog}
+        style={{ width: "32rem" }}
+        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
+        header="Program Details"
+        modal
+        className="p-fluid"
+        footer={programDialogFooter}
+        onHide={hideDialog}
+      >
+        <div className="field">
+          <label htmlFor="programName">Program Name</label>
+          <InputText
+            id="programName"
+            value={program.programName}
+            onChange={(e) => onInputChange(e, "programName")}
+            required
+            autoFocus
+            readOnly={!editable}
           />
-        </LocalizationProvider>
-      </Box>
-    </main>
+          {submitted && !program.programName && (
+            <small className="p-invalid">Program Name is required.</small>
+          )}
+        </div>
+
+        <div className="field">
+          <label htmlFor="date">Date</label>
+          <Calendar
+            id="date"
+            value={program.date ? new Date(program.date) : program.date}
+            onChange={(e) => onCalendarChange(e, "date")}
+            showIcon
+            disabled={!editable}
+          />
+        </div>
+
+        <div className="field">
+          <label htmlFor="startTime">Start Time</label>
+          <Calendar
+            id="startTime"
+            value={
+              program.startTime
+                ? new Date(program.startTime)
+                : program.startTime
+            }
+            // value={new Date(program.startTime).toDateString()}
+            //   onChange={(e) => setStartTime(e.value)}
+            onChange={(e) => onInputChange(e, "startTime")}
+            showIcon
+            timeOnly
+            hourFormat="12"
+            icon={() => <i className="pi pi-clock" />}
+            disabled={!editable}
+          />
+        </div>
+
+        <div className="field">
+          <label htmlFor="endTime">End Time</label>
+          <Calendar
+            id="endTime"
+            value={
+              program.endTime ? new Date(program.endTime) : program.endTime
+            }
+            onChange={(e) => onInputChange(e, "endTime")}
+            showIcon
+            timeOnly
+            hourFormat="12"
+            icon={() => <i className="pi pi-clock" />}
+            disabled={!editable}
+          />
+        </div>
+
+        <div className="field">
+          <label htmlFor="clientType">Client Type</label>
+
+          <ClientTypeDropdown
+            id="clientType"
+            value={program.clientType}
+            onChange={handleClientTypeChange}
+          />
+        </div>
+
+        <div className="field">
+          <label htmlFor="locationAndProgram">Location and Program</label>
+          <InputText
+            id="locationAndProgram"
+            value={program.locationAndProgram}
+            onChange={(e) => onInputChange(e, "locationAndProgram")}
+            readOnly={!editable}
+          />
+        </div>
+
+        <div className="field">
+          <label htmlFor="groupSize">Group Size</label>
+          <InputNumber
+            id="groupSize"
+            value={program.groupSize}
+            onValueChange={(e) => onInputNumberChange(e, "groupSize")}
+            integeronly
+            readOnly={!editable}
+          />
+        </div>
+
+        <div className="field">
+          <label htmlFor="contactPerson">Contact Person</label>
+          <InputText
+            id="contactPerson"
+            value={program.contactPerson}
+            onChange={(e) => onInputChange(e, "contactPerson")}
+            readOnly={!editable}
+          />
+        </div>
+
+        <div className="field">
+          <label htmlFor="contactPersonEmail">Contact Person Email</label>
+          <InputText
+            id="contactPersonEmail"
+            value={program.contactPersonEmail}
+            onChange={(e) => onInputChange(e, "contactPersonEmail")}
+            readOnly={!editable}
+          />
+        </div>
+
+        <div className="field-checkbox">
+          <input
+            type="checkbox"
+            id="underAgeParticipants"
+            checked={program.underAgeParticipants}
+            onChange={(e) =>
+              handleCheckboxChange("underAgeParticipants", e.target.checked)
+            }
+            disabled={!editable}
+          />
+          <label htmlFor="underAgeParticipants">Under Age Participants</label>
+        </div>
+
+        <div className="field">
+          <label htmlFor="facilitators">Facilitators</label>
+          <FacilitatorsMultiSelect
+            facilitators={facilitators}
+            onChange={handleFacilitatorsChange}
+          />
+        </div>
+
+        <div className="field">
+          <label htmlFor="facilitatorEmails">Facilitator Emails</label>
+          <InputText
+            id="facilitatorEmails"
+            value={program.facilitatorEmails}
+            onChange={(e) => onInputChange(e, "facilitatorEmails")}
+            disabled
+          />
+        </div>
+
+        <div className="field">
+          <label htmlFor="notes">Notes</label>
+          <InputTextarea
+            id="notes"
+            value={program.notes}
+            onChange={(e) => onInputChange(e, "notes")}
+            readOnly={!editable}
+          />
+        </div>
+
+        <div className="field-checkbox">
+          <input
+            type="checkbox"
+            id="returningClient"
+            checked={program.returningClient}
+            onChange={(e) =>
+              handleCheckboxChange("returningClient", e.target.checked)
+            }
+            disabled={!editable}
+          />
+          <label htmlFor="returningClient">Returning Client</label>
+        </div>
+
+        <div className="field-checkbox">
+          <input
+            type="checkbox"
+            id="contractSent"
+            checked={program.contractSent}
+            onChange={(e) =>
+              handleCheckboxChange("contractSent", e.target.checked)
+            }
+            disabled={!editable}
+          />
+          <label htmlFor="contractSent">Contract Sent</label>
+        </div>
+
+        <div className="field-checkbox">
+          <input
+            type="checkbox"
+            id="preProgramEmail"
+            checked={program.preProgramEmail}
+            onChange={(e) =>
+              handleCheckboxChange("preProgramEmail", e.target.checked)
+            }
+            disabled={!editable}
+          />
+          <label htmlFor="preProgramEmail">Pre-Program Email</label>
+        </div>
+
+        <div className="field-checkbox">
+          <input
+            type="checkbox"
+            id="packetReady"
+            checked={program.packetReady}
+            onChange={(e) =>
+              handleCheckboxChange("packetReady", e.target.checked)
+            }
+            disabled={!editable}
+          />
+          <label htmlFor="packetReady">Packet Ready</label>
+        </div>
+
+        <div className="field-checkbox">
+          <input
+            type="checkbox"
+            id="packetProcessed"
+            checked={program.packetProcessed}
+            onChange={(e) =>
+              handleCheckboxChange("packetProcessed", e.target.checked)
+            }
+            disabled={!editable}
+          />
+          <label htmlFor="packetProcessed">Packet Processed</label>
+        </div>
+
+        <div className="field-checkbox">
+          <input
+            type="checkbox"
+            id="followUp"
+            checked={program.followUp}
+            onChange={(e) => handleCheckboxChange("followUp", e.target.checked)}
+            disabled={!editable}
+          />
+          <label htmlFor="followUp">Follow Up</label>
+        </div>
+
+        <div className="field-checkbox">
+          <input
+            type="checkbox"
+            id="cancelled"
+            checked={program.cancelled}
+            onChange={(e) =>
+              handleCheckboxChange("cancelled", e.target.checked)
+            }
+            disabled={!editable}
+          />
+          <label htmlFor="cancelled">Cancelled</label>
+        </div>
+
+        <div className="field">
+          <label htmlFor="facilitatorsNeeded" className="font-bold">
+            Facilitators Needed
+          </label>
+          <div id="facilitatorsNeeded">
+            {program.facilitatorsNeeded &&
+              Object.entries(program.facilitatorsNeeded).map(
+                ([role, count], index) => (
+                  <div key={index} className="field">
+                    <label style={{ width: "120px" }}>{role}</label>
+                    <InputText
+                      value={count}
+                      onChange={(e) => onFacilitatorChange(e, role)}
+                      readOnly={!editable}
+                    />
+                  </div>
+                )
+              )}
+            {/* <Button
+              label="Add Role"
+              icon="pi pi-plus"
+              onClick={addFacilitatorRole}
+              className="p-mt-2"
+              disabled={!editable}
+            /> */}
+
+            <Button
+              label="Add Role"
+              icon="pi pi-plus"
+              onClick={showAddRoleDialog}
+              className="p-mt-2"
+              disabled={!editable}
+            />
+
+            <Dialog
+              header="Add New Role"
+              visible={isAddRoleDialogVisible}
+              style={{ width: "30vw" }}
+              modal
+              footer={
+                <div>
+                  <Button
+                    label="Cancel"
+                    icon="pi pi-times"
+                    onClick={() => setIsAddRoleDialogVisible(false)}
+                    className="p-button-text"
+                  />
+                  <Button
+                    label="Add"
+                    icon="pi pi-check"
+                    onClick={addFacilitatorRole}
+                  />
+                </div>
+              }
+              onHide={() => setIsAddRoleDialogVisible(false)}
+            >
+              <div className="p-field">
+                <InputText
+                  id="newRole"
+                  onChange={(e) => setNewRole(e.target.value)}
+                />
+              </div>
+            </Dialog>
+          </div>
+        </div>
+      </Dialog>
+
+      <Dialog
+        visible={deleteProgramDialog}
+        style={{ width: "32rem" }}
+        header="Confirm"
+        modal
+        footer={deleteProgramDialogFooter}
+        onHide={hideDeleteProgramDialog}
+      >
+        <div className="confirmation-content">
+          <i
+            className="pi pi-exclamation-triangle mr-3"
+            style={{ fontSize: "2rem" }}
+          />
+          {program && (
+            <span>
+              Are you sure you want to delete <b>{program.programName}</b>?
+            </span>
+          )}
+        </div>
+      </Dialog>
+
+      <Dialog
+        visible={deleteProgramsDialog}
+        style={{ width: "32rem" }}
+        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
+        header="Confirm"
+        modal
+        footer={deleteProgramsDialogFooter}
+        onHide={hideDeleteProgramsDialog}
+      >
+        <div className="confirmation-content">
+          <i
+            className="pi pi-exclamation-triangle mr-3"
+            style={{ fontSize: "2rem" }}
+          />
+          {program && (
+            <span>Are you sure you want to delete the selected programs?</span>
+          )}
+        </div>
+      </Dialog>
+    </div>
   );
 }
+
+// export default ProgramList;

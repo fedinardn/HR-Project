@@ -4,12 +4,14 @@ import { Button } from "primereact/button";
 import { InputNumber } from "primereact/inputnumber";
 import { Dropdown } from "primereact/dropdown";
 import { Card } from "primereact/card";
-import { DataTable, Column } from "primereact/datatable";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Calendar } from "primereact/calendar";
 import { InputMask } from "primereact/inputmask";
 import { Toast } from "primereact/toast";
 import { randomId } from "@mui/x-data-grid-generator";
+import { format } from "date-fns";
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
@@ -17,27 +19,21 @@ import styles from "../styles/AssignedStaff.module.css";
 import {
   getAllChargeItemCodes,
   createNewProgramForClient,
+  updateProgramForClient,
+  deleteProgramForClient,
 } from "../services/database.mjs";
-import jsPDF from "jspdf";
-import "jspdf-autotable";
 import PDFGenerator from "./PDFGenerator";
-import { tr } from "date-fns/locale";
 
-export default function AssignedProgramsList({
-  initialPrograms,
-  onAddProgram,
-  clientData,
-}) {
+export default function AssignedProgramsList({ initialPrograms, clientData }) {
   const [programs, setPrograms] = useState(initialPrograms);
   const [showContract, setShowContract] = useState(false);
   const [invoiceItems, setInvoiceItems] = useState([]);
   const [chargeItemCodes, setChargeItemCodes] = useState([]);
-  const [programName, setProgramName] = useState("");
-  const [programDate, setProgramDate] = useState(null);
   const [globalFilter, setGlobalFilter] = useState(null);
   const [programDetails, setProgramDetails] = useState({
-    programName: programName,
-    programDate: programDate,
+    programID: "",
+    programName: "",
+    programDate: null,
     totalCost: 0,
   });
 
@@ -52,22 +48,32 @@ export default function AssignedProgramsList({
         isService: item.isService,
         isProduct: item.isProduct,
       }));
+
       setChargeItemCodes(formattedData);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
+    // console.log(programs);
   };
 
   useEffect(() => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    setPrograms(initialPrograms);
+  }, [initialPrograms]);
+
   const handleCreateContractClick = () => {
-    // fetchData();
     setShowContract(true);
   };
 
   const handleCloseContractModal = () => {
+    setProgramDetails({
+      programName: "",
+      programDate: null,
+    });
+    setInvoiceItems([]);
     setShowContract(false);
   };
 
@@ -107,7 +113,8 @@ export default function AssignedProgramsList({
         } else {
           const newItem = {
             ...item,
-            [field]: val,
+            [field]:
+              field === "date" ? format(new Date(val), "MM/dd/yyyy") : val,
           };
 
           if (field === "qty" || field === "price") {
@@ -134,35 +141,48 @@ export default function AssignedProgramsList({
   const handleSave = async () => {
     try {
       const programData = {
-        programID: randomId(),
+        programID: programDetails.programID || randomId(),
         programName: programDetails.programName,
-        programDate: programDetails.programDate,
+        programDate: format(new Date(programDetails.programDate), "MM/dd/yyyy"),
         clientType: clientData.clientType,
         invoiceItems: invoiceItems,
+        totalCost: calculateTotal(),
       };
 
-      const newProgram = await createNewProgramForClient(
-        clientData.clientID,
-        programData
-      );
+      if (programDetails.programID) {
+        await updateProgramForClient(
+          clientData.clientID,
+          programDetails.programID,
+          programData
+        );
 
-      // // Update the local state with the new program
-      // setPrograms([...programs, newProgram]);
+        setPrograms(
+          programs.map((program) =>
+            program.programID === programData.programID ? programData : program
+          )
+        );
 
-      setShowContract(false);
+        toast.current.show({
+          severity: "success",
+          summary: "Successful",
+          detail: "Program Updated Successfully",
+          life: 3000,
+        });
+      } else {
+        const newProgram = await createNewProgramForClient(
+          clientData.clientID,
+          programData
+        );
 
-      setProgramDetails({
-        programName: "",
-        programDate: null,
-      });
-      setInvoiceItems([]);
+        setPrograms([...programs, newProgram]);
 
-      toast.current.show({
-        severity: "success",
-        summary: "Successful",
-        detail: "Program Saved Successfully",
-        life: 3000,
-      });
+        toast.current.show({
+          severity: "success",
+          summary: "Successful",
+          detail: "Program Saved Successfully",
+          life: 3000,
+        });
+      }
     } catch (error) {
       console.error("Error saving program:", error);
       toast.current.show({
@@ -172,12 +192,57 @@ export default function AssignedProgramsList({
         life: 3000,
       });
     }
+    setShowContract(false);
+
+    setProgramDetails({
+      programName: "",
+      programDate: null,
+    });
+    setInvoiceItems([]);
   };
+  const handleProgramDelete = async (clientID, programID) => {
+    try {
+      await deleteProgramForClient(clientID, programID);
+
+      toast.current.show({
+        severity: "error",
+        summary: "Deleted",
+        detail: "Program Deleted Successfully",
+        life: 3000,
+      });
+
+      setPrograms(
+        programs.filter((program) => program.programID !== programID)
+      );
+    } catch (error) {
+      console.error("Error deleting program:", error);
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Error Deleting Program. Please Try Again",
+        life: 3000,
+      });
+    }
+  };
+
   let totalCost = 0;
   const calculateTotal = () => {
     totalCost = invoiceItems.reduce((total, item) => total + item.subtotal, 0);
     // setProgramDetails({ ...programDetails, totalCost: totalCost });
     return totalCost;
+  };
+
+  const onRowClick = (event) => {
+    const rowData = event.data;
+
+    setInvoiceItems(rowData.invoiceItems || []);
+    setProgramDetails({
+      programID: rowData.programID,
+      programDate: rowData.programDate,
+      programName: rowData.programName,
+      totalCost: rowData.totalCost || 0,
+    });
+    setShowContract(true);
   };
 
   const itemTemplate = (rowData, { field }) => {
@@ -206,7 +271,7 @@ export default function AssignedProgramsList({
     if (field === "date") {
       return (
         <Calendar
-          value={rowData.date}
+          value={rowData.date ? new Date(rowData.date) : rowData.date}
           onChange={(e) => handleItemChange(e, rowData.id, "date")}
           placeholder="Select Date"
           showIcon
@@ -265,7 +330,9 @@ export default function AssignedProgramsList({
       <Toast ref={toast} />
       <div className={styles["task-list"]}>
         <div className={styles["header"]}>
-          <h1 className={styles.title}>Assigned Programs({programs.length})</h1>
+          <h1 className={styles.title}>
+            Assigned Programs({programs.length || 0})
+          </h1>
           <Button
             label="Assign Program"
             icon="pi pi-plus"
@@ -291,11 +358,37 @@ export default function AssignedProgramsList({
           paginator
           rows={10}
           className="p-mt-3"
+          onRowClick={onRowClick}
+          selectionMode="single"
         >
-          <Column field="name" header="Program Name" />
-          <Column field="date" header="Program Date" />
-          <Column field="location" header="Location" />
-          {/* Add more columns as necessary */}
+          <Column field="programName" header="Program Name" />
+          <Column
+            field="programDate"
+            header="Program Date"
+            body={(rowData) =>
+              rowData.programDate
+                ? new Date(rowData.programDate).toLocaleDateString([], {})
+                : rowData.programDate
+            }
+          ></Column>
+          <Column
+            field="totalCost"
+            header="Total Cost"
+            body={(rowData) => `$${(rowData.totalCost || 0).toFixed(2)}`}
+          />
+
+          <Column
+            body={(rowData) => (
+              <Button
+                icon="pi pi-trash"
+                className="p-button-danger p-button-rounded"
+                onClick={() =>
+                  handleProgramDelete(clientData.clientID, rowData.programID)
+                }
+              />
+            )}
+            style={{ width: "2vw" }}
+          />
         </DataTable>
       </div>
 
@@ -338,7 +431,11 @@ export default function AssignedProgramsList({
             <label htmlFor="programDate">Program Date</label>
             <Calendar
               id="programDate"
-              value={programDate}
+              value={
+                programDetails.programDate
+                  ? new Date(programDetails.programDate)
+                  : programDetails.programDate
+              }
               onChange={(e) =>
                 setProgramDetails({
                   ...programDetails,
