@@ -46,7 +46,7 @@ const PDFGenerator = ({ invoiceItems, clientData, programDetails }) => {
 
     // Load and add the image
     getImageFromUrl("/ctlcLogo.png", function (imgData) {
-      doc.addImage(imgData, "PNG", 145, 15, 40, 20);
+      doc.addImage(imgData, "PNG", 145, 0, 50, 50);
 
       // Add address
       doc.setFontSize(6);
