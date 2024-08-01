@@ -17,6 +17,7 @@ import { InputIcon } from "primereact/inputicon";
 import { MultiSelect } from "primereact/multiselect";
 import { Dropdown } from "primereact/dropdown";
 import { Message } from "primereact/message";
+import { Card } from "primereact/card";
 
 import { InputTextarea } from "primereact/inputtextarea";
 import classNames from "primereact/utils";
@@ -31,6 +32,7 @@ import {
   updateProgramInGrid,
   deleteProgramInGrid,
   getUserPermission,
+  getAllStaff,
 } from "../../../services/database.mjs";
 
 export default function ProgramList({ user }) {
@@ -76,6 +78,7 @@ export default function ProgramList({ user }) {
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [globalFilter, setGlobalFilter] = useState(null);
   const [userPermission, setUserPermission] = useState("");
+  const [facilitatorItems, setFacilitatorItems] = useState([]);
   const globalFilterFields = [
     "programName",
     "date",
@@ -84,12 +87,8 @@ export default function ProgramList({ user }) {
     "contactPersonEmail",
     "locationAndProgram",
   ];
-  const [facilitators] = useState([
-    { name: "John Doe", email: "JD@gmail.com" },
-    { name: "Jane Smith", email: "JS@gmail.com" },
-    { name: "Michael Johnson", email: "MJ@gmail.com" },
-    // Add more facilitators as needed
-  ]);
+
+  const [facilitators, setFacilitators] = useState([]);
 
   const [isAddRoleDialogVisible, setIsAddRoleDialogVisible] = useState(false);
   const [newRole, setNewRole] = useState("");
@@ -140,6 +139,16 @@ export default function ProgramList({ user }) {
         setUserPermission(permission);
         const data = await getAllProgramsInGrid();
         setPrograms(data);
+
+        const staff = await getAllStaff();
+        const formattedStaff = staff.map((item) => ({
+          id: item.staffID,
+          name: `${item.firstName} ${item.lastName}`,
+          email: item.email,
+          phone: item.phone,
+        }));
+
+        setFacilitators(formattedStaff);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -276,6 +285,8 @@ export default function ProgramList({ user }) {
     let _programs = [...programs];
     let _program = { ...program };
 
+    // _program.facilitators = facilitatorItems;
+
     if (!_program.isNew) {
       await updateProgramInGrid(_program.programID, _program);
       toast.current.show({
@@ -334,6 +345,12 @@ export default function ProgramList({ user }) {
 
     await deleteProgramInGrid(_program.programID);
     setDeleteProgramDialog(false);
+    toast.current.show({
+      severity: "error",
+      summary: "Successful",
+      detail: "Program Deleted Successfully",
+      life: 3000,
+    });
     fetchData();
   };
 
@@ -448,18 +465,18 @@ export default function ProgramList({ user }) {
     );
   };
 
-  const handleFacilitatorsChange = (e) => {
-    let selectedFacilitators = e.value;
-    let facilitatorEmails = selectedFacilitators.map(
-      (facilitator) => facilitator.email
-    );
+  // const handleFacilitatorsChange = (e) => {
+  //   let selectedFacilitators = e.value;
+  //   let facilitatorEmails = selectedFacilitators.map(
+  //     (facilitator) => facilitator.email
+  //   );
 
-    setProgram({
-      ...program,
-      facilitators: selectedFacilitators,
-      facilitatorEmails: facilitatorEmails,
-    });
-  };
+  //   setProgram({
+  //     ...program,
+  //     facilitators: selectedFacilitators,
+  //     facilitatorEmails: facilitatorEmails,
+  //   });
+  // };
 
   const ClientTypeDropdown = ({ onChange }) => {
     const clientTypes = ["STU", "NON-CU-STU", "CUP", "PDP", "COMMYTH"];
@@ -502,7 +519,7 @@ export default function ProgramList({ user }) {
 
   const formatFacilitatorsNeeded = (facilitatorsNeeded) => {
     const formattedText = Object.entries(facilitatorsNeeded)
-      .filter(([key, value]) => value)
+      .filter(([key, value]) => value && value !== "0" && value !== "")
       .map(([key, value]) => `${value} ${key}`)
       .join(", ");
 
@@ -574,6 +591,131 @@ export default function ProgramList({ user }) {
     </React.Fragment>
   );
 
+  const handleAddFacilitator = () => {
+    const newFacilitator = {
+      id: Date.now(),
+      facilitatorName: null,
+      role: "",
+    };
+    setProgram((prevProgram) => ({
+      ...prevProgram,
+      facilitators: [...(prevProgram.facilitators || []), newFacilitator],
+    }));
+  };
+
+  const handleRowDel = (id) => {
+    // const itemToDelete = program.facilitators.find((item) => item.id === id);
+
+    // if (itemToDelete) {
+    //   const updatedEmails = program.facilitatorEmails.filter(
+    //     (email) => email !== itemToDelete.email
+    //   );
+    //   // program.facilitatorEmails = updatedEmails;
+    //   const updatedItems = program.facilitators.filter(
+    //     (item) => item.id !== id
+    //   );
+    //   setProgram({
+    //     ...program,
+    //     facilitators: updatedItems,
+    //     facilitatorEmails: updatedEmails,
+    //   });
+    // }
+    const itemToDelete = program.facilitators.find((item) => item.id === id);
+
+    if (itemToDelete) {
+      const updatedEmails = program.facilitatorEmails.filter(
+        (email) => email !== itemToDelete.facilitatorName.email
+      );
+      const updatedItems = program.facilitators.filter(
+        (item) => item.id !== id
+      );
+      setProgram({
+        ...program,
+        facilitators: updatedItems,
+        facilitatorEmails: updatedEmails,
+      });
+    }
+    console.log(program);
+  };
+
+  const handleFacilitatorChange = (e, field, rowData) => {
+    const val = (e.target && e.target.value) || e.value;
+    let updatedEmails = [];
+
+    const updatedItems = program.facilitators.map((item) => {
+      if (item.id === rowData.id) {
+        if (field === "facilitatorName") {
+          const selectedStaff = val;
+
+          const selectedEmail = selectedStaff ? selectedStaff.email : "";
+
+          updatedEmails = [...program.facilitatorEmails];
+
+          const oldEmailIndex = updatedEmails.indexOf(item.email);
+          if (oldEmailIndex > -1) {
+            updatedEmails.splice(oldEmailIndex, 1);
+          }
+
+          if (selectedEmail) {
+            updatedEmails.push(selectedEmail);
+          }
+
+          return {
+            ...item,
+            facilitatorName: val,
+          };
+        } else {
+          return {
+            ...item,
+            [field]: val,
+          };
+        }
+      }
+      return item;
+    });
+    setProgram({
+      ...program,
+      facilitators: updatedItems,
+      facilitatorEmails: updatedEmails,
+    });
+    console.log(program);
+  };
+
+  const itemTemplate = (rowData, { field }) => {
+    if (field === "facilitatorName") {
+      return (
+        <Dropdown
+          options={facilitators}
+          optionLabel="name"
+          value={rowData.facilitatorName}
+          onChange={(e) =>
+            handleFacilitatorChange(e, "facilitatorName", rowData)
+          }
+          placeholder="Name"
+          filter
+        />
+      );
+    }
+    if (field === "role") {
+      return (
+        <Dropdown
+          value={rowData.role}
+          options={Object.keys(program.facilitatorsNeeded)}
+          onChange={(e) => handleFacilitatorChange(e, "role", rowData)}
+          placeholder="Select Role"
+          filter
+        />
+      );
+    }
+    return null;
+  };
+
+  const rowClass = (data) => {
+    return {
+      "bg-red-400": data.cancelled === true,
+    };
+  };
+
   return (
     <div>
       <Toast ref={toast} />
@@ -598,7 +740,7 @@ export default function ProgramList({ user }) {
           globalFilter={globalFilter}
           globalFilterFields={globalFilterFields}
           header={header}
-          //   sortMode="multiple"
+          rowClassName={rowClass}
           resizableColumns={true}
           reorderableColumns={true}
           showGridlines
@@ -825,11 +967,11 @@ export default function ProgramList({ user }) {
 
         <div className="field">
           <label htmlFor="groupSize">Group Size</label>
-          <InputNumber
+          <InputText
             id="groupSize"
             value={program.groupSize}
             onValueChange={(e) => onInputNumberChange(e, "groupSize")}
-            integeronly
+            keyfilter="int"
             readOnly={!editable}
           />
         </div>
@@ -867,12 +1009,52 @@ export default function ProgramList({ user }) {
           <label htmlFor="underAgeParticipants">Under Age Participants</label>
         </div>
 
-        <div className="field">
+        {/* <div className="field">
           <label htmlFor="facilitators">Facilitators</label>
           <FacilitatorsMultiSelect
             facilitators={facilitators}
             onChange={handleFacilitatorsChange}
           />
+        </div> */}
+
+        <div className="field">
+          <label htmlFor="facilitators">Facilitators</label>
+          <Card className="p-mb-3">
+            <DataTable
+              value={program.facilitators}
+              // tableStyle={{ minWidth: "50rem" }}
+            >
+              <Column
+                field="facilitatorName"
+                header="Name"
+                body={(rowData) =>
+                  itemTemplate(rowData, { field: "facilitatorName" })
+                }
+              />
+              <Column
+                field="role"
+                header="Role"
+                body={(rowData) => itemTemplate(rowData, { field: "role" })}
+              />
+              <Column
+                body={(rowData) => (
+                  <Button
+                    icon="pi pi-trash"
+                    className="p-button-danger p-button-rounded"
+                    onClick={() => handleRowDel(rowData.id)}
+                    disabled={!editable}
+                  />
+                )}
+              />
+            </DataTable>
+            <Button
+              label="Add Facilitator"
+              icon="pi pi-plus"
+              onClick={handleAddFacilitator}
+              className="p-mt-2"
+              disabled={!editable}
+            />
+          </Card>
         </div>
 
         <div className="field">
@@ -998,6 +1180,7 @@ export default function ProgramList({ user }) {
                       value={count}
                       onChange={(e) => onFacilitatorChange(e, role)}
                       readOnly={!editable}
+                      keyfilter="int"
                     />
                   </div>
                 )
@@ -1094,5 +1277,3 @@ export default function ProgramList({ user }) {
     </div>
   );
 }
-
-// export default ProgramList;
