@@ -123,8 +123,15 @@ export default function MyComponent({ user }) {
             <SideMenuItem
               src="https://cdn.builder.io/api/v1/image/assets/TEMP/8234ee97158ece626fe6881c9bfb223354c575b5839bc5c3edd1a052f7b7a007?apiKey=6dceda0d543f454b955d90f7c576a010&"
               alt="Settings Icon"
-              label="Settings"
+              label="Charge Items"
               href={"/app/charge-items/chargeItems"}
+            />
+
+            <SideMenuItem
+              src="https://cdn.builder.io/api/v1/image/assets/TEMP/8234ee97158ece626fe6881c9bfb223354c575b5839bc5c3edd1a052f7b7a007?apiKey=6dceda0d543f454b955d90f7c576a010&"
+              alt="Settings Icon"
+              label="Users"
+              href={"/app/users/viewUsers"}
             />
           </section>
         </aside>

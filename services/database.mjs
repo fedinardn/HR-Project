@@ -49,11 +49,41 @@ export const createUser = async (user) => {
     email: user.email,
     username: user.displayName,
     userid: user.uid,
-    permission: "client",
+    permission: "No Access",
   };
 
   await setDoc(doc(db, "users", newUser.email), newUser);
   return newUser;
+};
+
+export const getAllUsers = async () => {
+  const db = getFirestore();
+  const userCollection = collection(db, "users");
+
+  const q = query(userCollection);
+
+  const querySnapshot = await getDocs(q);
+
+  const users = [];
+  querySnapshot.forEach((doc) => {
+    users.push((doc.id, "=>", doc.data()));
+  });
+
+  return users;
+};
+
+export const updateUser = async (userEmail, updatedData) => {
+  const db = getFirestore();
+  const itemRef = doc(db, "users", userEmail);
+
+  try {
+    await updateDoc(itemRef, updatedData);
+    // console.log("Charge item details updated successfully");
+  } catch (error) {
+    console.error("Error updating user details:", error);
+    throw error;
+  }
+  return updatedData;
 };
 
 export const getUserPermission = async (userEmail) => {

@@ -279,7 +279,7 @@ const ProgramDialog = ({
   const footer = (
     <>
       <div>
-        {userPermission === "hr" &&
+        {userPermission === "Admin" &&
           (!editable ? (
             <Button label="Edit" icon="pi pi-pencil" onClick={onEdit} />
           ) : (

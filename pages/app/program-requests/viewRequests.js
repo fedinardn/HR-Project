@@ -14,7 +14,7 @@ export default function ViewRequests({ user }) {
   const fetchProgramRequests = async () => {
     if (user) {
       const userData = await getUserPermission(user.email);
-      if (userData == "client") {
+      if (userData == "Facilitator" || userData == "No Access") {
         const data = await getAllProgramRequestsForClient(user.uid).then();
         setProgramRequests(data);
       } else {

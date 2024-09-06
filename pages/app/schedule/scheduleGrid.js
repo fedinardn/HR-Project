@@ -217,7 +217,7 @@ export default function ProgramList({ user }) {
   const leftToolbarTemplate = () => {
     return (
       <div className="flex flex-wrap gap-2">
-        {userPermission == "hr" && (
+        {userPermission == "Admin" && (
           <>
             <Button
               label="New"
@@ -241,7 +241,7 @@ export default function ProgramList({ user }) {
   const rightToolbarTemplate = () => {
     return (
       <div>
-        {userPermission == "hr" && (
+        {userPermission == "Admin" && (
           <Button
             label="Export"
             icon="pi pi-upload"
@@ -537,7 +537,7 @@ export default function ProgramList({ user }) {
             }}
           ></Column>
 
-          {userPermission == "hr" && (
+          {userPermission == "Admin" && (
             <Column
               body={(rowData) => (
                 <>
