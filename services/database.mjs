@@ -33,32 +33,34 @@ export const getAllProgramRequestsForClient = async (uid) => {
   return programRequests;
 };
 
-export const createUser = async (uid) => {
+export const createUser = async (user) => {
   const db = getFirestore();
   const userRef = collection(db, "users");
-  const q = query(userRef, where("userid", "==", uid));
+  const q = query(userRef, where("userid", "==", user.uid));
 
   const querySnapshot = await getDocs(q);
 
   if (!querySnapshot.empty) {
-    console.log(`User with UID ${uid} already exists.`);
+    console.log(`User with UID ${user.uid} already exists.`);
     return null;
   }
 
   const newUser = {
-    userid: uid,
+    email: user.email,
+    username: user.displayName,
+    userid: user.uid,
     permission: "client",
   };
 
-  await setDoc(doc(db, "users", newUser.userid), newUser);
+  await setDoc(doc(db, "users", newUser.email), newUser);
   return newUser;
 };
 
-export const getUserPermission = async (uid) => {
+export const getUserPermission = async (userEmail) => {
   const db = getFirestore();
   const userCollection = collection(db, "users");
 
-  const q = query(userCollection, where("userid", "==", uid));
+  const q = query(userCollection, where("email", "==", userEmail));
 
   const querySnapshot = await getDocs(q);
 

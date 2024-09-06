@@ -9,7 +9,6 @@ import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
-import { InputNumber } from "primereact/inputnumber";
 import { Toast } from "primereact/toast";
 import { Toolbar } from "primereact/toolbar";
 import { IconField } from "primereact/iconfield";
@@ -19,21 +18,22 @@ import { Dropdown } from "primereact/dropdown";
 import { Message } from "primereact/message";
 import { Card } from "primereact/card";
 
-import { InputTextarea } from "primereact/inputtextarea";
-import classNames from "primereact/utils";
-import { format } from "date-fns";
+// import { InputTextarea } from "primereact/inputtextarea";
+// import classNames from "primereact/utils";
+// import { format } from "date-fns";
 import { randomId } from "@mui/x-data-grid-generator";
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
 import {
   getAllProgramsInGrid,
-  createNewProgramInGrid,
-  updateProgramInGrid,
+  // createNewProgramInGrid,
+  // updateProgramInGrid,
   deleteProgramInGrid,
   getUserPermission,
   getAllStaff,
 } from "../../../services/database.mjs";
+import ProgramDialog from "../../../components/ProgramDialog"; // Import the new component
 
 export default function ProgramList({ user }) {
   const [programs, setPrograms] = useState([]);
@@ -75,7 +75,7 @@ export default function ProgramList({ user }) {
   const [submitted, setSubmitted] = useState(false);
   const [selectedPrograms, setSelectedPrograms] = useState(null);
   const [editable, setEditable] = useState(false);
-  const [selectedProgram, setSelectedProgram] = useState(null);
+  // const [selectedProgram, setSelectedProgram] = useState(null);
   const [globalFilter, setGlobalFilter] = useState(null);
   const [userPermission, setUserPermission] = useState("");
   const [facilitatorItems, setFacilitatorItems] = useState([]);
@@ -134,7 +134,7 @@ export default function ProgramList({ user }) {
   const fetchData = async () => {
     if (user) {
       try {
-        const permission = await getUserPermission(user.uid);
+        const permission = await getUserPermission(user.email);
         // console.log(permission);
         setUserPermission(permission);
         const data = await getAllProgramsInGrid();
@@ -190,7 +190,7 @@ export default function ProgramList({ user }) {
       contactPersonEmail: "",
       underAgeParticipants: false,
       facilitators: [],
-      facilitatorEmails: [],
+      // facilitatorEmails: [],
       notes: "",
       returningClient: false,
       contractSent: false,
@@ -281,52 +281,6 @@ export default function ProgramList({ user }) {
     setDeleteProgramsDialog(true);
   };
 
-  const saveProgram = async () => {
-    let _programs = [...programs];
-    let _program = { ...program };
-
-    // _program.facilitators = facilitatorItems;
-
-    if (!_program.isNew) {
-      await updateProgramInGrid(_program.programID, _program);
-      toast.current.show({
-        severity: "success",
-        summary: "Successful",
-        detail: "Program Edited Successfully",
-        life: 3000,
-      });
-    } else {
-      setSubmitted(true);
-      await createNewProgramInGrid(
-        _program.id,
-        _program.programName,
-        _program.date,
-        _program.startTime,
-        _program.endTime,
-        _program.clientType,
-        _program.locationAndProgram,
-        _program.groupSize,
-        _program.contactPerson,
-        _program.contactPersonEmail,
-        _program.notes,
-        _program.facilitators,
-        _program.facilitatorsNeeded
-      );
-      _programs.push(_program);
-      toast.current.show({
-        severity: "success",
-        summary: "Successful",
-        detail: "Program Created Successfully",
-        life: 3000,
-      });
-    }
-
-    // setSubmitted(true);
-    // setPrograms(_programs);
-    setProgramDialog(false);
-    fetchData();
-  };
-
   const editProgram = (program) => {
     setProgram({ ...program });
     setProgramDialog(true);
@@ -376,108 +330,6 @@ export default function ProgramList({ user }) {
     });
   };
 
-  const onInputChange = (e, name) => {
-    const val = (e.target && e.target.value) || "";
-    let _program = { ...program };
-    _program[`${name}`] = val;
-
-    setProgram(_program);
-  };
-
-  const onInputNumberChange = (e, name) => {
-    const val = e.value || "";
-    let _program = { ...program };
-    _program[`${name}`] = val;
-
-    setProgram(_program);
-  };
-
-  const onCalendarChange = (e, name) => {
-    const val = e.value || null;
-    let _program = { ...program };
-    _program[`${name}`] = val;
-
-    setProgram(_program);
-  };
-
-  const findIndexById = (id) => {
-    let index = -1;
-    for (let i = 0; i < programs.length; i++) {
-      if (programs[i].id === id) {
-        index = i;
-        break;
-      }
-    }
-
-    return index;
-  };
-  const onFacilitatorChange = (e, role) => {
-    const val = (e.target && e.target.value) || "";
-    let _program = { ...program };
-
-    _program.facilitatorsNeeded[role] = val;
-
-    setProgram(_program);
-  };
-
-  // const addFacilitatorRole = () => {
-  //   const role = prompt("Enter the new role:");
-  //   if (role && !program.facilitatorsNeeded[role]) {
-  //     let _program = { ...program };
-  //     _program.facilitatorsNeeded[role] = "";
-  //     setProgram(_program);
-  //   }
-  // };
-
-  const addFacilitatorRole = () => {
-    if (newRole && !program.facilitatorsNeeded[newRole]) {
-      let _program = { ...program };
-      _program.facilitatorsNeeded[newRole] = "";
-      setProgram(_program);
-      setNewRole("");
-      setIsAddRoleDialogVisible(false);
-    }
-  };
-
-  const showAddRoleDialog = () => {
-    setIsAddRoleDialogVisible(true);
-  };
-
-  const FacilitatorsMultiSelect = ({
-    facilitators,
-    selectedFacilitators,
-    onChange,
-  }) => {
-    return (
-      <div className="card flex justify-content-center">
-        <MultiSelect
-          value={program.facilitators}
-          onChange={onChange}
-          options={facilitators}
-          optionLabel="name"
-          filter
-          display="chip"
-          placeholder="Select Facilitators"
-          className="w-full md:w-100rem"
-          disabled={!editable}
-        />
-      </div>
-    );
-  };
-
-  // const handleFacilitatorsChange = (e) => {
-  //   let selectedFacilitators = e.value;
-  //   let facilitatorEmails = selectedFacilitators.map(
-  //     (facilitator) => facilitator.email
-  //   );
-
-  //   setProgram({
-  //     ...program,
-  //     facilitators: selectedFacilitators,
-  //     facilitatorEmails: facilitatorEmails,
-  //   });
-  // };
-
   const ClientTypeDropdown = ({ onChange }) => {
     const clientTypes = ["STU", "NON-CU-STU", "CUP", "PDP", "COMMYTH"];
 
@@ -494,27 +346,6 @@ export default function ProgramList({ user }) {
         />
       </div>
     );
-  };
-
-  const handleClientTypeChange = (e) => {
-    let _program = { ...program };
-    try {
-      const updatedProgram = { ..._program, clientType: e.value };
-
-      setProgram(updatedProgram);
-    } catch (error) {
-      console.error("Error updating program details:", error);
-    }
-  };
-
-  const handleCheckboxChange = async (field, value) => {
-    let _program = { ...program };
-    try {
-      const updatedProgram = { ..._program, [field]: value };
-      setProgram(updatedProgram);
-    } catch (error) {
-      console.error("Error updating program details:", error);
-    }
   };
 
   const formatFacilitatorsNeeded = (facilitatorsNeeded) => {
@@ -535,27 +366,6 @@ export default function ProgramList({ user }) {
       <Message severity="success" text="No facilitators needed" />
     );
   };
-
-  const programDialogFooter = (
-    <>
-      <div>
-        {userPermission == "hr" &&
-          (!editable ? (
-            <Button label="Edit" icon="pi pi-pencil" onClick={toggleEditable} />
-          ) : (
-            <>
-              <Button
-                label="Cancel"
-                icon="pi pi-times"
-                onClick={toggleEditable}
-                className="p-button-text"
-              />
-              <Button label="Save" icon="pi pi-check" onClick={saveProgram} />
-            </>
-          ))}
-      </div>
-    </>
-  );
 
   const deleteProgramDialogFooter = (
     <>
@@ -590,125 +400,6 @@ export default function ProgramList({ user }) {
       />
     </React.Fragment>
   );
-
-  const handleAddFacilitator = () => {
-    const newFacilitator = {
-      id: Date.now(),
-      facilitatorName: null,
-      role: "",
-    };
-    setProgram((prevProgram) => ({
-      ...prevProgram,
-      facilitators: [...(prevProgram.facilitators || []), newFacilitator],
-    }));
-  };
-
-  const handleRowDel = (id) => {
-    // const itemToDelete = program.facilitators.find((item) => item.id === id);
-
-    // if (itemToDelete) {
-    //   const updatedEmails = program.facilitatorEmails.filter(
-    //     (email) => email !== itemToDelete.email
-    //   );
-    //   // program.facilitatorEmails = updatedEmails;
-    //   const updatedItems = program.facilitators.filter(
-    //     (item) => item.id !== id
-    //   );
-    //   setProgram({
-    //     ...program,
-    //     facilitators: updatedItems,
-    //     facilitatorEmails: updatedEmails,
-    //   });
-    // }
-    const itemToDelete = program.facilitators.find((item) => item.id === id);
-
-    if (itemToDelete) {
-      const updatedEmails = program.facilitatorEmails.filter(
-        (email) => email !== itemToDelete.facilitatorName.email
-      );
-      const updatedItems = program.facilitators.filter(
-        (item) => item.id !== id
-      );
-      setProgram({
-        ...program,
-        facilitators: updatedItems,
-        facilitatorEmails: updatedEmails,
-      });
-    }
-    console.log(program);
-  };
-
-  const handleFacilitatorChange = (e, field, rowData) => {
-    const val = (e.target && e.target.value) || e.value;
-    let updatedEmails = [];
-
-    const updatedItems = program.facilitators.map((item) => {
-      if (item.id === rowData.id) {
-        if (field === "facilitatorName") {
-          const selectedStaff = val;
-
-          const selectedEmail = selectedStaff ? selectedStaff.email : "";
-
-          updatedEmails = [...program.facilitatorEmails];
-
-          const oldEmailIndex = updatedEmails.indexOf(item.email);
-          if (oldEmailIndex > -1) {
-            updatedEmails.splice(oldEmailIndex, 1);
-          }
-
-          if (selectedEmail) {
-            updatedEmails.push(selectedEmail);
-          }
-
-          return {
-            ...item,
-            facilitatorName: val,
-          };
-        } else {
-          return {
-            ...item,
-            [field]: val,
-          };
-        }
-      }
-      return item;
-    });
-    setProgram({
-      ...program,
-      facilitators: updatedItems,
-      facilitatorEmails: updatedEmails,
-    });
-    console.log(program);
-  };
-
-  const itemTemplate = (rowData, { field }) => {
-    if (field === "facilitatorName") {
-      return (
-        <Dropdown
-          options={facilitators}
-          optionLabel="name"
-          value={rowData.facilitatorName}
-          onChange={(e) =>
-            handleFacilitatorChange(e, "facilitatorName", rowData)
-          }
-          placeholder="Name"
-          filter
-        />
-      );
-    }
-    if (field === "role") {
-      return (
-        <Dropdown
-          value={rowData.role}
-          options={Object.keys(program.facilitatorsNeeded)}
-          onChange={(e) => handleFacilitatorChange(e, "role", rowData)}
-          placeholder="Select Role"
-          filter
-        />
-      );
-    }
-    return null;
-  };
 
   const rowClass = (data) => {
     return {
@@ -873,366 +564,16 @@ export default function ProgramList({ user }) {
         </DataTable>
       </div>
 
-      <Dialog
+      <ProgramDialog
         visible={programDialog}
-        style={{ width: "32rem" }}
-        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
-        header="Program Details"
-        modal
-        className="p-fluid"
-        footer={programDialogFooter}
+        program={program}
+        editable={editable}
         onHide={hideDialog}
-      >
-        <div className="field">
-          <label htmlFor="programName">Program Name</label>
-          <InputText
-            id="programName"
-            value={program.programName}
-            onChange={(e) => onInputChange(e, "programName")}
-            required
-            autoFocus
-            readOnly={!editable}
-          />
-          {submitted && !program.programName && (
-            <small className="p-invalid">Program Name is required.</small>
-          )}
-        </div>
-
-        <div className="field">
-          <label htmlFor="date">Date</label>
-          <Calendar
-            id="date"
-            value={program.date ? new Date(program.date) : program.date}
-            onChange={(e) => onCalendarChange(e, "date")}
-            showIcon
-            disabled={!editable}
-          />
-        </div>
-
-        <div className="field">
-          <label htmlFor="startTime">Start Time</label>
-          <Calendar
-            id="startTime"
-            value={
-              program.startTime
-                ? new Date(program.startTime)
-                : program.startTime
-            }
-            // value={new Date(program.startTime).toDateString()}
-            //   onChange={(e) => setStartTime(e.value)}
-            onChange={(e) => onInputChange(e, "startTime")}
-            showIcon
-            timeOnly
-            hourFormat="12"
-            icon={() => <i className="pi pi-clock" />}
-            disabled={!editable}
-          />
-        </div>
-
-        <div className="field">
-          <label htmlFor="endTime">End Time</label>
-          <Calendar
-            id="endTime"
-            value={
-              program.endTime ? new Date(program.endTime) : program.endTime
-            }
-            onChange={(e) => onInputChange(e, "endTime")}
-            showIcon
-            timeOnly
-            hourFormat="12"
-            icon={() => <i className="pi pi-clock" />}
-            disabled={!editable}
-          />
-        </div>
-
-        <div className="field">
-          <label htmlFor="clientType">Client Type</label>
-
-          <ClientTypeDropdown
-            id="clientType"
-            value={program.clientType}
-            onChange={handleClientTypeChange}
-          />
-        </div>
-
-        <div className="field">
-          <label htmlFor="locationAndProgram">Location and Program</label>
-          <InputText
-            id="locationAndProgram"
-            value={program.locationAndProgram}
-            onChange={(e) => onInputChange(e, "locationAndProgram")}
-            readOnly={!editable}
-          />
-        </div>
-
-        <div className="field">
-          <label htmlFor="groupSize">Group Size</label>
-          <InputText
-            id="groupSize"
-            value={program.groupSize}
-            onValueChange={(e) => onInputNumberChange(e, "groupSize")}
-            keyfilter="int"
-            readOnly={!editable}
-          />
-        </div>
-
-        <div className="field">
-          <label htmlFor="contactPerson">Contact Person</label>
-          <InputText
-            id="contactPerson"
-            value={program.contactPerson}
-            onChange={(e) => onInputChange(e, "contactPerson")}
-            readOnly={!editable}
-          />
-        </div>
-
-        <div className="field">
-          <label htmlFor="contactPersonEmail">Contact Person Email</label>
-          <InputText
-            id="contactPersonEmail"
-            value={program.contactPersonEmail}
-            onChange={(e) => onInputChange(e, "contactPersonEmail")}
-            readOnly={!editable}
-          />
-        </div>
-
-        <div className="field-checkbox">
-          <input
-            type="checkbox"
-            id="underAgeParticipants"
-            checked={program.underAgeParticipants}
-            onChange={(e) =>
-              handleCheckboxChange("underAgeParticipants", e.target.checked)
-            }
-            disabled={!editable}
-          />
-          <label htmlFor="underAgeParticipants">Under Age Participants</label>
-        </div>
-
-        {/* <div className="field">
-          <label htmlFor="facilitators">Facilitators</label>
-          <FacilitatorsMultiSelect
-            facilitators={facilitators}
-            onChange={handleFacilitatorsChange}
-          />
-        </div> */}
-
-        <div className="field">
-          <label htmlFor="facilitators">Facilitators</label>
-          <Card className="p-mb-3">
-            <DataTable
-              value={program.facilitators}
-              // tableStyle={{ minWidth: "50rem" }}
-            >
-              <Column
-                field="facilitatorName"
-                header="Name"
-                body={(rowData) =>
-                  itemTemplate(rowData, { field: "facilitatorName" })
-                }
-              />
-              <Column
-                field="role"
-                header="Role"
-                body={(rowData) => itemTemplate(rowData, { field: "role" })}
-              />
-              <Column
-                body={(rowData) => (
-                  <Button
-                    icon="pi pi-trash"
-                    className="p-button-danger p-button-rounded"
-                    onClick={() => handleRowDel(rowData.id)}
-                    disabled={!editable}
-                  />
-                )}
-              />
-            </DataTable>
-            <Button
-              label="Add Facilitator"
-              icon="pi pi-plus"
-              onClick={handleAddFacilitator}
-              className="p-mt-2"
-              disabled={!editable}
-            />
-          </Card>
-        </div>
-
-        <div className="field">
-          <label htmlFor="facilitatorEmails">Facilitator Emails</label>
-          <InputText
-            id="facilitatorEmails"
-            value={program.facilitatorEmails}
-            onChange={(e) => onInputChange(e, "facilitatorEmails")}
-            disabled
-          />
-        </div>
-
-        <div className="field">
-          <label htmlFor="notes">Notes</label>
-          <InputTextarea
-            id="notes"
-            value={program.notes}
-            onChange={(e) => onInputChange(e, "notes")}
-            readOnly={!editable}
-          />
-        </div>
-
-        <div className="field-checkbox">
-          <input
-            type="checkbox"
-            id="returningClient"
-            checked={program.returningClient}
-            onChange={(e) =>
-              handleCheckboxChange("returningClient", e.target.checked)
-            }
-            disabled={!editable}
-          />
-          <label htmlFor="returningClient">Returning Client</label>
-        </div>
-
-        <div className="field-checkbox">
-          <input
-            type="checkbox"
-            id="contractSent"
-            checked={program.contractSent}
-            onChange={(e) =>
-              handleCheckboxChange("contractSent", e.target.checked)
-            }
-            disabled={!editable}
-          />
-          <label htmlFor="contractSent">Contract Sent</label>
-        </div>
-
-        <div className="field-checkbox">
-          <input
-            type="checkbox"
-            id="preProgramEmail"
-            checked={program.preProgramEmail}
-            onChange={(e) =>
-              handleCheckboxChange("preProgramEmail", e.target.checked)
-            }
-            disabled={!editable}
-          />
-          <label htmlFor="preProgramEmail">Pre-Program Email</label>
-        </div>
-
-        <div className="field-checkbox">
-          <input
-            type="checkbox"
-            id="packetReady"
-            checked={program.packetReady}
-            onChange={(e) =>
-              handleCheckboxChange("packetReady", e.target.checked)
-            }
-            disabled={!editable}
-          />
-          <label htmlFor="packetReady">Packet Ready</label>
-        </div>
-
-        <div className="field-checkbox">
-          <input
-            type="checkbox"
-            id="packetProcessed"
-            checked={program.packetProcessed}
-            onChange={(e) =>
-              handleCheckboxChange("packetProcessed", e.target.checked)
-            }
-            disabled={!editable}
-          />
-          <label htmlFor="packetProcessed">Packet Processed</label>
-        </div>
-
-        <div className="field-checkbox">
-          <input
-            type="checkbox"
-            id="followUp"
-            checked={program.followUp}
-            onChange={(e) => handleCheckboxChange("followUp", e.target.checked)}
-            disabled={!editable}
-          />
-          <label htmlFor="followUp">Follow Up</label>
-        </div>
-
-        <div className="field-checkbox">
-          <input
-            type="checkbox"
-            id="cancelled"
-            checked={program.cancelled}
-            onChange={(e) =>
-              handleCheckboxChange("cancelled", e.target.checked)
-            }
-            disabled={!editable}
-          />
-          <label htmlFor="cancelled">Cancelled</label>
-        </div>
-
-        <div className="field">
-          <label htmlFor="facilitatorsNeeded" className="font-bold">
-            Facilitators Needed
-          </label>
-          <div id="facilitatorsNeeded">
-            {program.facilitatorsNeeded &&
-              Object.entries(program.facilitatorsNeeded).map(
-                ([role, count], index) => (
-                  <div key={index} className="field">
-                    <label style={{ width: "120px" }}>{role}</label>
-                    <InputText
-                      value={count}
-                      onChange={(e) => onFacilitatorChange(e, role)}
-                      readOnly={!editable}
-                      keyfilter="int"
-                    />
-                  </div>
-                )
-              )}
-            {/* <Button
-              label="Add Role"
-              icon="pi pi-plus"
-              onClick={addFacilitatorRole}
-              className="p-mt-2"
-              disabled={!editable}
-            /> */}
-
-            <Button
-              label="Add Role"
-              icon="pi pi-plus"
-              onClick={showAddRoleDialog}
-              className="p-mt-2"
-              disabled={!editable}
-            />
-
-            <Dialog
-              header="Add New Role"
-              visible={isAddRoleDialogVisible}
-              style={{ width: "30vw" }}
-              modal
-              footer={
-                <div>
-                  <Button
-                    label="Cancel"
-                    icon="pi pi-times"
-                    onClick={() => setIsAddRoleDialogVisible(false)}
-                    className="p-button-text"
-                  />
-                  <Button
-                    label="Add"
-                    icon="pi pi-check"
-                    onClick={addFacilitatorRole}
-                  />
-                </div>
-              }
-              onHide={() => setIsAddRoleDialogVisible(false)}
-            >
-              <div className="p-field">
-                <InputText
-                  id="newRole"
-                  onChange={(e) => setNewRole(e.target.value)}
-                />
-              </div>
-            </Dialog>
-          </div>
-        </div>
-      </Dialog>
+        onEdit={toggleEditable}
+        facilitators={facilitators}
+        userPermission={userPermission}
+        onSave={fetchData}
+      />
 
       <Dialog
         visible={deleteProgramDialog}

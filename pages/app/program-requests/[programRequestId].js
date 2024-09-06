@@ -21,7 +21,7 @@ export default function programRequestData({ user }) {
       const data = await getDataForProgramRequest(programRequestId);
       setProgramRequestData(data);
       if (user) {
-        const permission = await getUserPermission(user.uid);
+        const permission = await getUserPermission(user.email);
         setUserPermission(permission);
       } else {
         console.log("no user");
