@@ -127,7 +127,12 @@ export default function MyComponent({ user }) {
               label="Schedule"
               href="/app/schedule/scheduleDisplay"
             />
-            <SideMenuItem icon="pi-chart-bar" label="Reports" href="#" />
+            <SideMenuItem
+              icon="pi-chart-bar"
+              label="Reports"
+              href="/app/analytics/analyticsView
+            "
+            />
             <SideMenuItem
               icon="pi-dollar"
               label="Charge Items"
