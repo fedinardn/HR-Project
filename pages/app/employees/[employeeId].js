@@ -7,35 +7,20 @@ import {
   getStaffDetails,
 } from "../../../services/database.mjs";
 import Link from "next/link";
-import AssignedProgramsList from "../../../components/AssignedProgamsList";
-import firebaseApp from "../../../firebase";
+import AssignedStaffPrograms from "../../../components/AssignedStaffPrograms";
+// import firebaseApp from "../../../firebase";
 
 export default function getStaffData({ user }) {
   const router = useRouter();
   const staffID = router.query.employeeId;
   const [staffData, setStaffData] = useState([]);
   const [showModal, setShowModal] = useState(false);
-  const [programs, setAssignedPrograms] = useState([
-    { name: "Jennet Gray", id: "1234 - Program A" },
-    { name: "Jennet Gray", id: "5678 - Program B" },
-    { name: "Jennet Gray", id: "9012 - Program C" },
-    { name: "Jennet Gray", id: "1234 - Program D" },
-    { name: "Jennet Gray", id: "5678 - Program E" },
-    { name: "Jennet Gray", id: "9012 - Program F" },
-    { name: "Jennet Gray", id: "1234 - Program G" },
-    { name: "Jennet Gray", id: "5678 - Program H" },
-    { name: "Jennet Gray", id: "9012 - Program I" },
-    { name: "Jennet Gray", id: "1234 - Program J" },
-  ]);
 
   const fetchStaffData = async () => {
     if (staffID) {
-      // console.log(staffID);
-      // const response = await fetch(`/api/employees/${staffID}`, {
-      //   method: "GET",
-      // });
       const data = await getStaffDetails(staffID).then();
       setStaffData(data);
+      // console.log(data);
     }
   };
 
@@ -45,6 +30,7 @@ export default function getStaffData({ user }) {
 
   const handleEditClick = () => {
     setShowModal(true);
+    console.log(staffData);
   };
 
   const handleSave = async (editedStaff) => {
@@ -161,11 +147,7 @@ export default function getStaffData({ user }) {
         />
       )}
       <StaffInfo info={staffData} />
-      <AssignedProgramsList
-        // initialPrograms={staffData.programs || []}  this is the correct one replace when functionality is correct
-        initialPrograms={programs}
-        onAddProgram={(newProgram) => console.log("Program added:", newProgram)}
-      />
+      <AssignedStaffPrograms staffData={staffData} />
     </>
   );
 }

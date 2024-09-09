@@ -21,7 +21,7 @@ export default function programRequestData({ user }) {
       const data = await getDataForProgramRequest(programRequestId);
       setProgramRequestData(data);
       if (user) {
-        const permission = await getUserPermission(user.uid);
+        const permission = await getUserPermission(user.email);
         setUserPermission(permission);
       } else {
         console.log("no user");
@@ -191,7 +191,7 @@ export default function programRequestData({ user }) {
         <CompanyOverview {...programRequestData} />
         <h2 className={styles["section-title"]}>Program Details</h2>
         <ProgramDetails {...programRequestData} />
-        {userPermission == "hr" && (
+        {userPermission == "Admin" && (
           <>
             <button
               className={styles["approve-button"]}

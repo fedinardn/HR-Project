@@ -33,32 +33,64 @@ export const getAllProgramRequestsForClient = async (uid) => {
   return programRequests;
 };
 
-export const createUser = async (uid) => {
+export const createUser = async (user) => {
   const db = getFirestore();
   const userRef = collection(db, "users");
-  const q = query(userRef, where("userid", "==", uid));
+  const q = query(userRef, where("userid", "==", user.uid));
 
   const querySnapshot = await getDocs(q);
 
   if (!querySnapshot.empty) {
-    console.log(`User with UID ${uid} already exists.`);
+    console.log(`User with UID ${user.uid} already exists.`);
     return null;
   }
 
   const newUser = {
-    userid: uid,
-    permission: "client",
+    email: user.email,
+    username: user.displayName,
+    userid: user.uid,
+    permission: "No Access",
   };
 
-  await setDoc(doc(db, "users", newUser.userid), newUser);
+  await setDoc(doc(db, "users", newUser.email), newUser);
   return newUser;
 };
 
-export const getUserPermission = async (uid) => {
+export const getAllUsers = async () => {
   const db = getFirestore();
   const userCollection = collection(db, "users");
 
-  const q = query(userCollection, where("userid", "==", uid));
+  const q = query(userCollection);
+
+  const querySnapshot = await getDocs(q);
+
+  const users = [];
+  querySnapshot.forEach((doc) => {
+    users.push((doc.id, "=>", doc.data()));
+  });
+
+  return users;
+};
+
+export const updateUser = async (userEmail, updatedData) => {
+  const db = getFirestore();
+  const itemRef = doc(db, "users", userEmail);
+
+  try {
+    await updateDoc(itemRef, updatedData);
+    // console.log("Charge item details updated successfully");
+  } catch (error) {
+    console.error("Error updating user details:", error);
+    throw error;
+  }
+  return updatedData;
+};
+
+export const getUserPermission = async (userEmail) => {
+  const db = getFirestore();
+  const userCollection = collection(db, "users");
+
+  const q = query(userCollection, where("email", "==", userEmail));
 
   const querySnapshot = await getDocs(q);
 
@@ -116,6 +148,22 @@ export const createProgramRequest = async (
   }
 
   return { id: docRef.id, ...newProgramRequest };
+};
+
+export const getAllContractedPrograms = async () => {
+  const db = getFirestore();
+  const programRequestsCollection = collection(db, "clientPrograms");
+
+  const q = query(programRequestsCollection);
+
+  const querySnapshot = await getDocs(q);
+
+  const programs = [];
+  querySnapshot.forEach((doc) => {
+    programs.push((doc.id, "=>", doc.data()));
+  });
+
+  return programs;
 };
 
 export const getAllProgramRequests = async () => {
@@ -256,6 +304,106 @@ export const getStaffDetails = async (staffID) => {
     staff.push((doc.id, "=>", doc.data()));
   });
   return staff[0];
+};
+
+export const assignProgramToStaff = async (staffID, programData) => {
+  const db = getFirestore();
+  const staffRef = doc(db, "staff", staffID);
+  const staffProgramRef = doc(
+    db,
+    "staffPrograms",
+    `${staffID}_${programData.programID}`
+  );
+
+  try {
+    // Add the program assignment to the staffPrograms collection
+    await setDoc(staffProgramRef, {
+      staffID: staffID,
+      ...programData,
+      createdAt: Date.now(),
+    });
+
+    // Get the staff document
+    // const staffDoc = await getDoc(staffRef);
+
+    // if (!staffDoc.exists()) {
+    //   throw new Error("Staff member not found");
+    // }
+
+    // // Update the staff document with the new program assignment
+    // const staffData = staffDoc.data();
+    // const updatedPrograms = staffData.programs
+    //   ? [...staffData.programs, programData]
+    //   : [programData];
+
+    // await updateDoc(staffRef, {
+    //   programs: updatedPrograms,
+    // });
+
+    return {
+      ...programData,
+    };
+  } catch (error) {
+    console.error("Error assigning program to staff:", error);
+    throw error;
+  }
+};
+
+export const updateStaffProgramAssignment = async (
+  staffID,
+  programID,
+  updatedProgramData
+) => {
+  const db = getFirestore();
+  const staffProgramRef = doc(db, "staffPrograms", `${staffID}_${programID}`);
+
+  try {
+    // Update the program assignment in the staffPrograms collection
+    await updateDoc(staffProgramRef, {
+      ...updatedProgramData,
+      updatedAt: Date.now(),
+    });
+
+    return {
+      ...updatedProgramData,
+    };
+  } catch (error) {
+    console.error("Error updating staff program assignment:", error);
+    throw error;
+  }
+};
+
+export const getStaffAssignments = async (staffID) => {
+  const db = getFirestore();
+  const staffProgramsClollection = collection(db, "staffPrograms");
+
+  const q = query(staffProgramsClollection, where("staffID", "==", staffID));
+
+  const querySnapshot = await getDocs(q);
+
+  const programs = [];
+
+  querySnapshot.forEach((doc) => {
+    programs.push((doc.id, "=>", doc.data()));
+  });
+  return programs;
+};
+
+export const deleteStaffAssignment = async (staffID, programID) => {
+  const db = getFirestore();
+  const staffProgramAssignmentRef = doc(
+    db,
+    "staffPrograms",
+    `${staffID}_${programID}`
+  );
+
+  try {
+    await deleteDoc(staffProgramAssignmentRef);
+    console.log("Assignment deleted successfully");
+  } catch (error) {
+    console.error("Error deleting Assignment:", error);
+    throw error;
+  }
 };
 
 // EMPLOYEE FUNCTIONS END HERE

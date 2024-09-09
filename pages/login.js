@@ -30,7 +30,7 @@ const uiConfig = {
     signInSuccessWithAuthResult: function (authResult, redirectUrl) {
       const user = authResult.user;
 
-      createUser(user.uid)
+      createUser(user)
         .then(() => {
           window.location.assign("/");
         })
