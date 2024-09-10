@@ -318,7 +318,6 @@ const ProgramDialog = ({
         footer={footer}
         onHide={onHide}
       >
-        {/* Include all the form fields here, similar to your original code */}
         <div className="field">
           <label htmlFor="programName">Program Name</label>
           <InputText
@@ -488,16 +487,6 @@ const ProgramDialog = ({
             />
           </Card>
         </div>
-
-        {/* <div className="field">
-          <label htmlFor="facilitatorEmails">Facilitator Emails</label>
-          <InputText
-            id="facilitatorEmails"
-            value={localProgram.facilitatorEmails}
-            onChange={(e) => onInputChange(e, "facilitatorEmails")}
-            disabled
-          />
-        </div> */}
 
         <div className="field">
           <label htmlFor="notes">Notes</label>
