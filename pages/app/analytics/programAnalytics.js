@@ -100,6 +100,7 @@ const AnalyticsDashboard = () => {
             readOnlyInput
             hideOnRangeSelection
             style={{ minWidth: "350px" }}
+            placeholder="MM/DD/YYYY - MM/DD/YYYY "
           />
         </div>
       </Card>

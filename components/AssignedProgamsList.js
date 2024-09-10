@@ -328,7 +328,7 @@ export default function AssignedProgramsList({ initialPrograms, clientData }) {
   return (
     <>
       <Toast ref={toast} />
-      <div className={styles["task-list"]}>
+      <Card>
         <div className={styles["header"]}>
           <h1 className={styles.title}>
             Assigned Programs({programs.length || 0})
@@ -390,7 +390,7 @@ export default function AssignedProgramsList({ initialPrograms, clientData }) {
             style={{ width: "2vw" }}
           />
         </DataTable>
-      </div>
+      </Card>
 
       <Dialog
         header="Create Client Contract"
@@ -400,8 +400,6 @@ export default function AssignedProgramsList({ initialPrograms, clientData }) {
         onHide={handleCloseContractModal}
         footer={
           <div className="flex">
-            {/* <Button label="Preview" icon="pi pi-eye" onClick={handlePreview} /> */}
-            {/* <Button label="PDF" icon="pi pi-file-pdf" onClick={handlePDF} /> */}
             <PDFGenerator
               invoiceItems={invoiceItems}
               clientData={clientData}
@@ -449,7 +447,7 @@ export default function AssignedProgramsList({ initialPrograms, clientData }) {
           </div>
         </div>
 
-        <Card className="p-mb-3">
+        <Card className="mb-4">
           <DataTable value={invoiceItems} tableStyle={{ minWidth: "50rem" }}>
             <Column
               field="itemCode"

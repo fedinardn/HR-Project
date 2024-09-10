@@ -4,7 +4,8 @@ import Tabs from "@mui/material/Tabs";
 import Tab from "@mui/material/Tab";
 import Box from "@mui/material/Box";
 import ProgramAnalyticsDashboard from "./programAnalytics";
-import StaffCostAnalysis from "./staffAnalytics";
+import StaffCostAnalysis from "./staffCostAnalytics";
+import FacilitatorAnalysis from "./staffProgramAnalytics";
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -47,7 +48,8 @@ export default function BasicTabs(user) {
       <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
         <Tabs value={value} onChange={handleChange} aria-label="Schedule Tabs">
           <Tab label="Program Analytics" {...a11yProps(0)} />
-          <Tab label="Staff Analytics" {...a11yProps(1)} />
+          <Tab label="Revenue Profit Analytics" {...a11yProps(1)} />
+          <Tab label="Staff Analytics" {...a11yProps(2)} />
         </Tabs>
       </Box>
 
@@ -56,6 +58,9 @@ export default function BasicTabs(user) {
       </CustomTabPanel>
       <CustomTabPanel value={value} index={1}>
         <StaffCostAnalysis {...user} />
+      </CustomTabPanel>
+      <CustomTabPanel value={value} index={2}>
+        <FacilitatorAnalysis {...user} />
       </CustomTabPanel>
     </Box>
   );

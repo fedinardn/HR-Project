@@ -1,30 +1,126 @@
-import { useEffect, useState } from "react";
-import styles from "../../../styles/viewAllStaff.module.css";
+// import { useEffect, useState } from "react";
+// import styles from "../../../styles/viewAllStaff.module.css";
+// import { getAllStaff } from "../../../services/database.mjs";
+// import Link from "next/link";
+
+// function StaffCard({ firstName, lastName, actionImgSrc, email }) {
+//   return (
+//     <section className={styles["staff-card"]}>
+//       <div className={styles["staff-info"]}>
+//         <div className={styles["staff-details"]}>
+//           <div className={styles["staff-name"]}>
+//             {firstName} {lastName}
+//           </div>
+//           <div className={styles["staff-role"]}>{email}</div>
+//         </div>
+//       </div>
+//       <img src={actionImgSrc} alt="" className="action-img" />
+//     </section>
+//   );
+// }
+
+// export default function ViewStaff({ user }) {
+//   const [searchQuery, setSearchQuery] = useState("");
+//   const [staff, setStaff] = useState([]);
+
+//   const fetchStaff = async () => {
+//     const data = await getAllStaff().then();
+//     setStaff(data);
+//   };
+
+//   useEffect(() => {
+//     fetchStaff();
+//   }, [user]);
+
+//   const handleSearch = (event) => {
+//     setSearchQuery(event.target.value);
+//   };
+
+//   const filterStaff = (staff, searchQuery) => {
+//     if (!searchQuery.trim()) {
+//       return staff;
+//     }
+
+//     return staff.filter(
+//       (member) =>
+//         member.firstName.toLowerCase().startsWith(searchQuery.toLowerCase()) ||
+//         member.lastName.toLowerCase().startsWith(searchQuery.toLowerCase())
+//     );
+//   };
+
+//   const filteredStaff = filterStaff(staff, searchQuery);
+
+//   return (
+//     <>
+//       <section className={styles["main-container"]}>
+//         <header className={styles["header"]}>
+//           <h1 className={styles["title"]}>Staff</h1>
+//           <Link
+//             className={styles["new-staff"]}
+//             href={"/app/employees/addNewEmployee"}
+//           >
+//             <h4 className={styles["new-staff-text"]}>Add New Staff</h4>
+//           </Link>
+//         </header>
+//         <section className={styles["content"]}>
+//           <h2 className={styles["content-title"]}>All staff</h2>
+//           <form
+//             onChange={(event) => handleSearch(event)}
+//             className={styles["search-form"]}
+//           >
+//             <input
+//               className={styles["search-input"]}
+//               type="text"
+//               id="searchStaff"
+//               placeholder="Search staff"
+//               aria-label="Search staff"
+//               // value={value}
+//               // onChange={handleSearch}
+//             />
+//             <img
+//               src="https://cdn.builder.io/api/v1/image/assets/TEMP/ef95366c70a6c027dfc7a1c0bb808953401267a94186d90914dcc35153889a45?apiKey=6dceda0d543f454b955d90f7c576a010&"
+//               alt=""
+//               className={styles["search-icon"]}
+//               // tabindex="0"
+//               role="button"
+//             />
+//           </form>
+//           {filteredStaff.length > 0
+//             ? filteredStaff.map((staffMember, index) => (
+//                 <a key={index} href={`/app/employees/${staffMember.staffID}`}>
+//                   <StaffCard
+//                     key={index}
+//                     firstName={staffMember.firstName}
+//                     lastName={staffMember.lastName}
+//                     email={staffMember.email}
+//                     actionImgSrc="https://cdn.builder.io/api/v1/image/assets/TEMP/60a6cea30403c6413700e7e7bd78dfdff5f044a135a9cb4ae1e1027f5aa242de?apiKey=6dceda0d543f454b955d90f7c576a010&"
+//                   />
+//                 </a>
+//               ))
+//             : "Oops...No staff with this name"}
+//         </section>
+//       </section>
+//     </>
+//   );
+// }
+
+import React, { useEffect, useState } from "react";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import { InputText } from "primereact/inputtext";
+import { Button } from "primereact/button";
+import { Card } from "primereact/card";
 import { getAllStaff } from "../../../services/database.mjs";
 import Link from "next/link";
-
-function StaffCard({ firstName, lastName, actionImgSrc, email }) {
-  return (
-    <section className={styles["staff-card"]}>
-      <div className={styles["staff-info"]}>
-        <div className={styles["staff-details"]}>
-          <div className={styles["staff-name"]}>
-            {firstName} {lastName}
-          </div>
-          <div className={styles["staff-role"]}>{email}</div>
-        </div>
-      </div>
-      <img src={actionImgSrc} alt="" className="action-img" />
-    </section>
-  );
-}
+import { useRouter } from "next/router";
 
 export default function ViewStaff({ user }) {
-  const [searchQuery, setSearchQuery] = useState("");
   const [staff, setStaff] = useState([]);
+  const [globalFilter, setGlobalFilter] = useState(null);
+  const router = useRouter();
 
   const fetchStaff = async () => {
-    const data = await getAllStaff().then();
+    const data = await getAllStaff();
     setStaff(data);
   };
 
@@ -32,74 +128,48 @@ export default function ViewStaff({ user }) {
     fetchStaff();
   }, [user]);
 
-  const handleSearch = (event) => {
-    setSearchQuery(event.target.value);
+  const header = (
+    <div className="flex justify-content-between align-items-center">
+      <span className="p-input-icon-left">
+        <InputText
+          type="search"
+          onInput={(e) => setGlobalFilter(e.target.value)}
+          placeholder="Search staff..."
+        />
+      </span>
+    </div>
+  );
+
+  const onRowClick = (event) => {
+    router.push(`/app/employees/${event.data.staffID}`);
   };
-
-  const filterStaff = (staff, searchQuery) => {
-    if (!searchQuery.trim()) {
-      return staff;
-    }
-
-    return staff.filter(
-      (member) =>
-        member.firstName.toLowerCase().startsWith(searchQuery.toLowerCase()) ||
-        member.lastName.toLowerCase().startsWith(searchQuery.toLowerCase())
-    );
-  };
-
-  const filteredStaff = filterStaff(staff, searchQuery);
 
   return (
-    <>
-      <section className={styles["main-container"]}>
-        <header className={styles["header"]}>
-          <h1 className={styles["title"]}>Staff</h1>
-          <Link
-            className={styles["new-staff"]}
-            href={"/app/employees/addNewEmployee"}
-          >
-            <h4 className={styles["new-staff-text"]}>Add New Staff</h4>
+    <div className="p-4" style={{ maxWidth: "1200px", margin: "0 auto" }}>
+      <Card>
+        <div className="flex justify-content-between align-items-center mb-4">
+          <h1 className="m-0">Staff</h1>
+          <Link href="/app/employees/addNewEmployee">
+            <Button label="Add New Staff" icon="pi pi-plus" />
           </Link>
-        </header>
-        <section className={styles["content"]}>
-          <h2 className={styles["content-title"]}>All staff</h2>
-          <form
-            onChange={(event) => handleSearch(event)}
-            className={styles["search-form"]}
-          >
-            <input
-              className={styles["search-input"]}
-              type="text"
-              id="searchStaff"
-              placeholder="Search staff"
-              aria-label="Search staff"
-              // value={value}
-              // onChange={handleSearch}
-            />
-            <img
-              src="https://cdn.builder.io/api/v1/image/assets/TEMP/ef95366c70a6c027dfc7a1c0bb808953401267a94186d90914dcc35153889a45?apiKey=6dceda0d543f454b955d90f7c576a010&"
-              alt=""
-              className={styles["search-icon"]}
-              // tabindex="0"
-              role="button"
-            />
-          </form>
-          {filteredStaff.length > 0
-            ? filteredStaff.map((staffMember, index) => (
-                <a key={index} href={`/app/employees/${staffMember.staffID}`}>
-                  <StaffCard
-                    key={index}
-                    firstName={staffMember.firstName}
-                    lastName={staffMember.lastName}
-                    email={staffMember.email}
-                    actionImgSrc="https://cdn.builder.io/api/v1/image/assets/TEMP/60a6cea30403c6413700e7e7bd78dfdff5f044a135a9cb4ae1e1027f5aa242de?apiKey=6dceda0d543f454b955d90f7c576a010&"
-                  />
-                </a>
-              ))
-            : "Oops...No staff with this name"}
-        </section>
-      </section>
-    </>
+        </div>
+        <DataTable
+          value={staff}
+          paginator
+          rows={10}
+          dataKey="staffID"
+          globalFilter={globalFilter}
+          header={header}
+          emptyMessage="No staff found."
+          onRowClick={onRowClick}
+          selectionMode="single"
+          metaKeySelection={false}
+        >
+          <Column field="firstName" header="First Name" sortable />
+          <Column field="lastName" header="Last Name" sortable />
+          <Column field="email" header="Email" sortable />
+        </DataTable>
+      </Card>
+    </div>
   );
 }

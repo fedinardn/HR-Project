@@ -7,6 +7,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
+import { Card } from "primereact/card";
 import {
   getAllContractedPrograms,
   assignProgramToStaff,
@@ -182,7 +183,7 @@ export default function AssignedStaffPrograms({ staffData }) {
   return (
     <>
       <Toast ref={toast} />
-      <div className={styles["task-list"]}>
+      <Card>
         <div className={styles["header"]}>
           <h1 className={styles.title}>
             Assigned Programs ({programs.length || 0})
@@ -232,7 +233,7 @@ export default function AssignedStaffPrograms({ staffData }) {
             style={{ width: "2vw" }}
           />
         </DataTable>
-      </div>
+      </Card>
 
       <Dialog
         header={editIndex !== null ? "Edit Assignment" : "Assign Program"}
