@@ -6,7 +6,6 @@ import { Calendar } from "primereact/calendar";
 import { Card } from "primereact/card";
 import { getAllContractedPrograms } from "../../../services/database.mjs";
 
-// Now I want to create a new page to calculate program cost, labour and profit. So for each program, I want to find all the staff that were assigned to it, calculate their hourly rate * the number of hours they worked +2 and draw a bar chart to compare the cost of the program, with the cost of all the staff on that program and another bar to display the profit
 const AnalyticsDashboard = () => {
   const [programs, setPrograms] = useState([]);
   const [dates, setDates] = useState(null);

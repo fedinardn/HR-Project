@@ -406,6 +406,22 @@ export const deleteStaffAssignment = async (staffID, programID) => {
   }
 };
 
+export const getAllStaffAssignments = async () => {
+  const db = getFirestore();
+  const staffAssignmentsCollection = collection(db, "staffPrograms");
+
+  const q = query(staffAssignmentsCollection);
+
+  const querySnapshot = await getDocs(q);
+
+  const programs = [];
+  querySnapshot.forEach((doc) => {
+    programs.push((doc.id, "=>", doc.data()));
+  });
+
+  return programs;
+};
+
 // EMPLOYEE FUNCTIONS END HERE
 
 //CLIENT FUNCTIONS
