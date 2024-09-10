@@ -226,9 +226,6 @@ export default function ViewStaff({ user }) {
           tooltip="Edit Staff"
           tooltipOptions={{ position: "top" }}
         />
-        <h2 className="m-0">
-          {staff.firstName} {staff.lastName}
-        </h2>
       </div>
     </div>
   );
@@ -243,6 +240,7 @@ export default function ViewStaff({ user }) {
   const StaffInfo = ({ info }) => (
     <Card title="Staff Information" className="mb-4">
       <div className="grid">
+        <InfoItem label="Name" value={`${info.firstName} ${info.lastName} `} />
         <InfoItem label="Address" value={info.address} />
         <InfoItem label="Email" value={info.email} />
         <InfoItem label="Phone" value={info.phone} />
