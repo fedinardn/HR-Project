@@ -89,7 +89,7 @@ export default function AssignedStaffPrograms({ staffData }) {
       });
       return;
     }
-    const totalCost = staffData.payRate * (hours + 2);
+    const totalCost = parseInt(staffData.payRate) * (hours + 2);
 
     const assignmentData = {
       programID: selectedProgram.programID,
