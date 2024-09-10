@@ -316,29 +316,11 @@ export const assignProgramToStaff = async (staffID, programData) => {
   );
 
   try {
-    // Add the program assignment to the staffPrograms collection
     await setDoc(staffProgramRef, {
       staffID: staffID,
       ...programData,
       createdAt: Date.now(),
     });
-
-    // Get the staff document
-    // const staffDoc = await getDoc(staffRef);
-
-    // if (!staffDoc.exists()) {
-    //   throw new Error("Staff member not found");
-    // }
-
-    // // Update the staff document with the new program assignment
-    // const staffData = staffDoc.data();
-    // const updatedPrograms = staffData.programs
-    //   ? [...staffData.programs, programData]
-    //   : [programData];
-
-    // await updateDoc(staffRef, {
-    //   programs: updatedPrograms,
-    // });
 
     return {
       ...programData,

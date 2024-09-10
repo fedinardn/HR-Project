@@ -91,16 +91,15 @@ const AnalyticsDashboard = () => {
       <h1>Analytics Dashboard</h1>
 
       <Card className="mb-4">
-        <div className="flex justify-content-center">
-          <h2>Date Range Selection</h2>
-
+        <h2>Date Range Selection</h2>
+        <div className="flex justify-content-left">
           <Calendar
             value={dates}
             onChange={(e) => setDates(e.value)}
             selectionMode="range"
             readOnlyInput
             hideOnRangeSelection
-            style={{ minWidth: "400px" }}
+            style={{ minWidth: "350px" }}
           />
         </div>
       </Card>
@@ -127,6 +126,8 @@ const AnalyticsDashboard = () => {
           paginator
           rows={10}
         >
+          <Column field="organizationName" header="Organization Name" />
+
           <Column field="programName" header="Program Name" />
           <Column field="clientType" header="Client Type" />
           <Column

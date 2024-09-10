@@ -92,6 +92,7 @@ export default function AssignedStaffPrograms({ staffData }) {
     const totalCost = parseInt(staffData.payRate) * (hours + 2);
 
     const assignmentData = {
+      staffName: `${staffData.firstName}  ${staffData.lastName}`,
       programID: selectedProgram.programID,
       programName: selectedProgram.programName,
       date: selectedProgram.programDate,

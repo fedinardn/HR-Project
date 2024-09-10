@@ -147,6 +147,7 @@ export default function AssignedProgramsList({ initialPrograms, clientData }) {
         clientType: clientData.clientType,
         invoiceItems: invoiceItems,
         totalCost: calculateTotal(),
+        organizationName: clientData.organizationName,
       };
 
       if (programDetails.programID) {
@@ -228,7 +229,6 @@ export default function AssignedProgramsList({ initialPrograms, clientData }) {
   let totalCost = 0;
   const calculateTotal = () => {
     totalCost = invoiceItems.reduce((total, item) => total + item.subtotal, 0);
-    // setProgramDetails({ ...programDetails, totalCost: totalCost });
     return totalCost;
   };
 
