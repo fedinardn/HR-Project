@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
+import withProtectedRoute from "../../../components/WithProtectedRoute";
 import EditStaffModal from "../../../components/EditStaffModal";
 import AssignedStaffPrograms from "../../../components/AssignedStaffPrograms";
 import {
@@ -11,7 +12,7 @@ import {
   getStaffDetails,
 } from "../../../services/database.mjs";
 
-export default function ViewStaff({ user }) {
+const ViewStaff = ({ user }) => {
   const router = useRouter();
   const staffID = router.query.employeeId;
   const [staffData, setStaffData] = useState({});
@@ -116,4 +117,6 @@ export default function ViewStaff({ user }) {
       />
     </div>
   );
-}
+};
+
+export default withProtectedRoute(ViewStaff);

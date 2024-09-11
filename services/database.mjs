@@ -274,7 +274,6 @@ export const createNewStaff = async (
     rescueTraining: rescueTraining,
     proFacilitator: proFacilitator,
     typeOfStaff: typeOfStaff,
-    programs: [],
   };
 
   await setDoc(staffRef, newStaff);
@@ -825,6 +824,53 @@ export const deleteProgramInGrid = async (programID) => {
     console.log("Program deleted successfully");
   } catch (error) {
     console.error("Error deleting program:", error);
+    throw error;
+  }
+};
+
+// CONTRACT FUNCTIONS
+
+export const getContractText = async () => {
+  const db = getFirestore();
+  const contractDocRef = doc(db, "contractText", "default");
+
+  try {
+    const contractDocSnap = await getDoc(contractDocRef);
+
+    if (contractDocSnap.exists()) {
+      return contractDocSnap.data();
+    } else {
+      console.log("No contract text found, returning default values");
+      return { paymentText: "", additionalText: "" };
+    }
+  } catch (error) {
+    console.error("Error fetching contract text:", error);
+    throw error;
+  }
+};
+
+export const saveContractText = async (contractText) => {
+  const db = getFirestore();
+  const contractDocRef = doc(db, "contractText", "default");
+
+  try {
+    await setDoc(contractDocRef, contractText, { merge: true });
+    console.log("Contract text saved successfully");
+  } catch (error) {
+    console.error("Error saving contract text:", error);
+    throw error;
+  }
+};
+
+export const updateContractTextField = async (field, value) => {
+  const db = getFirestore();
+  const contractDocRef = doc(db, "contractText", "default");
+
+  try {
+    await setDoc(contractDocRef, { [field]: value }, { merge: true });
+    console.log(`Contract text field '${field}' updated successfully`);
+  } catch (error) {
+    console.error(`Error updating contract text field '${field}':`, error);
     throw error;
   }
 };

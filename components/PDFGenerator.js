@@ -1,14 +1,24 @@
+import React from "react";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
 import { Button } from "primereact/button";
-import ctlcLogo from "/public/ctlcLogo.png";
+import { getContractText } from "../services/database.mjs";
 
 const PDFGenerator = ({ invoiceItems, clientData, programDetails }) => {
-  const generatePDF = (action = "save") => {
+  const generatePDF = async (action = "save") => {
     const doc = new jsPDF();
 
+    // Fetch the latest contract text
+    let contractText;
+    try {
+      contractText = await getContractText();
+    } catch (error) {
+      console.error("Error fetching contract text:", error);
+      return;
+    }
+
     // Add header
-    doc.setFontSize(14);
+    doc.setFontSize(12);
     doc.text(clientData.organizationName, 14, 20);
 
     // Add contact information
@@ -65,7 +75,7 @@ const PDFGenerator = ({ invoiceItems, clientData, programDetails }) => {
       );
 
       // Contract for services
-      doc.setFontSize(10);
+      doc.setFontSize(9);
       doc.text("CONTRACT FOR SERVICES", 14, 60);
       doc.setFontSize(8);
       doc.text("Cornell Outdoor Education will provide:", 14, 65);
@@ -86,7 +96,7 @@ const PDFGenerator = ({ invoiceItems, clientData, programDetails }) => {
         ],
         body: invoiceItems.map((item) => [
           item.description,
-          item.date ? item.date : "",
+          item.date,
           item.timeSlot,
           item.location,
           item.qty,
@@ -95,7 +105,7 @@ const PDFGenerator = ({ invoiceItems, clientData, programDetails }) => {
         ]),
         startY: 70,
         theme: "plain",
-        styles: { fontSize: 8 },
+        styles: { fontSize: 7 },
         columnStyles: { 0: { cellWidth: 60 }, 2: { cellWidth: 40 } },
       });
 
@@ -106,7 +116,7 @@ const PDFGenerator = ({ invoiceItems, clientData, programDetails }) => {
       const total = calculateTotal();
 
       doc.setFont(undefined, "bold");
-      doc.setFontSize(10);
+      doc.setFontSize(9);
       const totalText = `Total:   $${total.toFixed(2)}`;
       const x = 190;
       const y = doc.lastAutoTable.finalY + 10;
@@ -118,99 +128,77 @@ const PDFGenerator = ({ invoiceItems, clientData, programDetails }) => {
       doc.line(x - textWidth - 1, y + 1, x + 1, y + 1);
 
       doc.setFont(undefined, "normal");
+      // Function to parse HTML and add formatted text to PDF
+      const addFormattedText = (htmlContent, startY, maxWidth) => {
+        const parser = new DOMParser();
+        const htmlDoc = parser.parseFromString(htmlContent, "text/html");
+        let currentY = startY;
 
-      const paymentText = [
-        {
-          text: `A signed contract and roster are required by ${programDetails.programDate} to confirm this program. Final payment is due by ${programDetails.programDate}. If paying with a Cornell account number, the full accounting string is necessary.`,
-        },
-        {
-          checkbox: true,
-          text: "CHECK: Make checks payable to Cornell University",
-        },
-        {
-          checkbox: true,
-          text: "CORNELL INTERNAL BILLING AUTHORIZATION: Account # _____________________________",
-        },
-        {
-          checkbox: true,
-          text: "MC/Visa: Please call our office at 607-255-6183 to make a payment over the phone.",
-        },
-      ];
-      let currentYpay = doc.lastAutoTable.finalY + 20;
-      let currentXpay = 14;
-      doc.setFontSize(8);
-      doc.setFont(undefined, "bold");
-      doc.text("PAYMENT", 14, currentYpay);
-      doc.setFont(undefined, "normal");
-      doc.setFontSize(8);
-
-      paymentText.forEach((item) => {
-        if (item.checkbox) {
-          doc.rect(14, currentYpay + 6, 2, 2);
-          const lines = doc.splitTextToSize(item.text, 170);
-          lines.forEach((line, index) => {
-            doc.text(line, 19, currentYpay + 8);
-          });
-          currentYpay += 8;
-        } else {
-          const lines = doc.splitTextToSize(item.text, 170);
-          lines.forEach((line, index) => {
-            if (index === 0) {
-              doc.text(line, 14, currentYpay + 4);
-            } else {
-              currentYpay += 4;
-              doc.text(line, 14, currentYpay + 4);
+        const processNode = (node) => {
+          if (node.nodeType === Node.TEXT_NODE) {
+            const text = node.textContent
+              .trim()
+              .replace(/{}/g, programDetails.programDate);
+            const lines = doc.splitTextToSize(text, maxWidth);
+            doc.text(lines, 14, currentY);
+            currentY += lines.length * 4; // Reduced line height
+          } else if (node.nodeType === Node.ELEMENT_NODE) {
+            switch (node.tagName.toLowerCase()) {
+              case "p":
+                currentY += 2; // Significantly reduced space before paragraph
+                break;
+              case "strong":
+              case "b":
+                doc.setFont(undefined, "bold");
+                break;
+              case "em":
+              case "i":
+                doc.setFont(undefined, "italic");
+                break;
+              case "ol":
+              case "ul":
+                currentY += 4; // Add a little space before lists
+                break;
+              case "li":
+                doc.rect(14, currentY - 1.5, 2, 2); // Add checkbox
+                doc.text(node.textContent.trim(), 18, currentY);
+                currentY += 4; // Space between list items
+                return; // Skip processing child nodes for list items
             }
-          });
-        }
-        // currentYpay += 8;
-      });
 
-      const additionalText = [
-        { text: "NUMBER OF PARTICIPANTS: ", bold: true },
-        {
-          text: `To provide you with the appropriate number of facilitators, as well as the best matched facilitators, we begin the staffing process as soon as your signed contract is returned to us. We will staff for the number of participants listed above. If you need to change the number of participants, we need to know 2 weeks in advance of the program date. If the number drops within 2 weeks, we will charge for the number contracted. If your number increases, we will charge for the increased number.\n\n`,
-        },
-        { text: "CANCELLATION POLICY: ", bold: true },
-        {
-          text: `Programs canceled with at least three weeks notice will be refunded 50% of the deposit. No refunds will be made for programs canceled with less than three weeks notice.\n\n`,
-        },
-        { text: "CONTRACTUAL AGREEMENT: ", bold: true },
-        {
-          text: `This document is a contract between Cornell University Outdoor Education(COE) and the "Sponsoring Organization" specified above, contracting COE to conduct the selected course/program based upon the following terms and conditions:\n\n`,
-        },
-        { text: "ASSUMPTION OF RISK: ", bold: true },
-        {
-          text: `This contract requires that the sponsoring organization shall assume all risks, losses, damages or injuries to all individual involved including participants and spectators arising out of the program, and the sponsoring organization shall be solely responsible an answerable for all accidents or injuries, including death, to persons or property and hereby covenants and agrees to indemnify and hold harmless Cornell University, its officers, trustees, agents and employees from any and all claims or suits for losses, damages or injuries to persons or property of whatever kind or nature whether direct or indirect, including attorney's fees and cost of defense arising out of this program.\n\n`,
-        },
-        { text: "SAFETY: ", bold: true },
-        {
-          text: `Participants in this program are subject to Cornell University regulations, Cornell Outdoor Education guidelines, the laws of the United States, and the laws of New York State. In the event of violation of these, or behavior which is considered by Cornell Outdoor Education to be detrimental to the participant, other participants, or the Cornell Outdoor Education program, Cornell Outdoor Education shall have the right to dismiss the participant from the program while retaining all payments.\n\n`,
-        },
-        { text: "ACCEPTANCE OF CONTRACTUAL AGREEMENT: ", bold: true },
-        {
-          text: `The acceptance of this climbing course/program contract, evidenced by payment(or payment authorization) and the signature of the "contact person" for the sponsoring organization, binds the sponsoring organization and "contact person" to this contract.`,
-        },
-      ];
-      let currentY = doc.lastAutoTable.finalY + 60;
-      let currentX = 14;
+            Array.from(node.childNodes).forEach(processNode);
 
-      additionalText.forEach((segment) => {
-        if (segment.bold) {
-          doc.setFont(undefined, "bold");
-          doc.setFontSize(8);
-        } else {
-          doc.setFont(undefined, "normal");
-          doc.setFontSize(8);
-        }
-        const lines = doc.splitTextToSize(segment.text, 180);
-        doc.text(lines, 14, currentY);
-        currentY += doc.getTextDimensions(lines).h;
-      });
+            if (
+              ["strong", "b", "em", "i"].includes(node.tagName.toLowerCase())
+            ) {
+              doc.setFont(undefined, "normal");
+            }
+          }
+        };
+
+        processNode(htmlDoc.body);
+        return currentY;
+      };
+
+      // Add payment text
+      let currentY = doc.lastAutoTable.finalY + 10;
+      doc.setFontSize(9);
+      doc.setFont(undefined, "bold");
+      doc.text("PAYMENT", 14, currentY);
+      doc.setFontSize(8);
+      doc.setFont(undefined, "normal");
+      currentY = addFormattedText(contractText.paymentText, currentY + 3, 180);
+
+      // Add additional text
+      currentY = addFormattedText(
+        contractText.additionalText,
+        currentY + 5,
+        180
+      );
 
       // Signature lines
       const signY = doc.internal.pageSize.height - 20;
-      doc.setFontSize(8);
+      doc.setFontSize(7);
       doc.line(14, signY, 74, signY);
       doc.text("Client Representative", 14, signY + 4);
       doc.text("Date", 64, signY + 4);
@@ -218,13 +206,6 @@ const PDFGenerator = ({ invoiceItems, clientData, programDetails }) => {
       doc.line(120, signY, 190, signY);
       doc.text("CTLC Representative", 120, signY + 4);
       doc.text("Date", 180, signY + 4);
-
-      const formatDate = (date) => {
-        const options = { year: "2-digit", month: "2-digit", day: "2-digit" };
-        return new Date(date)
-          .toLocaleDateString("en-US", options)
-          .replace(/\//g, "-");
-      };
 
       if (action === "save") {
         doc.save(
@@ -238,22 +219,27 @@ const PDFGenerator = ({ invoiceItems, clientData, programDetails }) => {
         window.open(url, "_blank");
       }
     });
-  };
 
+    const formatDate = (date) => {
+      const options = { year: "2-digit", month: "2-digit", day: "2-digit" };
+      return new Date(date)
+        .toLocaleDateString("en-US", options)
+        .replace(/\//g, "-");
+    };
+  };
   return (
     <div>
       <Button
         icon="pi pi-file-pdf"
-        label="PDF"
+        label="Generate PDF"
         onClick={() => generatePDF("save")}
       />
       <Button
         icon="pi pi-eye"
-        label="Preview"
+        label="Preview PDF"
         onClick={() => generatePDF("preview")}
       />
     </div>
   );
 };
-
 export default PDFGenerator;
