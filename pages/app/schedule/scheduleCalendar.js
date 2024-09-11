@@ -9,7 +9,7 @@ import {
   getAllStaff,
 } from "../../../services/database.mjs";
 import { Toast } from "primereact/toast";
-import ProgramDialog from "../../../components/ProgramDialog"; // Make sure this path is correct
+import ProgramDialog from "../../../components/ProgramDialog";
 
 const localizer = momentLocalizer(moment);
 

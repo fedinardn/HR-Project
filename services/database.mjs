@@ -1,7 +1,6 @@
 import crypto from "crypto";
 import { uuidv7 } from "uuidv7";
 import { format } from "date-fns";
-import { useState } from "react";
 
 import {
   getFirestore,
@@ -102,52 +101,73 @@ export const getUserPermission = async (userEmail) => {
   return userData[0].permission;
 };
 
-export const createProgramRequest = async (
-  contactPerson,
-  companyName,
-  userid,
-  programTypes,
-  desiredDate,
-  desiredLength,
-  role,
-  email,
-  phone,
-  website,
-  size,
-  additionalDetails
-) => {
-  const db = getFirestore();
+// export const createProgramRequest = async (
+//   contactPerson,
+//   companyName,
+//   userid,
+//   programTypes,
+//   desiredDate,
+//   desiredLength,
+//   role,
+//   email,
+//   phone,
+//   website,
+//   size,
+//   additionalDetails
+// ) => {
+//   const db = getFirestore();
 
-  const programRequestsCollection = collection(db, "programRequests");
+//   const programRequestsCollection = collection(db, "programRequests");
+
+//   const newProgramRequest = {
+//     id: crypto.randomUUID(),
+//     userid: userid,
+//     contactPerson: contactPerson,
+//     companyName: companyName,
+//     programTypes: programTypes,
+//     desiredDate: desiredDate,
+//     desiredLength: desiredLength,
+//     role: role,
+//     email: email,
+//     phone: phone,
+//     website: website,
+//     size: size,
+//     additionalDetails: additionalDetails,
+//     dateSubmitted: Date.now(),
+//     approved: false,
+//   };
+
+//   // const docRef = await addDoc(programRequestsCollection, newProgramRequest);
+//   const docRef = await setDoc(
+//     doc(db, "programRequests", newProgramRequest.id),
+//     newProgramRequest
+//   );
+//   if (docRef === undefined) {
+//     return {};
+//   }
+
+//   return { id: docRef.id, ...newProgramRequest };
+// };
+
+export const createProgramRequest = async (programRequestDetails) => {
+  const db = getFirestore();
+  // const programRequestsCollection = collection(db, "programRequests");
 
   const newProgramRequest = {
-    id: crypto.randomUUID(),
-    userid: userid,
-    contactPerson: contactPerson,
-    companyName: companyName,
-    programTypes: programTypes,
-    desiredDate: desiredDate,
-    desiredLength: desiredLength,
-    role: role,
-    email: email,
-    phone: phone,
-    website: website,
-    size: size,
-    additionalDetails: additionalDetails,
-    dateSubmitted: Date.now(),
-    approved: false,
+    id: uuidv7(),
+    ...programRequestDetails,
   };
 
-  // const docRef = await addDoc(programRequestsCollection, newProgramRequest);
   const docRef = await setDoc(
     doc(db, "programRequests", newProgramRequest.id),
     newProgramRequest
   );
-  if (docRef === undefined) {
-    return {};
-  }
 
-  return { id: docRef.id, ...newProgramRequest };
+  // if (docRef === undefined) {
+  //   return {};
+  // }
+
+  return newProgramRequest;
 };
 
 export const getAllContractedPrograms = async () => {
