@@ -103,7 +103,6 @@ export default function AssignedStaffPrograms({ staffData }) {
     };
 
     try {
-      console.log(editIndex);
       if (editIndex !== null) {
         // Updating an existing assignment
         await updateStaffProgramAssignment(

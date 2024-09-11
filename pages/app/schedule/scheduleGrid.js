@@ -135,7 +135,6 @@ export default function ProgramList({ user }) {
     if (user) {
       try {
         const permission = await getUserPermission(user.email);
-        // console.log(permission);
         setUserPermission(permission);
         const data = await getAllProgramsInGrid();
         setPrograms(data);
@@ -268,7 +267,6 @@ export default function ProgramList({ user }) {
 
   const showProgramDetails = (program) => {
     setProgram({ ...program.data });
-    console.log(program);
     setProgramDialog(true);
     setEditable(false);
   };

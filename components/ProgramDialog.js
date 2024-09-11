@@ -34,8 +34,6 @@ const ProgramDialog = ({
 
   const toast = useRef(null);
 
-  console.log(localProgram);
-
   useEffect(() => {
     setLocalProgram(program);
   }, [program]);

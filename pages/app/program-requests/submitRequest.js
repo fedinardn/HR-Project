@@ -349,7 +349,6 @@ const SubmitProgramRequestPage = () => {
       };
 
       const response = await createProgramRequest(programRequestDetails);
-      console.log(response);
 
       if (response) {
         toast.current.show({

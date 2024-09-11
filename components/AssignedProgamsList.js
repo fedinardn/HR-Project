@@ -53,7 +53,6 @@ export default function AssignedProgramsList({ initialPrograms, clientData }) {
     } catch (error) {
       console.error("Error fetching data:", error);
     }
-    // console.log(programs);
   };
 
   useEffect(() => {
@@ -96,7 +95,6 @@ export default function AssignedProgramsList({ initialPrograms, clientData }) {
 
   const handleItemChange = (e, id, field) => {
     const val = (e.target && e.target.value) || e.value;
-    console.log(val);
 
     const updatedItems = invoiceItems.map((item) => {
       if (item.id === id) {
@@ -128,7 +126,6 @@ export default function AssignedProgramsList({ initialPrograms, clientData }) {
     });
     setInvoiceItems(updatedItems);
     setProgramDetails({ ...programDetails, totalCost: totalCost });
-    console.log(programDetails);
   };
   const handleRowDel = (id) => {
     const updatedItems = invoiceItems.filter((item) => item.id !== id);

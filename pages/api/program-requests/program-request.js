@@ -2,7 +2,6 @@ import * as fb from "../../../services/firebase.mjs";
 import * as db from "../../../services/database.mjs";
 
 export default async function handler(req, res) {
-  console.log("here", req.method);
   if (req.method.toUpperCase() === "POST") {
     const programRequest = req.body;
     const newProgramRequest = await db.createProgramRequest(
