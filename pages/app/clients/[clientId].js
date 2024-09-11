@@ -1,22 +1,26 @@
-import { useEffect, useState } from "react";
 import styles from "../../../styles/viewClient.module.css";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/router";
+import Link from "next/link";
+import { Button } from "primereact/button";
+import { Card } from "primereact/card";
+import { Toast } from "primereact/toast";
+import { Divider } from "primereact/divider";
 import EditClientModal from "../../../components/EditClientModal";
+import AssignedProgramsList from "../../../components/AssignedProgamsList";
 import {
   updateClientDetails,
   getClientDetails,
   getClientPrograms,
 } from "../../../services/database.mjs";
-import Link from "next/link";
-import AssignedProgramsList from "../../../components/AssignedProgamsList";
-import firebaseApp from "../../../firebase";
 
-export default function getClientData({ user }) {
+export default function ViewClient({ user }) {
   const router = useRouter();
   const clientID = router.query.clientId;
-  const [clientData, setClientData] = useState([]);
+  const [clientData, setClientData] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [programs, setPrograms] = useState([]);
+  const toast = useRef(null);
 
   const fetchClientData = async () => {
     if (clientID) {
@@ -29,7 +33,7 @@ export default function getClientData({ user }) {
 
   useEffect(() => {
     fetchClientData();
-  }, [router.query.clientId]);
+  }, [clientID]);
 
   const handleEditClick = () => {
     setShowModal(true);
@@ -40,101 +44,88 @@ export default function getClientData({ user }) {
       await updateClientDetails(editedClient.clientID, editedClient);
       setClientData(editedClient);
       setShowModal(false);
+      toast.current.show({
+        severity: "success",
+        summary: "Success",
+        detail: "Client details edited successfully",
+        life: 3000,
+      });
     } catch (error) {
       console.error("Error updating client details:", error);
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Failed to update client details",
+        life: 3000,
+      });
     }
   };
 
-  const handleCancel = () => {
-    setShowModal(false);
-  };
-
-  const ClientSection = ({ client }) => (
-    <section className={styles["staff-section"]}>
-      <Link
-        className={styles["staff-section-title"]}
-        href={"/app/clients/viewClients"}
-      >
-        Back to all clients
+  const ClientHeader = ({ client }) => (
+    <div className="flex align-items-center justify-content-between mb-4">
+      <Link href="/app/clients/viewClients">
+        <Button
+          label="Back to all clients"
+          icon="pi pi-arrow-left"
+          className="p-button-text"
+        />
       </Link>
-      <img
-        loading="lazy"
-        src="https://cdn.builder.io/api/v1/image/assets/TEMP/63a740c47816da57a476db663d7572ba724c1ef93e2fd84ee2eaec6ea6782891?apiKey=6dceda0d543f454b955d90f7c576a010&"
-        className={styles["staff-photo"]}
-        alt="Staff photo"
-        onClick={handleEditClick}
-      />
-    </section>
+      <div className="flex align-items-center">
+        <Button
+          icon="pi pi-pencil"
+          className="p-button-rounded p-button-text"
+          onClick={handleEditClick}
+          tooltip="Edit Client"
+          tooltipOptions={{ position: "top" }}
+        />
+      </div>
+    </div>
+  );
+
+  const InfoItem = ({ label, value }) => (
+    <div className="col-12 md:col-6 mb-3">
+      <label className="font-bold">{label}</label>
+      <div className="mt-2">{value || "N/A"}</div>
+    </div>
   );
 
   const ClientInfo = ({ info }) => (
-    <>
-      <section className={styles["staff-info"]}>
-        <h2 className={styles["info-title"]}>Client Information</h2>
-        <div className={styles["info-section"]}>
-          <section className={styles["sub-grid"]}>
-            <div className={styles["info-item"]}>
-              <div className={styles["label"]}>Organization Name</div>
-              <div className={styles["value"]}>{info.organizationName}</div>
-            </div>
-            <div className={styles["info-item"]}>
-              <div className={styles["label"]}>Contact Person</div>
-              <div className={styles["value"]}>{info.contactPerson}</div>
-            </div>
-          </section>
-
-          <section className={styles["sub-grid"]}>
-            <div className={styles["info-item"]}>
-              <div className={styles["label"]}>Email</div>
-              <div className={styles["value"]}>{info.contactPersonEmail}</div>
-            </div>
-            <div className={styles["info-item"]}>
-              <div className={styles["label"]}>Address</div>
-              <div className={styles["value"]}>{info.address}</div>
-            </div>
-          </section>
-          <section className={styles["sub-grid"]}>
-            <div className={styles["info-item"]}>
-              <div className={styles["label"]}>Phone</div>
-              <div className={styles["value"]}>{info.phone}</div>
-            </div>
-            <div className={styles["info-item"]}>
-              <div className={styles["label"]}>Mobile</div>
-              <div className={styles["value"]}>{info.mobile}</div>
-            </div>
-          </section>
+    <Card className="mb-4">
+      <div className="grid">
+        <InfoItem label="Organization Name" value={info.organizationName} />
+        <InfoItem label="Contact Person" value={info.contactPerson} />
+        <InfoItem label="Address" value={info.address} />
+        <InfoItem label="Email" value={info.contactPersonEmail} />
+        <InfoItem label="Phone" value={info.phone} />
+        <InfoItem label="Mobile" value={info.mobile} />
+        <InfoItem label="Type of Client" value={info.clientType} />
+      </div>
+      <Divider />
+      <div className="field col-12">
+        <label className="font-bold">Notes</label>
+        <div className="mt-2 whitespace-pre-line">
+          {info.notes || "No notes available."}
         </div>
-        <div className={styles["info-section"]}>
-          <section className={styles["sub-grid"]}>
-            <div className={styles["info-item"]}>
-              <div className={styles["label"]}>Type of Client</div>
-              <div className={styles["value"]}>{info.clientType}</div>
-            </div>
-          </section>
-        </div>
-      </section>
-    </>
+      </div>
+    </Card>
   );
 
   return (
-    <>
-      <ClientSection client={clientData} />
+    <div className={styles["staff-info"]}>
+      <Toast ref={toast} />
 
-      {showModal && (
-        <EditClientModal
-          client={clientData}
-          onSave={handleSave}
-          onCancel={handleCancel}
-        />
-      )}
+      <ClientHeader client={clientData} />
+      <EditClientModal
+        client={clientData}
+        visible={showModal}
+        onHide={() => setShowModal(false)}
+        onSave={handleSave}
+      />
       <ClientInfo info={clientData} />
-
       <AssignedProgramsList
         initialPrograms={programs}
         clientData={clientData}
       />
-
-      {/* <CreateClientContract /> */}
-    </>
+    </div>
   );
 }

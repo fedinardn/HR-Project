@@ -5,9 +5,9 @@ import { InputText } from "primereact/inputtext";
 import { InputIcon } from "primereact/inputicon";
 import { FilterMatchMode } from "primereact/api";
 import { Button } from "primereact/button";
+import { Card } from "primereact/card";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import styles from "../../../styles/viewClients.module.css";
 import { getAllClients } from "../../../services/database.mjs";
 import { IconField } from "primereact/iconfield";
 import "primereact/resources/themes/lara-light-blue/theme.css";
@@ -43,14 +43,6 @@ export default function ViewStaff({ user }) {
   const renderHeader = () => {
     return (
       <div className="flex justify-content-between">
-        <Button
-          type="button"
-          icon="pi pi-filter-slash"
-          label="Clear"
-          outlined
-          onClick={clearFilter}
-        />
-
         <IconField iconPosition="left">
           <InputIcon className="pi pi-search" />
           <InputText
@@ -64,13 +56,6 @@ export default function ViewStaff({ user }) {
     );
   };
 
-  const clearFilter = () => {
-    setFilters({
-      global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    });
-    setGlobalFilterValue("");
-  };
-
   const header = renderHeader();
 
   const onRowClick = (event) => {
@@ -78,54 +63,60 @@ export default function ViewStaff({ user }) {
   };
 
   return (
-    <section className={styles["main-container"]}>
-      <header className={styles["header"]}>
-        <h1 className={styles["title"]}>Clients</h1>
-        <Link className={styles["new-client"]} href="/app/clients/addNewClient">
-          <h4 className={styles["new-client-text"]}>Add New Client</h4>
-        </Link>
-      </header>
+    <div className="p-4" style={{ maxWidth: "1200px", margin: "0 auto" }}>
+      <Card>
+        <div className="flex justify-content-between align-items-center mb-4">
+          <h1 className="m-0">Clients</h1>
+          <Link href="/app/clients/addNewClient">
+            <Button label="Add New Client" icon="pi pi-plus" />
+          </Link>
+        </div>
 
-      <DataTable
-        value={clients}
-        paginator
-        rows={10}
-        dataKey="clientID"
-        filters={filters}
-        filterDisplay="menu"
-        x
-        globalFilterFields={["organizationName", "clientType", "contactPerson"]}
-        header={header}
-        emptyMessage="No clients found."
-        onRowClick={onRowClick}
-        selectionMode="single"
-      >
-        <Column
-          field="organizationName"
-          header="Client"
-          sortable
-          style={{ width: "25%" }}
-        ></Column>
-        <Column
-          field="clientType"
-          header="Type"
-          sortable
-          style={{ width: "25%" }}
-        ></Column>
-        <Column
-          field="contactPerson"
-          header="Contact"
-          sortable
-          style={{ width: "25%" }}
-        ></Column>
-        <Column
-          field="programs"
-          header="Programs"
-          sortable
-          body={(rowData) => rowData.programs.length}
-          style={{ width: "25%" }}
-        ></Column>
-      </DataTable>
-    </section>
+        <DataTable
+          value={clients}
+          paginator
+          rows={10}
+          dataKey="clientID"
+          filters={filters}
+          filterDisplay="menu"
+          x
+          globalFilterFields={[
+            "organizationName",
+            "clientType",
+            "contactPerson",
+          ]}
+          header={header}
+          emptyMessage="No clients found."
+          onRowClick={onRowClick}
+          selectionMode="single"
+        >
+          <Column
+            field="organizationName"
+            header="Client"
+            sortable
+            style={{ width: "25%" }}
+          ></Column>
+          <Column
+            field="clientType"
+            header="Type"
+            sortable
+            style={{ width: "25%" }}
+          ></Column>
+          <Column
+            field="contactPerson"
+            header="Contact"
+            sortable
+            style={{ width: "25%" }}
+          ></Column>
+          <Column
+            field="programs"
+            header="Programs"
+            sortable
+            body={(rowData) => rowData.programs.length}
+            style={{ width: "25%" }}
+          ></Column>
+        </DataTable>
+      </Card>
+    </div>
   );
 }
