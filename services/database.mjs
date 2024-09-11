@@ -831,14 +831,16 @@ export const deleteProgramInGrid = async (programID) => {
 // CONTRACT FUNCTIONS
 
 export const getContractText = async () => {
+  const db = getFirestore();
+  const contractDocRef = doc(db, "contractText", "default");
+
   try {
-    const contractDocRef = doc(db, "contractText", "default");
     const contractDocSnap = await getDoc(contractDocRef);
 
     if (contractDocSnap.exists()) {
       return contractDocSnap.data();
     } else {
-      // If no document exists, return default empty strings
+      console.log("No contract text found, returning default values");
       return { paymentText: "", additionalText: "" };
     }
   } catch (error) {
@@ -848,11 +850,27 @@ export const getContractText = async () => {
 };
 
 export const saveContractText = async (contractText) => {
+  const db = getFirestore();
+  const contractDocRef = doc(db, "contractText", "default");
+
   try {
-    const contractDocRef = doc(db, "contractText", "default");
     await setDoc(contractDocRef, contractText, { merge: true });
+    console.log("Contract text saved successfully");
   } catch (error) {
     console.error("Error saving contract text:", error);
+    throw error;
+  }
+};
+
+export const updateContractTextField = async (field, value) => {
+  const db = getFirestore();
+  const contractDocRef = doc(db, "contractText", "default");
+
+  try {
+    await setDoc(contractDocRef, { [field]: value }, { merge: true });
+    console.log(`Contract text field '${field}' updated successfully`);
+  } catch (error) {
+    console.error(`Error updating contract text field '${field}':`, error);
     throw error;
   }
 };
