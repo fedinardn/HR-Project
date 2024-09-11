@@ -6,6 +6,7 @@ import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { Toast } from "primereact/toast";
 import { Divider } from "primereact/divider";
+import withProtectedRoute from "../../../components/WithProtectedRoute";
 import EditClientModal from "../../../components/EditClientModal";
 import AssignedProgramsList from "../../../components/AssignedProgamsList";
 import {
@@ -14,7 +15,7 @@ import {
   getClientPrograms,
 } from "../../../services/database.mjs";
 
-export default function ViewClient({ user }) {
+const ViewClient = ({ user }) => {
   const router = useRouter();
   const clientID = router.query.clientId;
   const [clientData, setClientData] = useState({});
@@ -128,4 +129,6 @@ export default function ViewClient({ user }) {
       />
     </div>
   );
-}
+};
+
+export default withProtectedRoute(ViewClient);

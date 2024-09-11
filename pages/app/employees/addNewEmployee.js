@@ -211,6 +211,7 @@ import { Toast } from "primereact/toast";
 import { Card } from "primereact/card";
 import { InputMask } from "primereact/inputmask";
 import Link from "next/link";
+import withProtectedRoute from "../../../components/WithProtectedRoute";
 
 const trainingLows = ["No", "TA", "Level 1", "Level 2", "Lead"];
 const trainingHighs = ["No", "TA", "Level 1", "Level 2", "Lead"];
@@ -465,4 +466,4 @@ const AddNewStaff = () => {
   );
 };
 
-export default AddNewStaff;
+export default withProtectedRoute(AddNewStaff);

@@ -10,6 +10,8 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
 import { useRouter } from "next/router";
 import moment from "moment";
+import withProtectedRoute from "../components/WithProtectedRoute";
+
 import {
   getAllProgramRequests,
   getAllStaff,
@@ -90,12 +92,12 @@ const Dashboard = ({ user }) => {
       items: [
         {
           label: "Clients",
-          icon: "pi pi-users",
+          icon: "pi pi-briefcase",
           command: () => router.push("/app/clients/viewClients"),
         },
         {
           label: "Staff",
-          icon: "pi pi-user",
+          icon: "pi pi-users",
           command: () => router.push("/app/employees/viewEmployees"),
         },
         {
@@ -115,7 +117,7 @@ const Dashboard = ({ user }) => {
         },
         {
           label: "Users",
-          icon: "pi pi-cog",
+          icon: "pi pi-user",
           command: () => router.push("/app/users/viewUsers"),
         },
         {
@@ -264,10 +266,10 @@ const Dashboard = ({ user }) => {
 
         <div className="grid">
           <div className="col-12 md:col-4">
-            <Card title="Total Employees" subTitle={numberOfStaff}>
+            <Card title="Total Staff" subTitle={numberOfStaff}>
               <Button
                 icon="pi pi-users"
-                label="View Employees"
+                label="View Staff"
                 onClick={() => router.push("/app/employees/viewEmployees")}
               />
             </Card>
@@ -284,7 +286,7 @@ const Dashboard = ({ user }) => {
           <div className="col-12 md:col-4">
             <Card title="Program Requests" subTitle={numberOfProgramRequest}>
               <Button
-                icon="pi pi-calendar"
+                icon="pi pi-list"
                 label="View Requests"
                 onClick={() =>
                   router.push("/app/program-requests/viewRequests")
@@ -299,6 +301,13 @@ const Dashboard = ({ user }) => {
             <DataTable value={upcomingPrograms}>
               <Column body={programTemplate} />
             </DataTable>
+            <Button
+              label="Go to Schedule"
+              icon="pi pi-calendar"
+              onClick={() => router.push("/app/schedule/scheduleDisplay")}
+              className="p-mt-2"
+              style={{ marginTop: "10px" }}
+            />
           </Card>
         </div>
 
@@ -330,4 +339,4 @@ const Dashboard = ({ user }) => {
   );
 };
 
-export default Dashboard;
+export default withProtectedRoute(Dashboard);

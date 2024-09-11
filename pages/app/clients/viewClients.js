@@ -8,13 +8,14 @@ import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import withProtectedRoute from "../../../components/WithProtectedRoute";
 import { getAllClients } from "../../../services/database.mjs";
 import { IconField } from "primereact/iconfield";
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
 
-export default function ViewStaff({ user }) {
+const ViewClients = ({ user }) => {
   const [clients, setClients] = useState([]);
   const [globalFilterValue, setGlobalFilterValue] = useState("");
   const [filters, setFilters] = useState({
@@ -119,4 +120,6 @@ export default function ViewStaff({ user }) {
       </Card>
     </div>
   );
-}
+};
+
+export default withProtectedRoute(ViewClients);

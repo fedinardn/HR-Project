@@ -274,7 +274,6 @@ export const createNewStaff = async (
     rescueTraining: rescueTraining,
     proFacilitator: proFacilitator,
     typeOfStaff: typeOfStaff,
-    programs: [],
   };
 
   await setDoc(staffRef, newStaff);
@@ -825,6 +824,35 @@ export const deleteProgramInGrid = async (programID) => {
     console.log("Program deleted successfully");
   } catch (error) {
     console.error("Error deleting program:", error);
+    throw error;
+  }
+};
+
+// CONTRACT FUNCTIONS
+
+export const getContractText = async () => {
+  try {
+    const contractDocRef = doc(db, "contractText", "default");
+    const contractDocSnap = await getDoc(contractDocRef);
+
+    if (contractDocSnap.exists()) {
+      return contractDocSnap.data();
+    } else {
+      // If no document exists, return default empty strings
+      return { paymentText: "", additionalText: "" };
+    }
+  } catch (error) {
+    console.error("Error fetching contract text:", error);
+    throw error;
+  }
+};
+
+export const saveContractText = async (contractText) => {
+  try {
+    const contractDocRef = doc(db, "contractText", "default");
+    await setDoc(contractDocRef, contractText, { merge: true });
+  } catch (error) {
+    console.error("Error saving contract text:", error);
     throw error;
   }
 };

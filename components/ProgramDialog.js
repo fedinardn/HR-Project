@@ -39,18 +39,6 @@ const ProgramDialog = ({
   useEffect(() => {
     setLocalProgram(program);
   }, [program]);
-  // useEffect(() => {
-  //   if (program) {
-  //     // Convert string dates to Date objects for the Calendar components
-  //     const updatedProgram = {
-  //       ...program,
-  //       date: program.date ? new Date(program.date) : null,
-  //       startTime: program.startTime ? new Date(program.startTime) : null,
-  //       endTime: program.endTime ? new Date(program.endTime) : null,
-  //     };
-  //     setLocalProgram(updatedProgram);
-  //   }
-  // }, [program]);
 
   const saveProgram = async () => {
     let _program = { ...localProgram };
@@ -94,11 +82,6 @@ const ProgramDialog = ({
     onHide();
     onSave();
   };
-
-  // const onInputChange = (e, name) => {
-  //   const val = (e.target && e.target.value) || "";
-  //   setLocalProgram((prevProgram) => ({ ...prevProgram, [name]: val }));
-  // };
 
   const onInputChange = (e, name) => {
     const val = e.value !== undefined ? e.value : e.target.value;
