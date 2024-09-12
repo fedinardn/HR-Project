@@ -70,7 +70,6 @@ export default function ViewUsers() {
   const onInputChange = (e, name) => {
     const val = e.target.value;
     setEditingUser((prevUser) => ({ ...prevUser, [name]: val }));
-    console.log(editingUser);
   };
 
   const permissionOptions = [

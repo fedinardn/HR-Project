@@ -15,7 +15,6 @@ function MyApp({ Component, pageProps }) {
   useEffect(() => {
     // We track the auth state to reset firebaseUi if the user signs out.
     return onAuthStateChanged(getAuth(firebaseApp), (user) => {
-      // console.log("Auth state changed, user:", user);
       setUser(user);
     });
   }, []);

@@ -49,13 +49,11 @@ const withProtectedRoute = (WrappedComponent) => {
 
     if (loading) {
       return (
-        <div className="flex justify-content-center flex-wrap">
-          <ProgressSpinner
-            style={{ width: "100px", height: "100px" }}
-            strokeWidth="8"
-            fill="var(--surface-ground)"
-            animationDuration="1s"
-          />
+        <div
+          className="flex justify-content-center align-items-center"
+          style={{ height: "100vh" }}
+        >
+          <ProgressSpinner />
         </div>
       );
     }

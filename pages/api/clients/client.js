@@ -1,7 +1,6 @@
 import * as db from "../../../services/database.mjs";
 
 export default async function handler(req, res) {
-  console.log("here", req.method);
   if (req.method.toUpperCase() === "POST") {
     const clientDetails = req.body;
     const newclient = await db.createClient(

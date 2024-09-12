@@ -3,10 +3,8 @@ import * as db from "../../../services/database.mjs";
 export default async function handler(req, res) {
   const staffID = req.query.employeeId;
 
-  // console.log(typeof(staffID))
   if (req.method === "POST") {
     const staffData = await db.updateStaffDetails(staffID);
-    // console.log(staffData)
     if (staffData) {
       return res.status(200).json(staffData);
     } else {
@@ -14,12 +12,10 @@ export default async function handler(req, res) {
     }
   } else if (req.method === "GET") {
     const staffData = await db.getStaffDetails(staffID);
-    // console.log(staffData);
 
     if (staffData) {
       return res.status(200).json(staffData);
     } else {
-      console.log("no Staffdata");
       return res.status(200).json(["no staff with that id"]);
     }
   }

@@ -82,7 +82,6 @@ export default function FullFeaturedCrudGrid() {
     const rowToUpdate = rows.find((row) => row.id === id);
     const updatedRow = { ...rowToUpdate, [field]: value };
     const newRow = await updateChargeItem(id, updatedRow);
-    // console.log(newRow);
     setRows((prevRows) =>
       prevRows.map((row) => (row.id === newRow.id ? newRow : row))
     );
@@ -117,15 +116,12 @@ export default function FullFeaturedCrudGrid() {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.Edit } });
   };
 
-  //   const apiRef = useGridApiRef();
-
   const handleSaveClick = (id) => async () => {
     setRowModesModel({ ...rowModesModel, [id]: { mode: GridRowModes.View } });
   };
 
   const handleDeleteClick = (id) => async () => {
     setRows(rows.filter((row) => row.id !== id));
-    // console.log(id);
     await deleteChargeItem(id);
   };
 
@@ -143,7 +139,6 @@ export default function FullFeaturedCrudGrid() {
 
   const processRowUpdate = async (newRow) => {
     const updatedRow = { ...newRow };
-    // console.log(updatedRow);
 
     try {
       if (updatedRow.isNew) {

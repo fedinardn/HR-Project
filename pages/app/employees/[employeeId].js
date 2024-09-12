@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
+import { Divider } from "primereact/divider";
 import withProtectedRoute from "../../../components/WithProtectedRoute";
 import EditStaffModal from "../../../components/EditStaffModal";
 import AssignedStaffPrograms from "../../../components/AssignedStaffPrograms";
@@ -98,6 +99,13 @@ const ViewStaff = ({ user }) => {
         <InfoItem label="Tower Training" value={info.towerTraining} />
         <InfoItem label="Type of Staff" value={info.typeOfStaff} />
         <InfoItem label="Pro Facilitator Level" value={info.proFacilitator} />
+      </div>
+      <Divider />
+      <div className="field col-12">
+        <label className="font-bold">Notes</label>
+        <div className="mt-2 whitespace-pre-line">
+          {info.notes || "No notes available."}
+        </div>
       </div>
     </Card>
   );
