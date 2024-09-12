@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { Sidebar } from "primereact/sidebar";
@@ -8,8 +8,11 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Tag } from "primereact/tag";
+import { Badge } from "primereact/badge";
+import { ProgressSpinner } from "primereact/progressspinner";
 import { useRouter } from "next/router";
 import moment from "moment";
+
 import withProtectedRoute from "../components/WithProtectedRoute";
 
 import {
@@ -17,6 +20,10 @@ import {
   getAllStaff,
   getAllClients,
   getAllProgramsInGrid,
+  getProgramRequestNotification,
+  deleteProgramRequestNotification,
+  getFacilitatorRequestNotification,
+  deleteFacilitatorRequestNotification,
 } from "../services/database.mjs";
 
 const Dashboard = ({ user }) => {
@@ -24,61 +31,62 @@ const Dashboard = ({ user }) => {
   const [numberOfStaff, setNumberOfStaff] = useState(0);
   const [numberOfClients, setNumberOfClients] = useState(0);
   const [sidebarVisible, setSidebarVisible] = useState(false);
-  const [programRequests, setProgramRequests] = useState([]);
-  const [facilitatorRequests, setFacilitatorRequests] = useState([]);
+  const [programRequestNotifications, setProgramRequestNotifications] =
+    useState([]);
+  const [facilitatorRequestNotifications, setFacilitatorRequestNotifications] =
+    useState([]);
   const [upcomingPrograms, setUpcomingPrograms] = useState([]);
+  const [loading, setLoading] = useState(true); // Add this state
+
   const router = useRouter();
-  const op = React.useRef(null);
+  const op = useRef(null);
 
   const fetchPageDetails = async () => {
     if (user) {
-      const pageStaffData = await getAllStaff();
-      const pageRequestData = await getAllProgramRequests(user.uid);
-      const pageClientData = await getAllClients();
-      const allPrograms = await getAllProgramsInGrid();
+      try {
+        setLoading(true);
 
-      setNumberOfProgramRequest(pageRequestData.length);
-      setNumberOfStaff(pageStaffData.length);
-      setNumberOfClients(pageClientData.length);
+        const pageStaffData = await getAllStaff();
+        const pageRequestData = await getAllProgramRequests(user.uid);
+        const pageClientData = await getAllClients();
+        const allPrograms = await getAllProgramsInGrid();
+        const notifications = await getProgramRequestNotification();
+        const facilitatorNotifications =
+          await getFacilitatorRequestNotification();
 
-      setProgramRequests(pageRequestData.slice(0, 5));
-      setFacilitatorRequests([
-        {
-          id: 1,
-          name: "John Doe",
-          type: "New Facilitator",
-          date: "2023-06-01",
-        },
-        {
-          id: 2,
-          name: "Jane Smith",
-          type: "Training Request",
-          date: "2023-06-02",
-        },
-      ]);
+        setNumberOfProgramRequest(pageRequestData.length);
+        setNumberOfStaff(pageStaffData.length);
+        setNumberOfClients(pageClientData.length);
+        setProgramRequestNotifications(notifications);
+        setFacilitatorRequestNotifications(facilitatorNotifications);
 
-      // Filter and format upcoming programs
-      const today = moment().startOf("day");
-      const nextWeek = moment().add(7, "days").endOf("day");
-      const upcoming = allPrograms
-        .filter((program) => {
-          const programDate = moment(program.date, "MM/DD/YYYY");
-          return programDate.isBetween(today, nextWeek, null, "[]");
-        })
-        .map((program) => ({
-          ...program,
-          formattedDate: moment(program.date, "MM/DD/YYYY").format(
-            "MM/DD/YYYY"
-          ),
-          needsFacilitators: Object.values(program.facilitatorsNeeded).some(
-            (value) => value !== "0" && value !== ""
-          ),
-        }))
-        .sort((a, b) =>
-          moment(a.date, "MM/DD/YYYY").diff(moment(b.date, "MM/DD/YYYY"))
-        );
+        // Filter and format upcoming programs
+        const today = moment().startOf("day");
+        const nextWeek = moment().add(7, "days").endOf("day");
+        const upcoming = allPrograms
+          .filter((program) => {
+            const programDate = moment(program.date, "MM/DD/YYYY");
+            return programDate.isBetween(today, nextWeek, null, "[]");
+          })
+          .map((program) => ({
+            ...program,
+            formattedDate: moment(program.date, "MM/DD/YYYY").format(
+              "MM/DD/YYYY"
+            ),
+            needsFacilitators: Object.values(program.facilitatorsNeeded).some(
+              (value) => value !== "0" && value !== ""
+            ),
+          }))
+          .sort((a, b) =>
+            moment(a.date, "MM/DD/YYYY").diff(moment(b.date, "MM/DD/YYYY"))
+          );
 
-      setUpcomingPrograms(upcoming);
+        setUpcomingPrograms(upcoming);
+      } catch (error) {
+        console.error("Error fetching page details:", error);
+      } finally {
+        setLoading(false); // Set loading to false after fetching data
+      }
     }
   };
 
@@ -129,19 +137,18 @@ const Dashboard = ({ user }) => {
     },
   ];
 
-  const deleteNotification = (type, id) => {
-    if (type === "program") {
-      setProgramRequests(programRequests.filter((req) => req.id !== id));
-    } else {
-      setFacilitatorRequests(
-        facilitatorRequests.filter((req) => req.id !== id)
-      );
-    }
+  const deleteRequestNotification = async (id) => {
+    await deleteProgramRequestNotification(id);
+    setProgramRequestNotifications(
+      programRequestNotifications.filter((req) => req.id !== id)
+    );
   };
 
-  const deleteAllNotifications = () => {
-    setProgramRequests([]);
-    setFacilitatorRequests([]);
+  const deleteFacilitatorRequest = async (id) => {
+    await deleteFacilitatorRequestNotification(id);
+    setFacilitatorRequestNotifications(
+      facilitatorRequestNotifications.filter((req) => req.id !== id)
+    );
   };
 
   const formatProgramTime = (program) => {
@@ -174,33 +181,44 @@ const Dashboard = ({ user }) => {
 
   const notificationPanel = (
     <div className="p-3">
-      <div className="flex justify-content-between align-items-center mb-3">
-        <h3>Notifications</h3>
-        <Button
-          icon="pi pi-trash"
-          onClick={deleteAllNotifications}
-          tooltip="Delete All"
-        />
-      </div>
+      <h3>Notifications</h3>
       <TabView>
-        <TabPanel header="Program Requests">
-          <DataTable value={programRequests}>
-            <Column field="companyName" header="Company" />
-            <Column field="contactPerson" header="Contact" />
-            <Column field="desiredDate" header="Desired Date" />
+        <TabPanel
+          header={
+            <div>
+              Program Requests
+              <Badge value={programRequestNotifications.length} />
+            </div>
+          }
+        >
+          <DataTable
+            value={programRequestNotifications}
+            emptyMessage="No new notifications"
+          >
+            <Column field="message" header="Message" />
+            <Column
+              field="createdAt"
+              header="Date Received"
+              body={(rowData) => {
+                const date = new Date(rowData.createdAt);
+                return moment(date, "MM/DD/YYYY").format("MM/DD/YYYY");
+              }}
+            />
             <Column
               body={(rowData) => (
                 <div>
                   <Button
                     icon="pi pi-eye"
                     onClick={() =>
-                      router.push(`/app/program-requests/${rowData.id}`)
+                      router.push(
+                        `/app/program-requests/${rowData.relatedDocumentId}`
+                      )
                     }
                     className="p-button-text"
                   />
                   <Button
                     icon="pi pi-times"
-                    onClick={() => deleteNotification("program", rowData.id)}
+                    onClick={() => deleteRequestNotification(rowData.id)}
                     className="p-button-text p-button-danger"
                   />
                 </div>
@@ -208,26 +226,40 @@ const Dashboard = ({ user }) => {
             />
           </DataTable>
         </TabPanel>
-        <TabPanel header="Facilitator Requests">
-          <DataTable value={facilitatorRequests}>
-            <Column field="name" header="Name" />
-            <Column field="type" header="Request Type" />
-            <Column field="date" header="Date" />
+        <TabPanel
+          header={
+            <div>
+              Facilitator Requests
+              <Badge value={facilitatorRequestNotifications.length} />
+            </div>
+          }
+        >
+          <DataTable
+            value={facilitatorRequestNotifications}
+            emptyMessage="No new notifications"
+          >
+            <Column field="message" header="Message" />
+            <Column field="additionalDetails" header="Additional Details" />
+
+            <Column
+              field="createdAt"
+              header="Date Received"
+              body={(rowData) => {
+                const date = new Date(rowData.createdAt);
+                return moment(date, "MM/DD/YYYY").format("MM/DD/YYYY");
+              }}
+            />
             <Column
               body={(rowData) => (
                 <div>
                   <Button
                     icon="pi pi-eye"
-                    onClick={() =>
-                      router.push(`/app/facilitator-requests/${rowData.id}`)
-                    }
+                    onClick={() => router.push(`/app/schedule/scheduleDisplay`)}
                     className="p-button-text"
                   />
                   <Button
                     icon="pi pi-times"
-                    onClick={() =>
-                      deleteNotification("facilitator", rowData.id)
-                    }
+                    onClick={() => deleteFacilitatorRequest(rowData.id)}
                     className="p-button-text p-button-danger"
                   />
                 </div>
@@ -238,6 +270,17 @@ const Dashboard = ({ user }) => {
       </TabView>
     </div>
   );
+
+  if (loading) {
+    return (
+      <div
+        className="flex justify-content-center align-items-center"
+        style={{ height: "100vh" }}
+      >
+        <ProgressSpinner />
+      </div>
+    );
+  }
 
   return (
     <div className="flex">
@@ -257,7 +300,10 @@ const Dashboard = ({ user }) => {
             icon="pi pi-bell"
             onClick={(e) => op.current.toggle(e)}
             className="p-button-rounded p-button-text"
-            badge={programRequests.length + facilitatorRequests.length}
+            badge={
+              programRequestNotifications.length +
+              facilitatorRequestNotifications.length
+            }
             badgeClassName="p-badge-danger"
           />
         </div>

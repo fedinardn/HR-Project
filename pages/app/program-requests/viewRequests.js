@@ -5,7 +5,9 @@ import { Column } from "primereact/column";
 import { Tag } from "primereact/tag";
 import { Card } from "primereact/card";
 import { InputText } from "primereact/inputtext";
-import { Dropdown } from "primereact/dropdown";
+// import { Dropdown } from "primereact/dropdown";
+import moment from "moment";
+
 import {
   getAllProgramRequests,
   getAllProgramRequestsForClient,
@@ -89,9 +91,23 @@ export default function ViewRequests({ user }) {
           onRowClick={onRowClick}
           selectionMode="single"
         >
-          <Column field="programTypes" header="Name" sortable />
+          <Column
+            field="programTypes"
+            header="Name"
+            sortable
+            body={(rowData) => rowData.programTypes.join(", ")}
+          />
           <Column field="approved" header="Status" body={statusBodyTemplate} />
           <Column field="contactPerson" header="Contact Person" sortable />
+          <Column
+            field="createdAt"
+            header="Date Received"
+            sortable
+            body={(rowData) => {
+              const date = new Date(rowData.createdAt);
+              return moment(date, "MM/DD/YYYY").format("MM/DD/YYYY");
+            }}
+          />
         </DataTable>
       </Card>
 
@@ -111,9 +127,23 @@ export default function ViewRequests({ user }) {
           onRowClick={onRowClick}
           selectionMode="single"
         >
-          <Column field="programTypes" header="Name" sortable />
+          <Column
+            field="programTypes"
+            header="Name"
+            sortable
+            body={(rowData) => rowData.programTypes.join(", ")}
+          />
           <Column field="approved" header="Status" body={statusBodyTemplate} />
           <Column field="contactPerson" header="Contact Person" sortable />
+          <Column
+            field="createdAt"
+            header="Date Received"
+            sortable
+            body={(rowData) => {
+              const date = new Date(rowData.createdAt);
+              return moment(date, "MM/DD/YYYY").format("MM/DD/YYYY");
+            }}
+          />
         </DataTable>
       </Card>
     </div>

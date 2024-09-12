@@ -11,7 +11,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Card } from "primereact/card";
 import { Toast } from "primereact/toast";
-
+import FacilitatorRequestDialog from "./FacilitatorRequestModal";
 import {
   updateProgramInGrid,
   createNewProgramInGrid,
@@ -259,7 +259,8 @@ const ProgramDialog = ({
 
   const footer = (
     <>
-      <div>
+      <div className="flex justify-content-end">
+        <FacilitatorRequestDialog programDetails={localProgram} />
         {userPermission === "Admin" &&
           (!editable ? (
             <Button label="Edit" icon="pi pi-pencil" onClick={onEdit} />

@@ -1,7 +1,3 @@
-// import { FileUpload } from "primereact/fileupload";
-// import { RadioButton } from "primereact/radiobutton";
-// import { Tag } from "primereact/tag";
-
 import React, { useState, useEffect, useRef } from "react";
 import { Calendar } from "primereact/calendar";
 import { DataTable } from "primereact/datatable";
@@ -16,24 +12,17 @@ import { InputIcon } from "primereact/inputicon";
 import { MultiSelect } from "primereact/multiselect";
 import { Dropdown } from "primereact/dropdown";
 import { Message } from "primereact/message";
-import { Card } from "primereact/card";
-
-// import { InputTextarea } from "primereact/inputtextarea";
-// import classNames from "primereact/utils";
-// import { format } from "date-fns";
 import { randomId } from "@mui/x-data-grid-generator";
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primeicons/primeicons.css";
 import "primeflex/primeflex.css";
 import {
   getAllProgramsInGrid,
-  // createNewProgramInGrid,
-  // updateProgramInGrid,
   deleteProgramInGrid,
   getUserPermission,
   getAllStaff,
 } from "../../../services/database.mjs";
-import ProgramDialog from "../../../components/ProgramDialog"; // Import the new component
+import ProgramDialog from "../../../components/ProgramDialog";
 
 export default function ProgramList({ user }) {
   const [programs, setPrograms] = useState([]);
@@ -75,10 +64,8 @@ export default function ProgramList({ user }) {
   const [submitted, setSubmitted] = useState(false);
   const [selectedPrograms, setSelectedPrograms] = useState(null);
   const [editable, setEditable] = useState(false);
-  // const [selectedProgram, setSelectedProgram] = useState(null);
   const [globalFilter, setGlobalFilter] = useState(null);
   const [userPermission, setUserPermission] = useState("");
-  const [facilitatorItems, setFacilitatorItems] = useState([]);
   const globalFilterFields = [
     "programName",
     "date",
@@ -89,9 +76,6 @@ export default function ProgramList({ user }) {
   ];
 
   const [facilitators, setFacilitators] = useState([]);
-
-  const [isAddRoleDialogVisible, setIsAddRoleDialogVisible] = useState(false);
-  const [newRole, setNewRole] = useState("");
 
   const toast = useRef(null);
   const dt = useRef(null);
@@ -496,34 +480,7 @@ export default function ProgramList({ user }) {
             style={{ maxWidth: "300px", overflow: "scroll" }}
             sortable
           ></Column>
-          <Column
-            field="facilitators"
-            header="Facilitators"
-            body={(rowData) => (
-              <div>
-                {rowData.facilitators.map((facilitator, index) => (
-                  <div key={index} className="p-chip">
-                    <span>{facilitator.name}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-            sortable
-          ></Column>
-          <Column
-            field="facilitatorEmails"
-            header="Facilitator Emails"
-            body={(rowData) => (
-              <div>
-                {rowData.facilitatorEmails.map((facilitatorEmail, index) => (
-                  <div key={index} className="p-chip">
-                    <span>{facilitatorEmail}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-            sortable
-          ></Column>
+
           <Column
             field="notes"
             header="Notes"

@@ -101,61 +101,12 @@ export const getUserPermission = async (userEmail) => {
   return userData[0].permission;
 };
 
-// export const createProgramRequest = async (
-//   contactPerson,
-//   companyName,
-//   userid,
-//   programTypes,
-//   desiredDate,
-//   desiredLength,
-//   role,
-//   email,
-//   phone,
-//   website,
-//   size,
-//   additionalDetails
-// ) => {
-//   const db = getFirestore();
-
-//   const programRequestsCollection = collection(db, "programRequests");
-
-//   const newProgramRequest = {
-//     id: crypto.randomUUID(),
-//     userid: userid,
-//     contactPerson: contactPerson,
-//     companyName: companyName,
-//     programTypes: programTypes,
-//     desiredDate: desiredDate,
-//     desiredLength: desiredLength,
-//     role: role,
-//     email: email,
-//     phone: phone,
-//     website: website,
-//     size: size,
-//     additionalDetails: additionalDetails,
-//     dateSubmitted: Date.now(),
-//     approved: false,
-//   };
-
-//   // const docRef = await addDoc(programRequestsCollection, newProgramRequest);
-//   const docRef = await setDoc(
-//     doc(db, "programRequests", newProgramRequest.id),
-//     newProgramRequest
-//   );
-//   if (docRef === undefined) {
-//     return {};
-//   }
-
-//   return { id: docRef.id, ...newProgramRequest };
-// };
-
 export const createProgramRequest = async (programRequestDetails) => {
   const db = getFirestore();
-  // const programRequestsCollection = collection(db, "programRequests");
 
   const newProgramRequest = {
-    id: uuidv7(),
     ...programRequestDetails,
+    createdAt: Date.now(),
   };
 
   const docRef = await setDoc(
@@ -163,11 +114,54 @@ export const createProgramRequest = async (programRequestDetails) => {
     newProgramRequest
   );
 
-  // if (docRef === undefined) {
-  //   return {};
-  // }
-
   return newProgramRequest;
+};
+
+export const createProgramRequestNotification = async (
+  programRequestDetails
+) => {
+  const db = getFirestore();
+
+  const newNotification = {
+    id: uuidv7(),
+    type: "program_request",
+    message: "New program request created",
+    relatedDocumentId: programRequestDetails.id,
+    createdAt: Date.now(),
+  };
+
+  const notificationRef = doc(db, "notifications", newNotification.id);
+
+  await setDoc(notificationRef, newNotification);
+
+  return newNotification;
+};
+
+export const getProgramRequestNotification = async () => {
+  const db = getFirestore();
+
+  const notificationCollection = collection(db, "notifications");
+
+  const q = query(
+    notificationCollection,
+    where("type", "==", "program_request")
+  );
+  const querySnapshot = await getDocs(q);
+
+  const notifications = [];
+  querySnapshot.forEach((doc) => {
+    notifications.push((doc.id, "=>", doc.data()));
+  });
+
+  return notifications;
+};
+
+export const deleteProgramRequestNotification = async (id) => {
+  const db = getFirestore();
+
+  await deleteDoc(doc(db, "notifications", id));
+
+  return true;
 };
 
 export const getAllContractedPrograms = async () => {
@@ -423,6 +417,51 @@ export const getAllStaffAssignments = async () => {
   return programs;
 };
 
+export const createFacilitatorRequestNotification = async (requestDetails) => {
+  const db = getFirestore();
+
+  const newNotification = {
+    id: uuidv7(),
+    type: "facilitator_request",
+    message: `${requestDetails.name} wants to ${requestDetails.role} ${requestDetails.programName} on ${requestDetails.programDate}`,
+    additionalDetails: requestDetails.additionalDetails,
+    createdAt: Date.now(),
+  };
+
+  const notificationRef = doc(db, "notifications", newNotification.id);
+
+  await setDoc(notificationRef, newNotification);
+
+  return newNotification;
+};
+
+export const getFacilitatorRequestNotification = async () => {
+  const db = getFirestore();
+
+  const notificationCollection = collection(db, "notifications");
+
+  const q = query(
+    notificationCollection,
+    where("type", "==", "facilitator_request")
+  );
+  const querySnapshot = await getDocs(q);
+
+  const notifications = [];
+  querySnapshot.forEach((doc) => {
+    notifications.push((doc.id, "=>", doc.data()));
+  });
+
+  return notifications;
+};
+
+export const deleteFacilitatorRequestNotification = async (id) => {
+  const db = getFirestore();
+
+  await deleteDoc(doc(db, "notifications", id));
+
+  return true;
+};
+
 // EMPLOYEE FUNCTIONS END HERE
 
 //CLIENT FUNCTIONS
@@ -473,18 +512,18 @@ export const getClientDetails = async (clientID) => {
 
 export const getClientPrograms = async (clientID) => {
   const db = getFirestore();
-  const clientCollection = collection(db, "clients");
+  const clientProgramsCollection = collection(db, "clientPrograms");
 
-  const q = query(clientCollection, where("clientID", "==", clientID));
+  const q = query(clientProgramsCollection, where("clientID", "==", clientID));
 
   const querySnapshot = await getDocs(q);
 
-  const clients = [];
+  const programs = [];
 
   querySnapshot.forEach((doc) => {
-    clients.push((doc.id, "=>", doc.data()));
+    programs.push((doc.id, "=>", doc.data()));
   });
-  return clients[0].programs;
+  return programs;
 };
 
 export const getAllClients = async () => {
@@ -518,7 +557,6 @@ export const updateClientDetails = async (clientID, updatedClientData) => {
 
 export const createNewProgramForClient = async (clientID, programData) => {
   const db = getFirestore();
-  const clientRef = doc(db, "clients", clientID);
   const clientProgramRef = doc(db, "clientPrograms", programData.programID);
 
   try {
@@ -526,16 +564,6 @@ export const createNewProgramForClient = async (clientID, programData) => {
       clientID: clientID,
       ...programData,
       createdAt: Date.now(),
-    });
-
-    const clientDoc = await getDoc(clientRef);
-
-    if (!clientDoc.exists()) {
-      throw new Error("Client not found");
-    }
-
-    await updateDoc(clientRef, {
-      programs: [...clientDoc.data().programs, programData],
     });
 
     return {
@@ -553,30 +581,12 @@ export const updateProgramForClient = async (
   updatedProgramData
 ) => {
   const db = getFirestore();
-  const clientRef = doc(db, "clients", clientID);
   const clientProgramRef = doc(db, "clientPrograms", programID);
 
   try {
     await updateDoc(clientProgramRef, {
       ...updatedProgramData,
       updatedAt: Date.now(),
-    });
-
-    const clientDoc = await getDoc(clientRef);
-
-    if (!clientDoc.exists()) {
-      throw new Error("Client not found");
-    }
-
-    const clientData = clientDoc.data();
-    const updatedPrograms = clientData.programs.map((program) =>
-      program.programID === programID
-        ? { ...program, ...updatedProgramData }
-        : program
-    );
-
-    await updateDoc(clientRef, {
-      programs: updatedPrograms,
     });
 
     return {
@@ -590,27 +600,9 @@ export const updateProgramForClient = async (
 
 export const deleteProgramForClient = async (clientID, programID) => {
   const db = getFirestore();
-  const clientRef = doc(db, "clients", clientID);
   const programRef = doc(db, "clientPrograms", programID);
 
   try {
-    // Get the client document
-    const clientDoc = await getDoc(clientRef);
-
-    if (!clientDoc.exists()) {
-      throw new Error("Client not found");
-    }
-
-    // Remove the program from the client's list of programs
-    const updatedPrograms = clientDoc
-      .data()
-      .programs.filter((program) => program.programID !== programID);
-
-    await updateDoc(clientRef, {
-      programs: updatedPrograms,
-    });
-
-    // Delete the program document
     await deleteDoc(programRef);
 
     return {
