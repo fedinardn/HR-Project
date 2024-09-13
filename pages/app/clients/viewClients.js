@@ -109,13 +109,6 @@ const ViewClients = ({ user }) => {
             sortable
             style={{ width: "25%" }}
           ></Column>
-          <Column
-            field="programs"
-            header="Programs"
-            sortable
-            body={(rowData) => rowData.programs.length}
-            style={{ width: "25%" }}
-          ></Column>
         </DataTable>
       </Card>
     </div>

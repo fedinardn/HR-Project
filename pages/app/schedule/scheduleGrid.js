@@ -23,6 +23,7 @@ import {
   getAllStaff,
 } from "../../../services/database.mjs";
 import ProgramDialog from "../../../components/ProgramDialog";
+import ProgramRangeSelector from "../../../components/ProgramRangeSelector";
 
 export default function ProgramList({ user }) {
   const [programs, setPrograms] = useState([]);
@@ -215,6 +216,7 @@ export default function ProgramList({ user }) {
               onClick={confirmDeleteSelected}
               disabled={!selectedPrograms || !selectedPrograms.length}
             />
+            {/* <ProgramRangeSelector programs={programs} /> */}
           </>
         )}
       </div>
