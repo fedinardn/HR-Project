@@ -5,7 +5,7 @@ import { Column } from "primereact/column";
 import { Tag } from "primereact/tag";
 import { Card } from "primereact/card";
 import { InputText } from "primereact/inputtext";
-// import { Dropdown } from "primereact/dropdown";
+import { ProgressSpinner } from "primereact/progressspinner";
 import moment from "moment";
 
 import {
@@ -20,22 +20,31 @@ export default function ViewRequests({ user }) {
   const [pendingRequests, setPendingRequests] = useState([]);
   const [globalFilterApproved, setGlobalFilterApproved] = useState(null);
   const [globalFilterPending, setGlobalFilterPending] = useState(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   const fetchProgramRequests = async () => {
     if (user) {
-      const userData = await getUserPermission(user.email);
-      let data;
-      if (userData === "Facilitator" || userData === "No Access") {
-        data = await getAllProgramRequestsForClient(user.uid);
-      } else {
-        data = await getAllProgramRequests(user.uid);
+      setLoading(true);
+      try {
+        const userData = await getUserPermission(user.email);
+        let data;
+        if (userData === "Facilitator" || userData === "No Access") {
+          data = await getAllProgramRequestsForClient(user.uid);
+        } else {
+          data = await getAllProgramRequests(user.uid);
+        }
+        setProgramRequests(data);
+        setApprovedRequests(data.filter((request) => request.approved));
+        setPendingRequests(data.filter((request) => !request.approved));
+      } catch (error) {
+        console.error("Error fetching program requests:", error);
+      } finally {
+        setLoading(false);
       }
-      setProgramRequests(data);
-      setApprovedRequests(data.filter((request) => request.approved));
-      setPendingRequests(data.filter((request) => !request.approved));
     } else {
       console.log("No User");
+      setLoading(false);
     }
   };
 
@@ -70,6 +79,17 @@ export default function ViewRequests({ user }) {
       </div>
     );
   };
+
+  if (loading) {
+    return (
+      <div
+        className="flex justify-content-center align-items-center"
+        style={{ height: "100vh" }}
+      >
+        <ProgressSpinner />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4" style={{ maxWidth: "1200px", margin: "0 auto" }}>

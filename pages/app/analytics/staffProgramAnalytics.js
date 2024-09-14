@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
+import { ProgressSpinner } from "primereact/progressspinner";
 import {
   getAllStaff,
   getStaffAssignments,
@@ -46,6 +47,7 @@ const FacilitatorAnalysis = () => {
     return (
       <div className="flex justify-content-end">
         <span className="p-input-icon-left">
+          <i className="pi pi-search" />
           <InputText
             type="search"
             onInput={(e) => setGlobalFilter(e.target.value)}
@@ -56,6 +58,17 @@ const FacilitatorAnalysis = () => {
     );
   };
 
+  if (loading) {
+    return (
+      <div
+        className="flex justify-content-center align-items-center"
+        style={{ height: "100vh" }}
+      >
+        <ProgressSpinner />
+      </div>
+    );
+  }
+
   return (
     <div>
       <h1>Facilitator Analysis</h1>
@@ -64,7 +77,6 @@ const FacilitatorAnalysis = () => {
         paginator
         rows={10}
         dataKey="staffID"
-        loading={loading}
         globalFilter={globalFilter}
         header={renderHeader}
         emptyMessage="No facilitators found."

@@ -6,6 +6,7 @@ import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { Toast } from "primereact/toast";
 import { Divider } from "primereact/divider";
+import { ProgressSpinner } from "primereact/progressspinner";
 import withProtectedRoute from "../../../components/WithProtectedRoute";
 import EditClientModal from "../../../components/EditClientModal";
 import AssignedProgramsList from "../../../components/AssignedProgamsList";
@@ -21,14 +22,28 @@ const ViewClient = ({ user }) => {
   const [clientData, setClientData] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [programs, setPrograms] = useState([]);
+  const [loading, setLoading] = useState(true);
   const toast = useRef(null);
 
   const fetchClientData = async () => {
     if (clientID) {
-      const data = await getClientDetails(clientID);
-      setClientData(data);
-      const clientPrograms = await getClientPrograms(clientID);
-      setPrograms(clientPrograms);
+      setLoading(true);
+      try {
+        const data = await getClientDetails(clientID);
+        setClientData(data);
+        const clientPrograms = await getClientPrograms(clientID);
+        setPrograms(clientPrograms);
+      } catch (error) {
+        console.error("Error fetching client data:", error);
+        toast.current.show({
+          severity: "error",
+          summary: "Error",
+          detail: "Failed to load client details",
+          life: 3000,
+        });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -110,6 +125,17 @@ const ViewClient = ({ user }) => {
       </div>
     </Card>
   );
+
+  if (loading) {
+    return (
+      <div
+        className="flex justify-content-center align-items-center"
+        style={{ height: "100vh" }}
+      >
+        <ProgressSpinner />
+      </div>
+    );
+  }
 
   return (
     <div className={styles["staff-info"]}>

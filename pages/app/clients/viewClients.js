@@ -6,6 +6,7 @@ import { InputIcon } from "primereact/inputicon";
 import { FilterMatchMode } from "primereact/api";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
+import { ProgressSpinner } from "primereact/progressspinner";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import withProtectedRoute from "../../../components/WithProtectedRoute";
@@ -21,11 +22,19 @@ const ViewClients = ({ user }) => {
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   const fetchClients = async () => {
-    const data = await getAllClients();
-    setClients(data);
+    setLoading(true);
+    try {
+      const data = await getAllClients();
+      setClients(data);
+    } catch (error) {
+      console.error("Error fetching clients:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -63,6 +72,17 @@ const ViewClients = ({ user }) => {
     router.push(`/app/clients/${event.data.clientID}`);
   };
 
+  if (loading) {
+    return (
+      <div
+        className="flex justify-content-center align-items-center"
+        style={{ height: "100vh" }}
+      >
+        <ProgressSpinner />
+      </div>
+    );
+  }
+
   return (
     <div className="p-4" style={{ maxWidth: "1200px", margin: "0 auto" }}>
       <Card>
@@ -80,7 +100,6 @@ const ViewClients = ({ user }) => {
           dataKey="clientID"
           filters={filters}
           filterDisplay="menu"
-          x
           globalFilterFields={[
             "organizationName",
             "clientType",

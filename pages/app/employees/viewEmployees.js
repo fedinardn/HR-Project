@@ -4,6 +4,7 @@ import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
+import { ProgressSpinner } from "primereact/progressspinner";
 import { getAllStaff } from "../../../services/database.mjs";
 import Link from "next/link";
 import { useRouter } from "next/router";
@@ -12,11 +13,19 @@ import withProtectedRoute from "../../../components/WithProtectedRoute";
 const ViewStaff = ({ user }) => {
   const [staff, setStaff] = useState([]);
   const [globalFilter, setGlobalFilter] = useState(null);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   const fetchStaff = async () => {
-    const data = await getAllStaff();
-    setStaff(data);
+    setLoading(true);
+    try {
+      const data = await getAllStaff();
+      setStaff(data);
+    } catch (error) {
+      console.error("Error fetching staff data:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -38,6 +47,17 @@ const ViewStaff = ({ user }) => {
   const onRowClick = (event) => {
     router.push(`/app/employees/${event.data.staffID}`);
   };
+
+  if (loading) {
+    return (
+      <div
+        className="flex justify-content-center align-items-center"
+        style={{ height: "100vh" }}
+      >
+        <ProgressSpinner />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4" style={{ maxWidth: "1200px", margin: "0 auto" }}>

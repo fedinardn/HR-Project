@@ -1,102 +1,6 @@
-// import React, { useState, useEffect } from "react";
-// import { Button } from "primereact/button";
-// import { useRouter } from "next/router";
-// import { getAuth, onAuthStateChanged } from "firebase/auth";
-// import styles from "../styles/Home.module.css";
-// import Image from "next/image";
-
-// const ImageOverlay = ({
-//   imageSrc,
-//   title,
-//   description,
-//   buttonText,
-//   buttonLink,
-//   onButtonClick,
-// }) => (
-//   <div className={styles["image-overlay"]}>
-//     <Image
-//       src={imageSrc}
-//       alt={title}
-//       layout="fill"
-//       objectFit="cover"
-//       className={styles["background-image"]}
-//     />
-//     <div className={styles["content"]}>
-//       <h2 className={styles["title"]}>{title}</h2>
-//       <p className={styles["description"]}>{description}</p>
-//       <Button
-//         label={buttonText}
-//         onClick={() => onButtonClick(buttonLink)}
-//         className="p-button-raised p-button-rounded"
-//       />
-//     </div>
-//   </div>
-// );
-
-// const Home = () => {
-//   const [user, setUser] = useState(null);
-//   const router = useRouter();
-
-//   useEffect(() => {
-//     const auth = getAuth();
-//     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-//       setUser(currentUser);
-//     });
-
-//     return () => unsubscribe();
-//   }, []);
-
-//   const handleButtonClick = (path) => {
-//     if (!user) {
-//       router.push("/login");
-//     } else {
-//       router.push(path);
-//     }
-//   };
-
-//   const overlayData = [
-//     {
-//       imageSrc: "/tightRope.jpg",
-//       // title: "Submit a request",
-//       // description:
-//       //   "Use this form to submit a new program request for the HR team to review.",
-//       buttonText: "Submit a request",
-//       buttonLink: "/app/program-requests/submitRequest",
-//     },
-//     {
-//       imageSrc: "/tightRope.jpg",
-//       // title: "View program requests",
-//       // description:
-//       //   "Use this table to view all program requests that have been submitted and their status.",
-//       buttonText: "View program requests",
-//       buttonLink: "/app/program-requests/viewRequests",
-//     },
-//   ];
-
-//   return (
-//     <div className={styles.container}>
-//       <div className={styles.welcomeCard}>
-//         <h1 className={styles.mainTitle}>Welcome to CTLC!</h1>
-//         <p className={styles.titleParagraph}>
-//           Your trusted partner for team building programs
-//         </p>
-//       </div>
-//       {overlayData.map((overlay, index) => (
-//         <ImageOverlay
-//           key={index}
-//           {...overlay}
-//           onButtonClick={handleButtonClick}
-//         />
-//       ))}
-//     </div>
-//   );
-// };
-
-// export default Home;
-
-import React, { useState, useEffect } from "react";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
+import { Carousel } from "primereact/carousel";
 
 const ProgramCard = ({ icon, name, description, buttonText, buttonLink }) => (
   <Card className="flex flex-column h-full">
@@ -122,72 +26,62 @@ const ProgramCard = ({ icon, name, description, buttonText, buttonLink }) => (
 const ContactInfo = ({ icon, content, href }) => (
   <div className="flex align-items-center gap-2 mb-2">
     <i className={`pi ${icon}`}></i>
-    <a href={href} className="text-blue-500 hover:underline">
+    <a href={href} className="text-500 hover:underline">
       {content}
     </a>
   </div>
 );
 
-const CustomGallery = ({ images }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [images.length]);
-
-  return (
-    <div className="w-full h-64 overflow-hidden sticky">
-      {images.map((image, index) => (
-        <img
-          key={index}
-          src={image.source}
-          alt={image.alt}
-          className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-500 ${
-            index === currentIndex ? "opacity-100" : "opacity-0"
-          }`}
-        />
-      ))}
-      <div className="absolute bottom-4 left-0 right-0 flex justify-center">
-        {images.map((_, index) => (
-          <button
-            key={index}
-            onClick={() => setCurrentIndex(index)}
-            className={`w-3 h-3 rounded-full mx-1 focus:outline-none ${
-              index === currentIndex ? "bg-white" : "bg-gray-400"
-            }`}
-          />
-        ))}
-      </div>
-    </div>
-  );
-};
-
 const HomePage = () => {
   const images = [
+    { source: "/dangleDuo.jpeg", alt: "Team Building 8" },
     { source: "/tightRope.jpg", alt: "Team Building 1" },
+    { source: "/rockClimbing.jpg", alt: "Team Building 4" },
+    { source: "/support.jpg", alt: "Team Building 6" },
     { source: "/rappel.jpg", alt: "Team Building 2" },
     { source: "/people.jpg", alt: "Team Building 3" },
-    { source: "/rockClimbing.jpg", alt: "Team Building 4" },
     { source: "/silhouette.jpg", alt: "Team Building 5" },
-    { source: "/support.jpg", alt: "Team Building 6" },
     { source: "/whaleWatch.jpg", alt: "Team Building 7" },
-    { source: "/dangleDuo.jpeg", alt: "Team Building 8" },
   ];
+
+  const carouselItemTemplate = (item) => {
+    return (
+      <div>
+        <img
+          src={item.source}
+          alt={item.alt}
+          style={{
+            aspectRatio: "16/9",
+            borderRadius: "12px",
+          }}
+        />
+      </div>
+    );
+  };
 
   return (
     <>
-      <div className="flex flex-col min-h-screen">
-        <div className="container mx-auto p-4 flex-grow">
-          <h1 className="text-3xl font-bold mb-4 text-center">
-            Cornell Team and Leadership Center
-          </h1>
+      <div className="block">
+        <h1 className="text-3xl font-bold mb-4 text-center">
+          Cornell Team and Leadership Center
+        </h1>
+        <div className="mb-5 flex justify-content-center">
+          <div style={{ width: "66%" }}>
+            <Carousel
+              value={images}
+              numVisible={1}
+              numScroll={1}
+              circular
+              autoplayInterval={3000}
+              itemTemplate={carouselItemTemplate}
+            />
+          </div>
+        </div>
 
+        <div className="container mx-auto p-4 flex-grow">
           <Card className="mb-5">
             <div className="flex flex-column md:flex-row justify-content-between align-items-center">
-              <div className="flex-grow-1 mb-4 md:mb-0 md:mr-4">
+              <div className="flex-grow-1 mb-3 md:mb-0 md:mr-4">
                 <div className="flex align-items-center gap-3">
                   <i className="pi pi-info-circle text-4xl"></i>
                   <p className="text-2xl font-bold mb-4">Who we are</p>
@@ -270,10 +164,6 @@ const HomePage = () => {
           </div>
         </div>
       </div>
-
-      {/* <div className="w-full mt-8">
-        <CustomGallery images={images} />
-      </div> */}
     </>
   );
 };

@@ -5,6 +5,7 @@ import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { Divider } from "primereact/divider";
+import { ProgressSpinner } from "primereact/progressspinner";
 import withProtectedRoute from "../../../components/WithProtectedRoute";
 import EditStaffModal from "../../../components/EditStaffModal";
 import AssignedStaffPrograms from "../../../components/AssignedStaffPrograms";
@@ -18,12 +19,26 @@ const ViewStaff = ({ user }) => {
   const staffID = router.query.employeeId;
   const [staffData, setStaffData] = useState({});
   const [showModal, setShowModal] = useState(false);
+  const [loading, setLoading] = useState(true);
   const toast = useRef(null);
 
   const fetchStaffData = async () => {
     if (staffID) {
-      const data = await getStaffDetails(staffID);
-      setStaffData(data);
+      setLoading(true);
+      try {
+        const data = await getStaffDetails(staffID);
+        setStaffData(data);
+      } catch (error) {
+        console.error("Error fetching staff details:", error);
+        toast.current.show({
+          severity: "error",
+          summary: "Error",
+          detail: "Failed to load staff details",
+          life: 3000,
+        });
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
@@ -109,6 +124,17 @@ const ViewStaff = ({ user }) => {
       </div>
     </Card>
   );
+
+  if (loading) {
+    return (
+      <div
+        className="flex justify-content-center align-items-center"
+        style={{ height: "100vh" }}
+      >
+        <ProgressSpinner />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4" style={{ maxWidth: "1200px", margin: "0 auto" }}>

@@ -77,7 +77,6 @@ const FacilitatorRequestDialog = ({ programDetails }) => {
         />
       </div>
 
-      {/* Modal Dialog */}
       <Dialog
         header="Facilitation Request"
         visible={isDialogVisible}
