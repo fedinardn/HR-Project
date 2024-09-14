@@ -1,8 +1,18 @@
+import React, { useState, useEffect } from "react";
 import { Card } from "primereact/card";
 import { Button } from "primereact/button";
 import { Carousel } from "primereact/carousel";
+import { useRouter } from "next/router";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
-const ProgramCard = ({ icon, name, description, buttonText, buttonLink }) => (
+const ProgramCard = ({
+  icon,
+  name,
+  description,
+  buttonText,
+  buttonLink,
+  onButtonClick,
+}) => (
   <Card className="flex flex-column h-full">
     <div className="flex-grow-1">
       <div className="flex align-items-center gap-3 mb-3">
@@ -15,8 +25,8 @@ const ProgramCard = ({ icon, name, description, buttonText, buttonLink }) => (
       <div className="mt-5 pt-3">
         <Button
           label={buttonText}
-          className="p-button-rounded "
-          onClick={() => window.open(buttonLink, "_blank")}
+          className="p-button-rounded"
+          onClick={() => onButtonClick(buttonLink)}
         />
       </div>
     )}
@@ -33,6 +43,30 @@ const ContactInfo = ({ icon, content, href }) => (
 );
 
 const HomePage = () => {
+  const [user, setUser] = useState(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setUser(currentUser);
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const handleButtonClick = (path) => {
+    if (path === "/app/program-requests/submitRequest") {
+      if (!user) {
+        router.push("/login");
+      } else {
+        router.push(path);
+      }
+    } else {
+      window.open(path, "_blank");
+    }
+  };
+
   const images = [
     { source: "/dangleDuo.jpeg", alt: "Team Building 8" },
     { source: "/tightRope.jpg", alt: "Team Building 1" },
@@ -99,9 +133,8 @@ const HomePage = () => {
                   label="Explore Programs"
                   className="p-button-rounded p-button-outlined"
                   onClick={() =>
-                    window.open(
-                      "https://scl.cornell.edu/sub/coe/ctlc/programs",
-                      "_blank"
+                    handleButtonClick(
+                      "https://scl.cornell.edu/sub/coe/ctlc/programs"
                     )
                   }
                 />
@@ -117,6 +150,7 @@ const HomePage = () => {
                 description="Since the early 1980s, we've served over twenty thousand individuals. Our unique approach engages participants in transformative experiences, shifting perspectives and inspiring new ways of operating. Join us to explore the power of experiential learning."
                 buttonText="Learn More"
                 buttonLink="https://scl.cornell.edu/sub/coe/ctlc/who-we-serve"
+                onButtonClick={handleButtonClick}
               />
             </div>
             <div className="col-12 md:col-6 lg:col-3 mb-3">
@@ -126,6 +160,7 @@ const HomePage = () => {
                 description="Ready to elevate your team's performance? Our tailored programs cater to your specific needs, combining innovative techniques with proven methodologies. From short sessions to multi-day trainings, we craft experiences that drive lasting change and growth."
                 buttonText="Submit a Request"
                 buttonLink="/app/program-requests/submitRequest"
+                onButtonClick={handleButtonClick}
               />
             </div>
             <div className="col-12 md:col-6 lg:col-3 mb-3">
@@ -135,6 +170,7 @@ const HomePage = () => {
                 description="Experience exceptional programming at our high-quality facilities on Cornell University's campus in Ithaca, New York. Our year-round venue offers diverse environments for team building, from indoor spaces to outdoor challenge courses, supporting dynamic learning experiences."
                 buttonText="Explore"
                 buttonLink="https://scl.cornell.edu/sub/coe/ctlc/facilities"
+                onButtonClick={handleButtonClick}
               />
             </div>
             <div className="col-12 md:col-6 lg:col-3 mb-3">
