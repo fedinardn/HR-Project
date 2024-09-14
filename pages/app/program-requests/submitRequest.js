@@ -53,23 +53,36 @@ const SubmitProgramRequestPage = () => {
   ];
 
   const programTypes = [
-    { label: "Low Element Program", value: "Low Element Program" },
-    { label: "High Element Program", value: "High Element Program" },
     {
-      label: "Low and High Element Program",
-      value: "Low and High Element Program",
+      label: "Challenge Course-Low Element Program",
+      value: "Challenge Course-Low Element Program",
     },
-    { label: "Team Bonding", value: "Team Bonding" },
-    { label: "Leadership Program", value: "Leadership Program" },
-    { label: "Virtual Program", value: "Virtual Program" },
-    { label: "I'm not sure!", value: "Unsure" },
+    {
+      label: "Challenge Course-High Element Program",
+      value: "Challenge Course-High Element Program",
+    },
+    {
+      label: "Challenge Course-Low and High Element Program",
+      value: "Challenge Course-Low and High Element Program",
+    },
+    { label: "Portable team building", value: "Portable team building" },
+    { label: "Scavenger Hunt", value: "Scavenger Hunt" },
+    { label: "Virtual teambuilding", value: "Virtual teambuilding" },
+    {
+      label: "Leadership Assessment (MBTI, DiSC, etc.)",
+      value: "Leadership Assessment (MBTI, DiSC, etc.)",
+    },
+    { label: "Canoe Program", value: "Canoe Program" },
+    { label: "Rappel Program", value: "Rappel Program" },
+    { label: "Climbing Program", value: "Climbing Program" },
+    { label: "Dragon Boat Program", value: "Dragon Boat Program" },
+    { label: "Other Program", value: "Other Program" },
   ];
 
   const groupTypes = [
     { label: "Cornell Student", value: "Cornell Student" },
     { label: "Cornell Grad Student", value: "Cornell Grad Student" },
     { label: "Cornell Staff", value: "Cornell Staff" },
-    { label: "Student", value: "Student" },
     {
       label: "Other College or University",
       value: "Other College or University",
@@ -89,8 +102,7 @@ const SubmitProgramRequestPage = () => {
     },
     { label: "Cornell Campus", value: "Cornell Campus" },
     {
-      label:
-        "You select a location (for scavenger hunts and portable programs)",
+      label: "You select a location (portable programs)",
       value: "Custom Location",
     },
     { label: "Virtual Program (Zoom preferred)", value: "Virtual Program" },
@@ -151,7 +163,6 @@ const SubmitProgramRequestPage = () => {
           returningClient: null,
           underageParticipants: null,
           goals: "",
-          otherInfo: "",
         });
       } else {
         throw new Error("Failed to submit program request");
@@ -232,18 +243,25 @@ const SubmitProgramRequestPage = () => {
             />
           </div>
           <div className="p-field mb-3">
-            <label htmlFor="size">Number of Participants </label>
-            <InputNumber
+            <label htmlFor="size">Number of Participants * </label>
+            <small id="size-help">
+              (if you don't know the exact number, please write a range, ex.
+              10-14)
+            </small>
+            <InputText
               id="size"
               name="size"
               value={formData.size}
               onValueChange={(e) =>
                 setFormData((prev) => ({ ...prev, size: e.value }))
               }
+              aria-describedby="size-help"
+              required
             />
           </div>
           <div className="p-field mb-3">
             <label htmlFor="programTypes">Type of Program *</label>
+
             <MultiSelect
               id="programTypes"
               name="programTypes"
@@ -255,6 +273,9 @@ const SubmitProgramRequestPage = () => {
           </div>
           <div className="p-field mb-3">
             <label htmlFor="desiredDates">Desired Date for Program </label>
+            <small id="date-help">
+              (If you are unsure, you can select multiple dates)
+            </small>
             <Calendar
               id="desiredDates"
               name="desiredDates"
@@ -262,6 +283,7 @@ const SubmitProgramRequestPage = () => {
               onChange={handleInputChange}
               selectionMode="multiple"
               readOnlyInput
+              aria-describedby="size-help"
             />
           </div>
           <div className="p-field mb-3">
@@ -351,16 +373,7 @@ const SubmitProgramRequestPage = () => {
               rows={3}
             />
           </div>
-          <div className="p-field mb-3">
-            <label htmlFor="otherInfo">Other Information</label>
-            <InputTextarea
-              id="otherInfo"
-              name="otherInfo"
-              value={formData.otherInfo}
-              onChange={handleInputChange}
-              rows={3}
-            />
-          </div>
+
           <Button type="submit" label="Submit" className="mt-3" />
         </form>
       </Card>

@@ -12,6 +12,7 @@ import { InputIcon } from "primereact/inputicon";
 import { MultiSelect } from "primereact/multiselect";
 import { Dropdown } from "primereact/dropdown";
 import { Message } from "primereact/message";
+import { ProgressSpinner } from "primereact/progressspinner";
 import { randomId } from "@mui/x-data-grid-generator";
 import "primereact/resources/themes/lara-light-blue/theme.css";
 import "primeicons/primeicons.css";
@@ -67,6 +68,9 @@ export default function ProgramList({ user }) {
   const [editable, setEditable] = useState(false);
   const [globalFilter, setGlobalFilter] = useState(null);
   const [userPermission, setUserPermission] = useState("");
+  const [facilitators, setFacilitators] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const globalFilterFields = [
     "programName",
     "date",
@@ -75,8 +79,6 @@ export default function ProgramList({ user }) {
     "contactPersonEmail",
     "locationAndProgram",
   ];
-
-  const [facilitators, setFacilitators] = useState([]);
 
   const toast = useRef(null);
   const dt = useRef(null);
@@ -119,6 +121,7 @@ export default function ProgramList({ user }) {
   const fetchData = async () => {
     if (user) {
       try {
+        setLoading(true);
         const permission = await getUserPermission(user.email);
         setUserPermission(permission);
         const data = await getAllProgramsInGrid();
@@ -135,9 +138,18 @@ export default function ProgramList({ user }) {
         setFacilitators(formattedStaff);
       } catch (error) {
         console.error("Error fetching data:", error);
+        toast.current.show({
+          severity: "error",
+          summary: "Error",
+          detail: "Failed to load program data",
+          life: 3000,
+        });
+      } finally {
+        setLoading(false);
       }
     } else {
       console.log("No User");
+      setLoading(false);
     }
   };
 
@@ -148,7 +160,9 @@ export default function ProgramList({ user }) {
   const header = () => {
     return (
       <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
-        <h4 className="m-0">Manage Programs</h4>
+        <h4 className="m-0">
+          Manage Programs (double click to open a program)
+        </h4>
         <IconField iconPosition="left">
           <InputIcon className="pi pi-search" />
           <InputText
@@ -160,6 +174,7 @@ export default function ProgramList({ user }) {
       </div>
     );
   };
+
   const openNew = () => {
     setProgram({
       id: randomId(),
@@ -174,7 +189,6 @@ export default function ProgramList({ user }) {
       contactPersonEmail: "",
       underAgeParticipants: false,
       facilitators: [],
-      // facilitatorEmails: [],
       notes: "",
       returningClient: false,
       contractSent: false,
@@ -216,7 +230,7 @@ export default function ProgramList({ user }) {
               onClick={confirmDeleteSelected}
               disabled={!selectedPrograms || !selectedPrograms.length}
             />
-            {/* <ProgramRangeSelector programs={programs} /> */}
+            {/* <ProgramRangeSelector /> */}
           </>
         )}
       </div>
@@ -300,11 +314,8 @@ export default function ProgramList({ user }) {
     }
 
     setPrograms(_programs);
-
     setDeleteProgramsDialog(false);
-
     setSelectedPrograms(null);
-
     fetchData();
     toast.current.show({
       severity: "success",
@@ -312,24 +323,6 @@ export default function ProgramList({ user }) {
       detail: "Programs Deleted",
       life: 3000,
     });
-  };
-
-  const ClientTypeDropdown = ({ onChange }) => {
-    const clientTypes = ["STU", "NON-CU-STU", "CUP", "PDP", "COMMYTH"];
-
-    return (
-      <div className="card flex justify-content-center">
-        <Dropdown
-          value={program.clientType}
-          onChange={onChange}
-          options={clientTypes}
-          optionLabel="name"
-          placeholder="Select Client Type"
-          className="w-full md:w-100rem"
-          disabled={!editable}
-        />
-      </div>
-    );
   };
 
   const formatFacilitatorsNeeded = (facilitatorsNeeded) => {
@@ -391,6 +384,17 @@ export default function ProgramList({ user }) {
     };
   };
 
+  if (loading) {
+    return (
+      <div
+        className="flex justify-content-center align-items-center"
+        style={{ height: "100vh" }}
+      >
+        <ProgressSpinner />
+      </div>
+    );
+  }
+
   return (
     <div>
       <Toast ref={toast} />
@@ -424,7 +428,6 @@ export default function ProgramList({ user }) {
           onRowDoubleClick={showProgramDetails}
         >
           <Column selectionMode="multiple" exportable={false}></Column>
-
           <Column field="programName" header="Program Name" sortable></Column>
           <Column
             field="date"
@@ -482,7 +485,6 @@ export default function ProgramList({ user }) {
             style={{ maxWidth: "300px", overflow: "scroll" }}
             sortable
           ></Column>
-
           <Column
             field="notes"
             header="Notes"
@@ -493,7 +495,6 @@ export default function ProgramList({ user }) {
               overflow: "scroll",
             }}
           ></Column>
-
           {userPermission == "Admin" && (
             <Column
               body={(rowData) => (

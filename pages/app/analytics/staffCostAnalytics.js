@@ -3,7 +3,8 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dialog } from "primereact/dialog";
 import { Chart } from "primereact/chart";
-import { InputText } from "primereact/inputtext"; // Add this import
+import { InputText } from "primereact/inputtext";
+import { ProgressSpinner } from "primereact/progressspinner";
 import {
   getAllContractedPrograms,
   getAllStaffAssignments,
@@ -16,18 +17,23 @@ const StaffCostAnalysis = () => {
   const [showModal, setShowModal] = useState(false);
   const [chartData, setChartData] = useState({});
   const [globalFilter, setGlobalFilter] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     fetchData();
   }, []);
 
   const fetchData = async () => {
     try {
+      setLoading(true);
       const programsData = await getAllContractedPrograms();
       const staffAssignmentsData = await getAllStaffAssignments();
       setPrograms(programsData);
       setStaffAssignments(staffAssignmentsData);
     } catch (error) {
       console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -71,11 +77,11 @@ const StaffCostAnalysis = () => {
     return `$${value.toFixed(2)}`;
   };
 
-  // Add this function for the search bar
   const renderHeader = () => {
     return (
       <div className="flex justify-content-end">
         <span className="p-input-icon-left">
+          <i className="pi pi-search" />
           <InputText
             type="search"
             onInput={(e) => setGlobalFilter(e.target.value)}
@@ -85,6 +91,17 @@ const StaffCostAnalysis = () => {
       </div>
     );
   };
+
+  if (loading) {
+    return (
+      <div
+        className="flex justify-content-center align-items-center"
+        style={{ height: "100vh" }}
+      >
+        <ProgressSpinner />
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -98,7 +115,6 @@ const StaffCostAnalysis = () => {
         emptyMessage="No programs found."
       >
         <Column field="organizationName" header="Organization Name" />
-
         <Column field="programName" header="Program Name" />
         <Column field="programDate" header="Date" />
         <Column field="clientType" header="Client Type" />

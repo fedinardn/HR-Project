@@ -9,6 +9,7 @@ import {
   getAllStaff,
 } from "../../../services/database.mjs";
 import { Toast } from "primereact/toast";
+import { ProgressSpinner } from "primereact/progressspinner";
 import ProgramDialog from "../../../components/ProgramDialog";
 
 const localizer = momentLocalizer(moment);
@@ -20,6 +21,7 @@ const MyCalendar = ({ user }) => {
   const [editable, setEditable] = useState(false);
   const [userPermission, setUserPermission] = useState("");
   const [facilitators, setFacilitators] = useState([]);
+  const [loading, setLoading] = useState(true);
   const toast = useRef(null);
 
   const onSelectEvent = useCallback((calEvent) => {
@@ -40,6 +42,7 @@ const MyCalendar = ({ user }) => {
 
   const fetchEvents = async () => {
     try {
+      setLoading(true);
       if (user) {
         const programs = await getAllProgramsInGrid();
         const permission = await getUserPermission(user.email);
@@ -81,6 +84,14 @@ const MyCalendar = ({ user }) => {
       }
     } catch (error) {
       console.error("Error fetching events:", error);
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Failed to load calendar events",
+        life: 3000,
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -96,12 +107,22 @@ const MyCalendar = ({ user }) => {
       setFacilitators(formattedStaff);
     } catch (error) {
       console.error("Error fetching facilitators:", error);
+      toast.current.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Failed to load facilitators",
+        life: 3000,
+      });
     }
   };
 
   useEffect(() => {
-    fetchEvents();
-    fetchFacilitators();
+    const loadData = async () => {
+      setLoading(true);
+      await Promise.all([fetchEvents(), fetchFacilitators()]);
+      setLoading(false);
+    };
+    loadData();
   }, [user]);
 
   const eventStyleGetter = (event) => {
@@ -122,6 +143,17 @@ const MyCalendar = ({ user }) => {
       style: style,
     };
   };
+
+  if (loading) {
+    return (
+      <div
+        className="flex justify-content-center align-items-center"
+        style={{ height: "100vh" }}
+      >
+        <ProgressSpinner />
+      </div>
+    );
+  }
 
   return (
     <div>

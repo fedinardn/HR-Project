@@ -5,6 +5,7 @@ import { Button } from "primereact/button";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
 import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import { ProgressSpinner } from "primereact/progressspinner";
 import {
   deleteProgramRequest,
   getUserPermission,
@@ -17,17 +18,31 @@ export default function ProgramRequestData({ user }) {
   const programRequestId = router.query.programRequestId;
   const [programRequestData, setProgramRequestData] = useState({});
   const [userPermission, setUserPermission] = useState(null);
+  const [loading, setLoading] = useState(true);
   const toast = useRef(null);
 
   const fetchRequestData = async () => {
     if (programRequestId) {
-      const data = await getDataForProgramRequest(programRequestId);
-      setProgramRequestData(data);
-      if (user) {
-        const permission = await getUserPermission(user.email);
-        setUserPermission(permission);
-      } else {
-        console.log("no user");
+      setLoading(true);
+      try {
+        const data = await getDataForProgramRequest(programRequestId);
+        setProgramRequestData(data);
+        if (user) {
+          const permission = await getUserPermission(user.email);
+          setUserPermission(permission);
+        } else {
+          console.log("no user");
+        }
+      } catch (error) {
+        console.error("Error fetching program request data:", error);
+        toast.current.show({
+          severity: "error",
+          summary: "Error",
+          detail: "Failed to load program request data",
+          life: 3000,
+        });
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -60,7 +75,7 @@ export default function ProgramRequestData({ user }) {
     try {
       const result = await approveProgramRequest(programRequestId);
       if (result) {
-        await fetchRequestData(); // Refresh the data
+        await fetchRequestData();
         toast.current.show({
           severity: "success",
           summary: "Approved",
@@ -94,6 +109,17 @@ export default function ProgramRequestData({ user }) {
       <div className="mt-2">{value || "N/A"}</div>
     </div>
   );
+
+  if (loading) {
+    return (
+      <div
+        className="flex justify-content-center align-items-center"
+        style={{ height: "100vh" }}
+      >
+        <ProgressSpinner />
+      </div>
+    );
+  }
 
   return (
     <div className="p-4" style={{ maxWidth: "1200px", margin: "0 auto" }}>
@@ -164,16 +190,13 @@ export default function ProgramRequestData({ user }) {
             ).toLocaleDateString()}
           />
           <div className="col-12">
-            <span className="font-bold">Additional Details: </span>
-            <p>{programRequestData.additionalDetails || "N/A"}</p>
-          </div>
-          <div className="col-12">
             <span className="font-bold">Goals: </span>
             <p>{programRequestData.goals || "N/A"}</p>
           </div>
+
           <div className="col-12">
-            <span className="font-bold">Other Information: </span>
-            <p>{programRequestData.otherInfo || "N/A"}</p>
+            <span className="font-bold">Additional Details: </span>
+            <p>{programRequestData.additionalDetails || "N/A"}</p>
           </div>
 
           {userPermission === "Admin" && (
