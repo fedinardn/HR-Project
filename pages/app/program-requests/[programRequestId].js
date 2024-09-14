@@ -164,16 +164,13 @@ export default function ProgramRequestData({ user }) {
             ).toLocaleDateString()}
           />
           <div className="col-12">
-            <span className="font-bold">Additional Details: </span>
-            <p>{programRequestData.additionalDetails || "N/A"}</p>
-          </div>
-          <div className="col-12">
             <span className="font-bold">Goals: </span>
             <p>{programRequestData.goals || "N/A"}</p>
           </div>
+
           <div className="col-12">
-            <span className="font-bold">Other Information: </span>
-            <p>{programRequestData.otherInfo || "N/A"}</p>
+            <span className="font-bold">Additional Details: </span>
+            <p>{programRequestData.additionalDetails || "N/A"}</p>
           </div>
 
           {userPermission === "Admin" && (

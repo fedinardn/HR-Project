@@ -29,6 +29,7 @@ function MyApp({ Component, pageProps }) {
         <Component {...pageProps} user={user} />
       </PrimeReactProvider>
       <Footer />
+
       <Analytics />
       <SpeedInsights />
     </div>
