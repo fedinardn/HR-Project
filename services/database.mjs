@@ -236,38 +236,14 @@ export const deleteProgramRequest = async (programRequestId) => {
 
 // EMPLOYEE FUNCTIONS
 
-export const createNewStaff = async (
-  firstName,
-  lastName,
-  address,
-  payRate,
-  phone,
-  email,
-  lowsTraining,
-  highsTraining,
-  towerTraining,
-  rescueTraining,
-  proFacilitator,
-  typeOfStaff
-) => {
+export const createNewStaff = async (staffData) => {
   const db = getFirestore();
-  const staffID = crypto.randomUUID();
+  const staffID = uuidv7();
   const staffRef = doc(db, "staff", staffID);
 
   const newStaff = {
-    staffID: staffID,
-    firstName: firstName,
-    lastName: lastName,
-    address: address,
-    payRate: payRate,
-    phone: phone,
-    email: email,
-    lowsTraining: lowsTraining,
-    highsTraining: highsTraining,
-    towerTraining: towerTraining,
-    rescueTraining: rescueTraining,
-    proFacilitator: proFacilitator,
-    typeOfStaff: typeOfStaff,
+    staffID,
+    ...staffData,
   };
 
   await setDoc(staffRef, newStaff);

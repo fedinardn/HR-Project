@@ -8,6 +8,7 @@ import { Card } from "primereact/card";
 import { InputMask } from "primereact/inputmask";
 import Link from "next/link";
 import withProtectedRoute from "../../../components/WithProtectedRoute";
+import { createNewStaff } from "../../../services/database.mjs";
 
 const trainingLows = ["No", "TA", "Level 1", "Level 2", "Lead"];
 const trainingHighs = ["No", "TA", "Level 1", "Level 2", "Lead"];
@@ -45,38 +46,28 @@ const AddNewStaff = () => {
     event.preventDefault();
 
     try {
-      const response = await fetch("/api/employees/employee", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const newStaff = await createNewStaff(formData);
 
-      if (response.ok) {
-        toast.current.show({
-          severity: "success",
-          summary: "Success",
-          detail: "New staff member created",
-          life: 3000,
-        });
-        setFormData({
-          firstName: "",
-          lastName: "",
-          address: "",
-          payRate: null,
-          phone: "",
-          email: "",
-          lowsTraining: "",
-          highsTraining: "",
-          towerTraining: "",
-          rescueTraining: "",
-          proFacilitator: "",
-          typeOfStaff: "",
-        });
-      } else {
-        throw new Error("Failed to create staff member");
-      }
+      toast.current.show({
+        severity: "success",
+        summary: "Success",
+        detail: "New staff member created",
+        life: 3000,
+      });
+      setFormData({
+        firstName: "",
+        lastName: "",
+        address: "",
+        payRate: null,
+        phone: "",
+        email: "",
+        lowsTraining: "",
+        highsTraining: "",
+        towerTraining: "",
+        rescueTraining: "",
+        proFacilitator: "",
+        typeOfStaff: "",
+      });
     } catch (error) {
       console.error("Error creating new staff member:", error);
       toast.current.show({
