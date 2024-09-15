@@ -10,8 +10,8 @@ import { updateStaffDetails } from "../services/database.mjs";
 import { useRouter } from "next/router";
 
 const trainingOptions = {
-  trainingLows: ["No", "TA", "Level 1", "Level 2", "Lead"],
-  trainingHighs: ["No", "TA", "Level 1", "Level 2", "Lead"],
+  lowsTraining: ["No", "TA", "Level 1", "Level 2", "Lead"],
+  highsTraining: ["No", "TA", "Level 1", "Level 2", "Lead"],
   towerTraining: ["No", "TA", "Lead"],
   rescueTraining: ["No", "Yes"],
   proFacilitator: ["No", "TA", "Level 1", "Lead"],
