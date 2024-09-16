@@ -4,6 +4,7 @@ import { Button } from "primereact/button";
 import { Carousel } from "primereact/carousel";
 import { useRouter } from "next/router";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import Image from "next/image";
 
 const ProgramCard = ({
   icon,
@@ -75,15 +76,17 @@ const HomePage = () => {
     { source: "/rappel.jpg", alt: "Team Building 2" },
     { source: "/people.jpg", alt: "Team Building 3" },
     { source: "/silhouette.jpg", alt: "Team Building 5" },
-    { source: "/whaleWatch.jpg", alt: "Team Building 7" },
+    // { source: "/whaleWatch.jpg", alt: "Team Building 7" },
   ];
 
   const carouselItemTemplate = (item) => {
     return (
       <div>
-        <img
+        <Image
           src={item.source}
           alt={item.alt}
+          width={1000}
+          height={1000}
           style={{
             aspectRatio: "16/9",
             borderRadius: "12px",
