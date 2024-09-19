@@ -230,7 +230,7 @@ export default function ProgramList({ user }) {
               onClick={confirmDeleteSelected}
               disabled={!selectedPrograms || !selectedPrograms.length}
             />
-            {/* <ProgramRangeSelector /> */}
+            <ProgramRangeSelector programs={programs} />
           </>
         )}
       </div>
