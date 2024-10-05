@@ -53,6 +53,7 @@ const WorkdayApp = ({ user }) => {
       if (user) {
         const userLogs = await getHoursLoggedByUser(user.email);
         setLogData(userLogs);
+        console.log(logData);
       }
     } catch (error) {
       console.error("Error fetching user logs:", error);
@@ -67,14 +68,24 @@ const WorkdayApp = ({ user }) => {
   };
 
   const formatDate = (date) => {
-    return `${date.getMonth() + 1}/${date.getDate()}`;
+    const estDate = new Date(
+      date.toLocaleString("en-US", { timeZone: "America/New_York" })
+    );
+    return `${estDate.getMonth() + 1}/${estDate.getDate()}`;
   };
 
   const getWeekDates = useCallback(() => {
     return days.map((day, index) => {
       const date = new Date(currentDate);
       date.setDate(currentDate.getDate() - currentDate.getDay() + index);
-      return { day, date: formatDate(date), fullDate: new Date(date) };
+      const estDate = new Date(
+        date.toLocaleString("en-US", { timeZone: "America/New_York" })
+      );
+      return {
+        day,
+        date: formatDate(estDate),
+        fullDate: estDate,
+      };
     });
   }, [currentDate]);
 
@@ -101,9 +112,11 @@ const WorkdayApp = ({ user }) => {
   };
 
   const handleDateSelect = (e) => {
-    const date = e.value;
-    const startOfWeek = new Date(date);
-    startOfWeek.setDate(date.getDate() - date.getDay());
+    const selectedDate = new Date(
+      e.value.toLocaleString("en-US", { timeZone: "America/New_York" })
+    );
+    const startOfWeek = new Date(selectedDate);
+    startOfWeek.setDate(selectedDate.getDate() - selectedDate.getDay());
     setCurrentDate(startOfWeek);
   };
 
@@ -134,6 +147,7 @@ const WorkdayApp = ({ user }) => {
     }
     setSelectedSlot({ date, hour });
     setModalOpen(true);
+    console.log(currentEntry);
   };
 
   const handleEntryChange = (field, value) => {
@@ -146,6 +160,29 @@ const WorkdayApp = ({ user }) => {
         updated.hours = Math.max(0, diff);
       }
       return updated;
+    });
+  };
+
+  const checkOverlap = (entryToCheck, existingEntries) => {
+    return existingEntries.some((entry) => {
+      if (
+        entry.date !== entryToCheck.date ||
+        entry.timeID === entryToCheck.timeID
+      ) {
+        return false;
+      }
+
+      const entryStart = new Date(`${entry.date}T${entry.startTime}`);
+      const entryEnd = new Date(`${entry.date}T${entry.endTime}`);
+      const checkStart = new Date(
+        `${entryToCheck.date}T${entryToCheck.startTime}`
+      );
+      const checkEnd = new Date(`${entryToCheck.date}T${entryToCheck.endTime}`);
+
+      return (
+        (entryStart < checkEnd && entryEnd > checkStart) ||
+        (checkStart < entryEnd && checkEnd > entryStart)
+      );
     });
   };
 
@@ -167,14 +204,22 @@ const WorkdayApp = ({ user }) => {
       return;
     }
 
-    const isOverlapping = logData.some(
-      (entry) =>
-        entry.date === currentEntry.date &&
-        entry.timeID !== currentEntry.timeID &&
-        new Date(`${entry.date}T${entry.startTime}`) <
-          new Date(`${currentEntry.date}T${currentEntry.endTime}`) &&
-        new Date(`${entry.date}T${entry.endTime}`) >
-          new Date(`${currentEntry.date}T${currentEntry.startTime}`)
+    const estDate = new Date(currentEntry.date).toLocaleString("en-US", {
+      timeZone: "America/New_York",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    const [month, day, year] = estDate.split("/");
+    const formattedDate = `${year}-${month.padStart(2, "0")}-${day.padStart(
+      2,
+      "0"
+    )}`;
+    const entryToSubmit = { ...currentEntry, date: formattedDate };
+
+    const isOverlapping = checkOverlap(
+      isNewEntry ? entryToSubmit : currentEntry,
+      logData
     );
 
     if (isOverlapping) {
@@ -188,7 +233,8 @@ const WorkdayApp = ({ user }) => {
 
     try {
       if (isNewEntry) {
-        const newLog = await logTime(user.email, currentEntry);
+        console.log(entryToSubmit);
+        const newLog = await logTime(user.email, entryToSubmit);
         setLogData((prevLogs) => [...prevLogs, newLog]);
       } else {
         await updateLog(user.email, currentEntry.timeID, currentEntry);
@@ -241,17 +287,20 @@ const WorkdayApp = ({ user }) => {
   const calculateWeekTotalHours = useCallback(() => {
     const startOfWeek = new Date(currentDate);
     startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
-    startOfWeek.setHours(0, 0, 0, 0);
-    const startOfWeekString = startOfWeek.toISOString().split("T")[0];
+    const estStartOfWeek = new Date(
+      startOfWeek.toLocaleString("en-US", { timeZone: "America/New_York" })
+    );
+    estStartOfWeek.setHours(0, 0, 0, 0);
+    const startOfWeekString = estStartOfWeek.toISOString().split("T")[0];
 
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 5);
+    const endOfWeek = new Date(estStartOfWeek);
+    endOfWeek.setDate(estStartOfWeek.getDate() + 5);
     endOfWeek.setHours(23, 59, 59, 999);
     const endOfWeekString = endOfWeek.toISOString().split("T")[0];
 
     return logData.reduce((total, entry) => {
       if (entry.date >= startOfWeekString && entry.date <= endOfWeekString) {
-        return total + entry.hours || 0;
+        return total + (parseFloat(entry.hours) || 0);
       }
       return total;
     }, 0);
@@ -283,7 +332,10 @@ const WorkdayApp = ({ user }) => {
   };
 
   const renderTimeSlot = (date, hour) => {
-    const dateKey = date.toISOString().split("T")[0];
+    const estDate = new Date(date);
+    estDate.setHours(0, 0, 0, 0);
+
+    const dateKey = estDate.toISOString().split("T")[0];
     const entries = logData.filter((log) => log.date === dateKey);
     const existingEntries = entries.filter((entry) => {
       const startHour = parseInt(entry.startTime.split(":")[0]);
