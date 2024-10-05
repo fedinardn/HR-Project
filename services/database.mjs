@@ -14,6 +14,8 @@ import {
   getDoc,
   updateDoc,
   deleteDoc,
+  serverTimestamp,
+  writeBatch,
 } from "firebase/firestore";
 
 export const getAllProgramRequestsForClient = async (uid) => {
@@ -839,6 +841,142 @@ export const updateContractTextField = async (field, value) => {
     console.log(`Contract text field '${field}' updated successfully`);
   } catch (error) {
     console.error(`Error updating contract text field '${field}':`, error);
+    throw error;
+  }
+};
+
+//LOGGING HOURS
+export const logTime = async (userID, timeBlock) => {
+  const db = getFirestore();
+
+  const userDocRef = doc(db, "hoursLogged", userID);
+
+  const timeLogsCollectionRef = collection(userDocRef, "timeLogs");
+
+  try {
+    await setDoc(
+      userDocRef,
+      { lastUpdated: serverTimestamp() },
+      { merge: true }
+    );
+
+    const newLogRef = doc(timeLogsCollectionRef, timeBlock.timeID);
+    await setDoc(newLogRef, {
+      ...timeBlock,
+      dateSubmitted: serverTimestamp(),
+    });
+
+    return { ...timeBlock };
+  } catch (error) {
+    console.error("Error logging time:", error);
+    throw error;
+  }
+};
+
+export const getAllLoggedHours = async () => {
+  const db = getFirestore();
+  const hoursLoggedRef = collection(db, "hoursLogged");
+  const allLogs = [];
+
+  try {
+    const userDocs = await getDocs(hoursLoggedRef);
+
+    for (const userDoc of userDocs.docs) {
+      const userId = userDoc.id;
+      const timeLogsRef = collection(db, "hoursLogged", userId, "timeLogs");
+
+      const timeLogsDocs = await getDocs(timeLogsRef);
+
+      timeLogsDocs.forEach((doc) => {
+        allLogs.push({
+          userId: userId,
+          ...doc.data(),
+        });
+      });
+    }
+    console.log(allLogs);
+    return allLogs;
+  } catch (error) {
+    console.error("Error retrieving logged hours:", error);
+    throw error;
+  }
+};
+
+// Function to get hours logged for a specific user
+export const getHoursLoggedByUser = async (userID) => {
+  const db = getFirestore();
+  const userLogsCollectionRef = collection(
+    db,
+    "hoursLogged",
+    userID,
+    "timeLogs"
+  );
+
+  const userLogs = [];
+
+  try {
+    const logs = await getDocs(userLogsCollectionRef);
+
+    logs.forEach((logDoc) => {
+      userLogs.push({
+        ...logDoc.data(),
+      });
+    });
+
+    return userLogs;
+  } catch (error) {
+    console.error(`Error getting hours logged for user ${userID}:`, error);
+    throw error;
+  }
+};
+
+export const updateLog = async (userID, logID, updatedData) => {
+  const db = getFirestore();
+  const logDocRef = doc(db, "hoursLogged", userID, "timeLogs", logID);
+
+  try {
+    await updateDoc(logDocRef, {
+      ...updatedData,
+      lastUpdated: serverTimestamp(),
+    });
+    return { success: true, logID };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateMultipleLogs = async (userID, logUpdates) => {
+  const db = getFirestore();
+  const batch = writeBatch(db);
+
+  try {
+    logUpdates.forEach(({ logID, data }) => {
+      const logDocRef = doc(db, "hoursLogged", userID, "timeLogs", logID);
+      batch.update(logDocRef, {
+        ...data,
+        lastUpdated: serverTimestamp(),
+      });
+    });
+
+    await batch.commit();
+    console.log(
+      `Successfully updated ${logUpdates.length} logs for user ${userID}`
+    );
+    return { success: true, updatedCount: logUpdates.length };
+  } catch (error) {
+    console.error(`Error updating multiple logs for user ${userID}:`, error);
+    throw error;
+  }
+};
+
+export const deleteLog = async (userID, logID) => {
+  const db = getFirestore();
+  const logDocRef = doc(db, "hoursLogged", userID, "timeLogs", logID);
+
+  try {
+    await deleteDoc(logDocRef);
+    return { success: true, logID };
+  } catch (error) {
     throw error;
   }
 };
