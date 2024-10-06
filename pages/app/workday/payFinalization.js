@@ -25,6 +25,7 @@ const PayFinalization = () => {
     if (!dateRange || dateRange.length !== 2) return;
 
     const [startDate, endDate] = dateRange;
+    endDate.setHours(23, 59, 59, 999);
 
     const filteredHours = loggedHours.filter((log) => {
       const submittedDate = new Date(log.dateSubmitted.toDate());
