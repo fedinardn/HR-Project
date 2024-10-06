@@ -204,25 +204,25 @@ const WorkdayApp = ({ user }) => {
       return;
     }
 
-    // const estDate = new Date(currentEntry.date).toLocaleString("en-US", {
-    //   timeZone: "America/New_York",
-    //   year: "numeric",
-    //   month: "2-digit",
-    //   day: "2-digit",
-    // });
-    // const [month, day, year] = estDate.split("/");
-    // const formattedDate = `${year}-${month.padStart(2, "0")}-${day.padStart(
-    //   2,
-    //   "0"
-    // )}`;
-    // const entryToSubmit = { ...currentEntry, date: formattedDate };
+    const estDate = new Date(currentEntry.date).toLocaleString("en-US", {
+      timeZone: "America/New_York",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    const [month, day, year] = estDate.split("/");
+    const formattedDate = `${year}-${month.padStart(2, "0")}-${day.padStart(
+      2,
+      "0"
+    )}`;
+    const entryToSubmit = { ...currentEntry, date: formattedDate };
 
-    // const isOverlapping = checkOverlap(
-    //   isNewEntry ? entryToSubmit : currentEntry,
-    //   logData
-    // );
+    const isOverlapping = checkOverlap(
+      isNewEntry ? entryToSubmit : currentEntry,
+      logData
+    );
 
-    const isOverlapping = checkOverlap(currentEntry, logData);
+    // const isOverlapping = checkOverlap(currentEntry, logData);
 
     if (isOverlapping) {
       toast.current.show({
@@ -235,9 +235,9 @@ const WorkdayApp = ({ user }) => {
 
     try {
       //   console.log(entryToSubmit);
-      console.log(currentEntry);
+      //   console.log(currentEntry);
       if (isNewEntry) {
-        const newLog = await logTime(user.email, currentEntry);
+        const newLog = await logTime(user.email, entryToSubmit);
         setLogData((prevLogs) => [...prevLogs, newLog]);
       } else {
         await updateLog(user.email, currentEntry.timeID, currentEntry);
