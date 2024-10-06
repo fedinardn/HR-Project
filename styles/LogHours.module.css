@@ -107,8 +107,12 @@
     border: 1px solid var(--surface-border);
     cursor: pointer;
     position: absolute;
-    overflow: scroll;
+    overflow: auto;
     width: 100%;
+}
+
+.entrySlot::-webkit-scrollbar {
+    display: none;
 }
 
 .entrySlot:hover {

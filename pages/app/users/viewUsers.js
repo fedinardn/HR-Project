@@ -332,6 +332,17 @@ export default function ViewUsers() {
               />
             </div>
           </div>
+
+          <div className="col-12 md:col-6">
+            <div className="field">
+              <label htmlFor="payRate">Pay Rate</label>
+              <InputText
+                id="payRate"
+                value={editingUser?.payRate || ""}
+                onChange={(e) => onInputChange(e, "payRate")}
+              />
+            </div>
+          </div>
         </div>
       </Dialog>
     </section>

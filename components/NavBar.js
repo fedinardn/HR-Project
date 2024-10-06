@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Menubar } from "primereact/menubar";
+import { Button } from "primereact/button";
 import { Avatar } from "primereact/avatar";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
 import { useRouter } from "next/router";
@@ -53,36 +54,6 @@ const NavBar = () => {
     });
   };
 
-  const getDashboardItems = () => {
-    if (userPermission === "Admin") {
-      return [
-        {
-          label: "Schedule",
-          command: () => {
-            router.push("/app/schedule/scheduleDisplay");
-          },
-        },
-        {
-          label: "Dashboard",
-          command: () => {
-            router.push("/dashboard");
-          },
-        },
-      ];
-    } else if (userPermission === "Facilitator") {
-      return [
-        {
-          label: "Schedule",
-          command: () => {
-            router.push("/app/schedule/scheduleDisplay");
-          },
-        },
-      ];
-    } else {
-      return [];
-    }
-  };
-
   const items = [
     {
       label: "Home",
@@ -103,12 +74,32 @@ const NavBar = () => {
     },
   ];
 
-  if (userPermission === "Admin" || userPermission === "Facilitator") {
-    items.push({
-      label: "Dashboard",
-      icon: "pi pi-chart-line",
-      items: getDashboardItems(),
-    });
+  if (userPermission === "Admin") {
+    items.push(
+      {
+        label: "Dashboard",
+        icon: "pi pi-chart-line",
+        command: () => router.push("/dashboard"),
+      },
+      {
+        label: "Schedule",
+        icon: "pi pi-calendar",
+        command: () => router.push("/app/schedule/scheduleDisplay"),
+      }
+    );
+  } else if (userPermission === "Facilitator") {
+    items.push(
+      {
+        label: "Schedule",
+        icon: "pi pi-calendar",
+        command: () => router.push("/app/schedule/scheduleDisplay"),
+      },
+      {
+        label: "Log Hours",
+        icon: "pi pi-clock",
+        command: () => router.push("/app/workday/logHours"),
+      }
+    );
   }
 
   items.push({

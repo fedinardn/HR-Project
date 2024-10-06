@@ -17,6 +17,7 @@ import {
   serverTimestamp,
   writeBatch,
 } from "firebase/firestore";
+// import { error } from "console";
 
 export const getAllProgramRequestsForClient = async (uid) => {
   const db = getFirestore();
@@ -894,7 +895,7 @@ export const getAllLoggedHours = async () => {
         });
       });
     }
-    console.log(allLogs);
+    // console.log(allLogs);
     return allLogs;
   } catch (error) {
     console.error("Error retrieving logged hours:", error);
@@ -948,6 +949,7 @@ export const updateLog = async (userID, logID, updatedData) => {
 export const updateMultipleLogs = async (userID, logUpdates) => {
   const db = getFirestore();
   const batch = writeBatch(db);
+  console.log(logUpdates);
 
   try {
     logUpdates.forEach(({ logID, data }) => {

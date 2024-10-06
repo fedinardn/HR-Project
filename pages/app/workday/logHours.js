@@ -53,7 +53,7 @@ const WorkdayApp = ({ user }) => {
       if (user) {
         const userLogs = await getHoursLoggedByUser(user.email);
         setLogData(userLogs);
-        console.log(logData);
+        // console.log(logData);
       }
     } catch (error) {
       console.error("Error fetching user logs:", error);
@@ -147,7 +147,7 @@ const WorkdayApp = ({ user }) => {
     }
     setSelectedSlot({ date, hour });
     setModalOpen(true);
-    console.log(currentEntry);
+    // console.log(currentEntry);
   };
 
   const handleEntryChange = (field, value) => {
@@ -204,23 +204,25 @@ const WorkdayApp = ({ user }) => {
       return;
     }
 
-    const estDate = new Date(currentEntry.date).toLocaleString("en-US", {
-      timeZone: "America/New_York",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
-    const [month, day, year] = estDate.split("/");
-    const formattedDate = `${year}-${month.padStart(2, "0")}-${day.padStart(
-      2,
-      "0"
-    )}`;
-    const entryToSubmit = { ...currentEntry, date: formattedDate };
+    // const estDate = new Date(currentEntry.date).toLocaleString("en-US", {
+    //   timeZone: "America/New_York",
+    //   year: "numeric",
+    //   month: "2-digit",
+    //   day: "2-digit",
+    // });
+    // const [month, day, year] = estDate.split("/");
+    // const formattedDate = `${year}-${month.padStart(2, "0")}-${day.padStart(
+    //   2,
+    //   "0"
+    // )}`;
+    // const entryToSubmit = { ...currentEntry, date: formattedDate };
 
-    const isOverlapping = checkOverlap(
-      isNewEntry ? entryToSubmit : currentEntry,
-      logData
-    );
+    // const isOverlapping = checkOverlap(
+    //   isNewEntry ? entryToSubmit : currentEntry,
+    //   logData
+    // );
+
+    const isOverlapping = checkOverlap(currentEntry, logData);
 
     if (isOverlapping) {
       toast.current.show({
@@ -232,9 +234,10 @@ const WorkdayApp = ({ user }) => {
     }
 
     try {
+      //   console.log(entryToSubmit);
+      console.log(currentEntry);
       if (isNewEntry) {
-        console.log(entryToSubmit);
-        const newLog = await logTime(user.email, entryToSubmit);
+        const newLog = await logTime(user.email, currentEntry);
         setLogData((prevLogs) => [...prevLogs, newLog]);
       } else {
         await updateLog(user.email, currentEntry.timeID, currentEntry);

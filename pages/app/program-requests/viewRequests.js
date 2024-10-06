@@ -73,7 +73,7 @@ export default function ViewRequests({ user }) {
           <InputText
             type="search"
             onInput={(e) => setGlobalFilterState(e.target.value)}
-            placeholder="Global Search"
+            placeholder="Search Requests"
           />
         </span>
       </div>

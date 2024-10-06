@@ -133,6 +133,21 @@ const Dashboard = ({ user }) => {
           icon: "pi pi-book",
           command: () => router.push("/app/contract/contractEditor"),
         },
+        {
+          label: "Log Hours",
+          icon: "pi pi-calendar",
+          command: () => router.push("/app/workday/logHours"),
+        },
+        {
+          label: "Log Hours Admin",
+          icon: "pi pi-clock",
+          command: () => router.push("/app/workday/logHoursAdmin"),
+        },
+        {
+          label: "Pay Finalization",
+          icon: "pi pi-dollar",
+          command: () => router.push("/app/workday/payFinalization"),
+        },
       ],
     },
   ];
