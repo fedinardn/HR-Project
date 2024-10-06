@@ -53,10 +53,8 @@ const WorkdayApp = ({ user }) => {
       if (user) {
         const userLogs = await getHoursLoggedByUser(user.email);
         setLogData(userLogs);
-        // console.log(logData);
       }
     } catch (error) {
-      console.error("Error fetching user logs:", error);
       toast.current.show({
         severity: "error",
         summary: "Error",
@@ -68,23 +66,32 @@ const WorkdayApp = ({ user }) => {
   };
 
   const formatDate = (date) => {
-    const estDate = new Date(
-      date.toLocaleString("en-US", { timeZone: "America/New_York" })
-    );
-    return `${estDate.getMonth() + 1}/${estDate.getDate()}`;
+    return date.toLocaleDateString("en-US", {
+      month: "2-digit",
+      day: "2-digit",
+    });
+  };
+
+  const formatDateForDatabase = (date) => {
+    return date
+      .toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      })
+      .split("/")
+      .reverse()
+      .join("-");
   };
 
   const getWeekDates = useCallback(() => {
     return days.map((day, index) => {
       const date = new Date(currentDate);
       date.setDate(currentDate.getDate() - currentDate.getDay() + index);
-      const estDate = new Date(
-        date.toLocaleString("en-US", { timeZone: "America/New_York" })
-      );
       return {
         day,
-        date: formatDate(estDate),
-        fullDate: estDate,
+        date: formatDate(date),
+        fullDate: date,
       };
     });
   }, [currentDate]);
@@ -112,9 +119,7 @@ const WorkdayApp = ({ user }) => {
   };
 
   const handleDateSelect = (e) => {
-    const selectedDate = new Date(
-      e.value.toLocaleString("en-US", { timeZone: "America/New_York" })
-    );
+    const selectedDate = new Date(e.value);
     const startOfWeek = new Date(selectedDate);
     startOfWeek.setDate(selectedDate.getDate() - selectedDate.getDay());
     setCurrentDate(startOfWeek);
@@ -136,7 +141,7 @@ const WorkdayApp = ({ user }) => {
     } else {
       setCurrentEntry({
         timeID: uuidv7(),
-        date: date.toISOString().split("T")[0],
+        date: formatDateForDatabase(date),
         programName: "",
         startTime: `${formattedHour}:00`,
         endTime: `${(hour + 1).toString().padStart(2, "0")}:00`,
@@ -147,7 +152,6 @@ const WorkdayApp = ({ user }) => {
     }
     setSelectedSlot({ date, hour });
     setModalOpen(true);
-    // console.log(currentEntry);
   };
 
   const handleEntryChange = (field, value) => {
@@ -172,12 +176,10 @@ const WorkdayApp = ({ user }) => {
         return false;
       }
 
-      const entryStart = new Date(`${entry.date}T${entry.startTime}`);
-      const entryEnd = new Date(`${entry.date}T${entry.endTime}`);
-      const checkStart = new Date(
-        `${entryToCheck.date}T${entryToCheck.startTime}`
-      );
-      const checkEnd = new Date(`${entryToCheck.date}T${entryToCheck.endTime}`);
+      const entryStart = new Date(`2000-01-01T${entry.startTime}`);
+      const entryEnd = new Date(`2000-01-01T${entry.endTime}`);
+      const checkStart = new Date(`2000-01-01T${entryToCheck.startTime}`);
+      const checkEnd = new Date(`2000-01-01T${entryToCheck.endTime}`);
 
       return (
         (entryStart < checkEnd && entryEnd > checkStart) ||
@@ -204,25 +206,7 @@ const WorkdayApp = ({ user }) => {
       return;
     }
 
-    const estDate = new Date(currentEntry.date).toLocaleString("en-US", {
-      timeZone: "America/New_York",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
-    const [month, day, year] = estDate.split("/");
-    const formattedDate = `${year}-${month.padStart(2, "0")}-${day.padStart(
-      2,
-      "0"
-    )}`;
-    const entryToSubmit = { ...currentEntry, date: formattedDate };
-
-    const isOverlapping = checkOverlap(
-      isNewEntry ? entryToSubmit : currentEntry,
-      logData
-    );
-
-    // const isOverlapping = checkOverlap(currentEntry, logData);
+    const isOverlapping = checkOverlap(currentEntry, logData);
 
     if (isOverlapping) {
       toast.current.show({
@@ -234,10 +218,8 @@ const WorkdayApp = ({ user }) => {
     }
 
     try {
-      //   console.log(entryToSubmit);
-      //   console.log(currentEntry);
       if (isNewEntry) {
-        const newLog = await logTime(user.email, entryToSubmit);
+        const newLog = await logTime(user.email, currentEntry);
         setLogData((prevLogs) => [...prevLogs, newLog]);
       } else {
         await updateLog(user.email, currentEntry.timeID, currentEntry);
@@ -255,7 +237,6 @@ const WorkdayApp = ({ user }) => {
         detail: isNewEntry ? "Time entry added." : "Time entry updated.",
       });
     } catch (error) {
-      console.error("Error submitting log:", error);
       toast.current.show({
         severity: "error",
         summary: "Error",
@@ -267,7 +248,6 @@ const WorkdayApp = ({ user }) => {
   const handleDelete = async () => {
     try {
       await deleteLog(user.email, currentEntry.timeID);
-      const dateKey = selectedSlot.date.toISOString().split("T")[0];
       setLogData((prevLogs) =>
         prevLogs.filter((log) => log.timeID !== currentEntry.timeID)
       );
@@ -278,7 +258,6 @@ const WorkdayApp = ({ user }) => {
         detail: "Time entry deleted.",
       });
     } catch (error) {
-      console.error("Error deleting log:", error);
       toast.current.show({
         severity: "error",
         summary: "Error",
@@ -287,22 +266,24 @@ const WorkdayApp = ({ user }) => {
     }
   };
 
+  const parseLocalDate = (dateString) => {
+    const [year, day, month] = dateString.split("-").map(Number);
+    return new Date(year, month - 1, day);
+  };
+
   const calculateWeekTotalHours = useCallback(() => {
     const startOfWeek = new Date(currentDate);
     startOfWeek.setDate(currentDate.getDate() - currentDate.getDay());
-    const estStartOfWeek = new Date(
-      startOfWeek.toLocaleString("en-US", { timeZone: "America/New_York" })
-    );
-    estStartOfWeek.setHours(0, 0, 0, 0);
-    const startOfWeekString = estStartOfWeek.toISOString().split("T")[0];
+    startOfWeek.setHours(0, 0, 0, 0);
 
-    const endOfWeek = new Date(estStartOfWeek);
-    endOfWeek.setDate(estStartOfWeek.getDate() + 5);
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
     endOfWeek.setHours(23, 59, 59, 999);
-    const endOfWeekString = endOfWeek.toISOString().split("T")[0];
 
     return logData.reduce((total, entry) => {
-      if (entry.date >= startOfWeekString && entry.date <= endOfWeekString) {
+      const entryDate = parseLocalDate(entry.date);
+
+      if (entryDate >= startOfWeek && entryDate <= endOfWeek) {
         return total + (parseFloat(entry.hours) || 0);
       }
       return total;
@@ -335,10 +316,7 @@ const WorkdayApp = ({ user }) => {
   };
 
   const renderTimeSlot = (date, hour) => {
-    const estDate = new Date(date);
-    estDate.setHours(0, 0, 0, 0);
-
-    const dateKey = estDate.toISOString().split("T")[0];
+    const dateKey = formatDateForDatabase(date);
     const entries = logData.filter((log) => log.date === dateKey);
     const existingEntries = entries.filter((entry) => {
       const startHour = parseInt(entry.startTime.split(":")[0]);
